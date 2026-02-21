@@ -1001,6 +1001,17 @@
   <div id="warn-overlay"></div>
 
   <!-- TITLE -->
+  <!-- ── LOADING SCREEN ── -->
+  <div id="loadscreen" style="display:none;position:fixed;inset:0;z-index:400;background:radial-gradient(ellipse at 50% 60%,#0d1a0a 0%,#050a03 100%);flex-direction:column;align-items:center;justify-content:center;gap:24px;font-family:'Press Start 2P',monospace;">
+    <div style="font-size:clamp(11px,3vw,20px);color:#ffd700;text-align:center;text-shadow:0 0 20px #ffd700aa,4px 4px 0 #8b5e00;animation:logoPulse 2s infinite;line-height:2">⚔️ ANNIVERSAIRE PAPA ⚔️</div>
+    <div style="font-size:clamp(14px,4vw,28px);color:#fff;opacity:0.6">🎵</div>
+    <div id="load-msg" style="font-family:'VT323',monospace;font-size:clamp(16px,4vw,22px);color:#e8d890;letter-spacing:2px;">Composition de la musique...</div>
+    <div style="width:min(320px,80vw);height:12px;background:#050a03;border:2px solid #ffd70066;border-radius:2px;overflow:hidden;">
+      <div id="load-bar-fill" style="height:100%;width:0%;background:linear-gradient(90deg,#8b5e00,#ffd700);transition:width 0.3s;border-radius:2px;box-shadow:0 0 8px #ffd70066;"></div>
+    </div>
+    <div style="font-size:clamp(5px,1.4vw,7px);color:#9a8a60;text-align:center;line-height:2">Synthèse audio procédurale en cours...</div>
+  </div>
+
   <div id="title">
     <canvas id="title-canvas"></canvas>
     <div class="title-content">
@@ -1008,10 +1019,10 @@
       <div class="title-logo">ANNIVERSAIRE<br>PAPA</div>
       <div class="title-tagline">— Légende du Royaume —</div>
       <div class="title-features">
-        Sauvez le royaume en incarnant un héros d'exception !<br>
-        Explorez des donjons périlleux, affrontez des monstres redoutables,<br>
-        Atteignez "l'étoile" et confiez lui le voeu pour lequel vous vous êtes battu durant ces 365 jours !<br>
-        Bonne chance, Héro !
+        5 niveaux épiques · 5 boss légendaires · Des patterns redoutables mais faisables !<br>
+        De la Forêt des Souvenirs aux Cryptes Maudites, du Gouffre de l'Oubli au Sommet ultime...<br>
+        Affrontez Thyrax, le Dragon Suprême, boss final aux attaques dévastateurs !<br>
+        Bonne chance, Héros !
       </div>
       <button class="start-btn" onclick="startGame()">► COMMENCER L'AVENTURE</button>
     </div>
@@ -1147,6 +1158,8 @@
     <div class="vic-msg">Papa,<br><br>
       Tu as traversé la Forêt des Souvenirs,<br>
       Le Château des Épreuves,<br>
+      Les Cryptes Maudites,<br>
+      Le Gouffre de l'Oubli,<br>
       Et le Sommet de la Sagesse.<br><br>
       Comme dans la vie — jamais tu n'as lâché. ❤️<br><br>
       On t'aime. Merci d'être notre héros. 🏆</div>
@@ -1230,7 +1243,7 @@
       FLOOR: 7, WALL: 8, SNOW: 9, ICE: 10, LAVA: 11, DARK: 12, BRIDGE: 13, TALL_GRASS: 14,
       HILL: 15, SAND: 16, MOSS: 17
     };
-    const BLOCK = { 2: true, 3: true, 4: true, 8: true, 11: true };
+    const BLOCK = { 2: true, 3: true, 4: true, 8: true, 11: true, 12: true };
     const PASSABLE = t => !BLOCK[t];
     function buildTile(id, frame = 0) {
       const key = `${id}_${frame % 4}`;
@@ -1255,7 +1268,7 @@
         case TB.SNOW: { cx.fillStyle = '#d0e8f8'; cx.fillRect(0, 0, T, T); for (let i = 0; i < 8; i++) { cx.fillStyle = i % 2 ? 'rgba(255,255,255,0.45)' : 'rgba(180,200,220,0.3)'; cx.fillRect(rand(i * 5, 1, f) * T | 0, rand(i * 11, f, 2) * T | 0, 4 + i % 3, 2 + i % 3); } break; }
         case TB.ICE: { cx.fillStyle = '#7aaac8'; cx.fillRect(0, 0, T, T); cx.fillStyle = 'rgba(220,240,255,0.42)'; cx.fillRect(2, 2, 22, 5); cx.fillRect(5, 11, 12, 3); cx.fillStyle = 'rgba(255,255,255,0.55)'; cx.fillRect(3, 3, 10, 2); break; }
         case TB.LAVA: { cx.fillStyle = '#380e00'; cx.fillRect(0, 0, T, T); for (let i = 0; i < 3; i++) { const y = 5 + i * 9 + Math.sin(f * 0.06 + i * 1.8) * 2.5; cx.fillStyle = `rgba(${175 - i * 28},${55 - i * 10},0,0.75)`; cx.beginPath(); cx.moveTo(0, y); for (let x = 0; x <= T; x += 3)cx.lineTo(x, y + Math.sin((x + f * 3) * 0.4 + i) * 3.5); cx.lineTo(T, y + 9); cx.lineTo(0, y + 9); cx.closePath(); cx.fill(); } break; }
-        case TB.DARK: { cx.fillStyle = '#090914'; cx.fillRect(0, 0, T, T); cx.fillStyle = 'rgba(25,25,55,0.5)'; cx.fillRect(3, 3, T - 6, T - 6); break; }
+        case TB.DARK: { cx.fillStyle = '#12121e'; cx.fillRect(0, 0, T, T); cx.fillStyle = 'rgba(35,30,65,0.55)'; cx.fillRect(3, 3, T - 6, T - 6); cx.fillStyle = 'rgba(50,40,80,0.15)'; cx.fillRect(1,1,T-2,2); cx.fillRect(1,1,2,T-2); break; }
         case TB.BRIDGE: { cx.fillStyle = '#0c3a6a'; cx.fillRect(0, 0, T, T);['#8b5e2a', '#a06830', '#7a5020', '#9a6828'].forEach((c, i) => { const y = 4 + i * 7; cx.fillStyle = c; cx.fillRect(1, y, T - 2, 6); }); break; }
         case TB.TALL_GRASS: { cx.fillStyle = '#2a7a2a'; cx.fillRect(0, 0, T, T); cx.strokeStyle = '#44b044'; cx.lineWidth = 1.5; for (let i = 0; i < 10; i++) { const x = 3 + i * 2.8, h = 9 + Math.sin(i * 2.3) * 3, sw = Math.sin(f * 0.04 + i * 0.7) * 2; cx.beginPath(); cx.moveTo(x, T - 2); cx.quadraticCurveTo(x + sw, T - h * 0.5, x + sw * 1.5, T - h); cx.stroke(); } break; }
         case TB.HILL: { cx.fillStyle = '#3a8c30'; cx.fillRect(0, 0, T, T); const hg = cx.createLinearGradient(0, 0, 0, T); hg.addColorStop(0, 'rgba(120,200,80,0.28)'); hg.addColorStop(1, 'rgba(0,0,0,0.22)'); cx.fillStyle = hg; cx.fillRect(0, 0, T, T); break; }
@@ -1305,14 +1318,46 @@
       weapon: "🔮 Bâton de Nytherion", wPow: 6,
       reward: "🔮 Bâton de Nytherion ! +100 XP", rewardIcon: "🔮", bgA: '#0d0d22'
     }, {
+      name: ["La Toile de l'Abomination", "Une puanteur de sang froid vous saisit...", "Des fils translucides scintillent dans l'obscurité."], biome: "webs",
+      quest: "Détruis 4 Cocons de Peur", questCount: 4, questType: "collect", questItem: "🕸️",
+      questMsgs: [
+        ["🕸️", "COCON BRISÉ", "Un cocon palpitant... quelque chose dedans n'est plus vivant.", "Vous le lacérez. Un fluide visqueux se répand.", "1/4 cocons détruits. La toile frissonne."],
+        ["🕸️", "COCON BRISÉ", "Le second cocon exhale une odeur de venin.", "Des yeux innombrables vous observent depuis les ombres.", "2/4 cocons détruits."],
+        ["🕸️", "COCON BRISÉ", "Le troisième cocon se défait dans un crissement d'os.", "Un chuchotis : 'Plus personne ne sort de mes filets...'", "3/4 cocons détruits."],
+        ["🕸️", "TOUS LES COCONS", "Le dernier cocon explose dans une gerbe de soie noire.", "Le sol vibre... les murs de la toile se contractent...", "Un nom s'inscrit en sang sur les fils :", "Arakhne, la Tisseuse Maudite..."]
+      ],
+      bossName: "Arakhne, la Tisseuse", bossIcon: "🕷️", bossHP: 80, bossPhases: 3,
+      bossSpeed: 0.50, bossAggroR: 310, bossWarnR: 440,
+      bossPatterns: ['web_snare', 'venom_burst', 'silk_storm', 'death_beam', 'brood_summon', 'enrage'],
+      bossDialog: ["Je suis Arakhne, la Tisseuse ! Chaque âme finit dans mes filets !", "Comment... tu brises mes toiles comme si elles n'étaient rien ?!", "Mon venin... s'épuise... impossible pour un mortel...", "Toile détruite ! 🕷️ Crochets d'Arakhne débloqués !"],
+      weapon: "🕷️ Crochets d'Arakhne", wPow: 8,
+      reward: "🕷️ Crochets d'Arakhne ! +150 XP", rewardIcon: "🕷️", bgA: '#0d0512'
+    }, {
+      name: ["Le Désert de Cristal Fracturé", "Le sol vibre sous vos pieds...", "Des cristaux géants percent le ciel comme des lances."], biome: "crystal",
+      quest: "Brise 5 Piliers de Cristal", questCount: 5, questType: "collect", questItem: "💎",
+      questMsgs: [
+        ["💎", "PILIER BRISÉ", "Le cristal explose en mille éclats de lumière aveuglante.", "Un son cristallin résonne dans toute la plaine.", "1/5 piliers brisés."],
+        ["💎", "PILIER BRISÉ", "Le second cristal s'effondre dans un rugissement sourd.", "Des fissures apparaissent dans le sol alentour.", "2/5 piliers brisés."],
+        ["💎", "PILIER BRISÉ", "Le troisième cristal libère une énergie prismatique aveuglante.", "Vous sentez quelque chose de gigantesque s'éveiller.", "3/5 piliers brisés."],
+        ["💎", "PILIER BRISÉ", "Le quatrième cristal se désintègre en poussière d'étoiles.", "Le ciel au-dessus se fissure comme du verre.", "4/5 piliers brisés."],
+        ["💎", "TOUS LES PILIERS", "Le dernier pilier explose. La terre tremble violemment.", "Des millions d'éclats de cristal volent en tous sens.", "Une forme titanesque émerge des décombres :", "Zarveth, le Colosse Prismatique !"]
+      ],
+      bossName: "Zarveth, le Colosse Prismatique", bossIcon: "💎", bossHP: 95, bossPhases: 3,
+      bossSpeed: 0.40, bossAggroR: 330, bossWarnR: 480,
+      bossPatterns: ['crystal_shard', 'prism_beam', 'quake_stomp', 'mirror_barrage', 'refraction_nova', 'enrage'],
+      bossDialog: ["Je suis ZARVETH ! Ce désert est mon trône, ces cristaux ma chair !", "Tu casses ma carapace... mais ma lumière est éternelle !", "Les... prismes... s'éteignent... comment ?!", "Désert libéré ! 💎 Éclat de Zarveth débloqué !"],
+      weapon: "💎 Éclat de Zarveth", wPow: 9,
+      reward: "💎 Éclat de Zarveth ! +175 XP", rewardIcon: "💎", bgA: '#030408'
+    }, {
       name: "Le Sommet de la Sagesse", biome: "mountain",
       quest: ["Atteins l'Étoile Finale, au sommet de la montagne", "Une présence pesante vous glace le sang..."], questCount: 1, questType: "collect", questItem: "⭐",
       questMsgs: [["⭐", "L'ÉTOILE FINALE", "Vous l'avez donc trouvée... l'\"Étoile\"", "Elle brille pour vous depuis les ténèbres de l'univers.", "Vous sentez une énergie puissante vous envahir", "et une voix résonne dans votre esprit :", "\"Tu as fait du chemin pour venir jusqu'ici... mais tu n'es pas encore arrivé.\"", "Vous faites un voeu...", "Une année de combat, de persévérance, de courage...", "L'étoile vous octroie le fruit de votre désir."]],
-      bossName: "Thyrax, le Souffle Noir", bossIcon: "🐉", bossHP: 100, bossPhases: 3,
-      bossPatterns: ['fireball_burst', 'aerial_slam', 'time_stop', 'meteor', 'dash_slam', 'enrage'],
-      bossDialog: ["Je suis Thyrax le Grand ! Les années passent, personne ne m'arrête !", "PERSONNE N'ETAIT CENSE DEROGER CET ORDRE", "\"vous avez mis fin au règne temporel de Thyrax.\"", "🐉 DRAGON VAINCU ! ⭐ Étoile de Sagesse ! VICTOIRE !"],
-      weapon: "⭐ Étoile de Sagesse", wPow: 10,
-      reward: "⭐ Étoile de Sagesse ! +200 XP", rewardIcon: "⭐", bgA: '#080812'
+      bossName: "Thyrax SUPRÊME", bossIcon: "🐉", bossHP: 160, bossPhases: 4,
+      bossSpeed: 0.62, bossAggroR: 380, bossWarnR: 500,
+      bossPatterns: ['fireball_burst', 'aerial_slam', 'time_stop', 'meteor', 'dash_slam', 'death_beam', 'void_spiral', 'chain_lightning', 'dark_nova', 'enrage'],
+      bossDialog: ["Je suis THYRAX LE SUPRÊME ! Le temps lui-même se plie à ma volonté !", "Impossible... aucun mortel n'a jamais...", "Ma flamme éternelle... elle vacille... QUI ES-TU ?!", "\"vous avez mis fin au règne éternel de Thyrax le Suprême.\"", "🐉 DRAGON SUPRÊME VAINCU ! ⭐ Étoile de Sagesse ! VICTOIRE ULTIME !"],
+      weapon: "⭐ Étoile de Sagesse", wPow: 12,
+      reward: "⭐ Étoile de Sagesse ! +300 XP", rewardIcon: "⭐", bgA: '#050310'
     }];
 
     // ============================================================
@@ -1330,7 +1375,15 @@
       mountain: [{ icon: '🧊', name: 'Géant de Glace', hp: 16, maxHp: 16, spd: 0.38, dmg: 4, xp: 40, r: 17 },
       { icon: '🦅', name: 'Griffon', hp: 8, maxHp: 8, spd: 1.6, dmg: 3, xp: 32, r: 13 },
       { icon: '🪨', name: 'Golem', hp: 20, maxHp: 20, spd: 0.28, dmg: 5, xp: 50, r: 18 },
-      { icon: '🌨️', name: 'Élémental', hp: 11, maxHp: 11, spd: 1.3, dmg: 3, xp: 38, r: 13 }]
+      { icon: '🌨️', name: 'Élémental', hp: 11, maxHp: 11, spd: 1.3, dmg: 3, xp: 38, r: 13 }],
+      webs: [{ icon: '🕷️', name: 'Araignée Vénéneuse', hp: 10, maxHp: 10, spd: 1.8, dmg: 2, xp: 26, r: 12 },
+      { icon: '🦂', name: 'Scorpion Géant', hp: 14, maxHp: 14, spd: 1.2, dmg: 3, xp: 34, r: 14 },
+      { icon: '🪲', name: 'Coléoptère Sombre', hp: 18, maxHp: 18, spd: 0.7, dmg: 4, xp: 38, r: 15 },
+      { icon: '🦗', name: 'Chasseur Silencieux', hp: 8, maxHp: 8, spd: 2.8, dmg: 2, xp: 30, r: 11 }],
+      crystal: [{ icon: '💠', name: 'Éclat Vivant', hp: 12, maxHp: 12, spd: 1.4, dmg: 3, xp: 30, r: 12 },
+      { icon: '🔷', name: 'Golem de Cristal', hp: 24, maxHp: 24, spd: 0.5, dmg: 5, xp: 58, r: 16 },
+      { icon: '✨', name: 'Lueur Prismatique', hp: 9, maxHp: 9, spd: 2.2, dmg: 2, xp: 32, r: 11 },
+      { icon: '🌀', name: 'Vortex de Verre', hp: 16, maxHp: 16, spd: 1.0, dmg: 4, xp: 46, r: 14 }]
     };
 
     // ============================================================
@@ -1369,14 +1422,120 @@
     }
     function genMap(biome) {
       const seed = Math.random() * 1000;
-      const base = biome === 'castle' ? TB.FLOOR : biome === 'mountain' ? TB.SNOW : TB.GRASS;
-      const wall = biome === 'castle' ? TB.WALL : biome === 'mountain' ? TB.ROCK : TB.TREE;
+      const base = biome === 'castle' ? TB.FLOOR : biome === 'mountain' ? TB.SNOW : biome === 'webs' ? TB.DARK : biome === 'crystal' ? TB.DARK : TB.GRASS;
+      const wall = biome === 'castle' ? TB.WALL : biome === 'mountain' ? TB.ROCK : biome === 'webs' ? TB.WALL : biome === 'crystal' ? TB.ROCK : TB.TREE;
       const map = [];
       for (let r = 0; r < ROWS; r++) { map[r] = []; for (let c = 0; c < COLS; c++)map[r][c] = base; }
       fillR(map, 0, 0, 3, COLS, wall); fillR(map, ROWS - 3, 0, ROWS, COLS, wall);
       fillR(map, 0, 0, ROWS, 3, wall); fillR(map, 0, COLS - 3, ROWS, COLS, wall);
       let startPos, bossPos, questPos;
-      if (biome === 'forest') {
+      if (biome === 'webs') {
+        // Labyrinthe de toile : tout est DARK (mur), on creuse des chambres et tunnels larges
+        fillR(map, 3, 3, ROWS - 3, COLS - 3, TB.DARK);
+
+        // Chambres principales — plus grandes, garantit de l'espace
+        const chambers = [
+          {r:50, c:40, rr:6, rc:8},   // entrée (bas centre)
+          {r:38, c:20, rr:5, rc:7},   // gauche
+          {r:38, c:58, rr:5, rc:7},   // droite
+          {r:24, c:36, rr:6, rc:9},   // centre
+          {r:10, c:20, rr:4, rc:6},   // boss G
+          {r:10, c:55, rr:4, rc:6},   // boss D
+          {r:14, c:37, rr:3, rc:5},   // salle boss centrale
+        ];
+        for (const ch of chambers) {
+          fillE(map, ch.r, ch.c, ch.rr, ch.rc, TB.FLOOR);
+          // Flaques venimeuses (déco, passable car non dans BLOCK)
+          // On met juste du FLOOR partout dans les chambres
+        }
+
+        // Tunnels larges (w=2) reliant toutes les chambres
+        carveT(map, 50, 40, 38, 20, TB.FLOOR, 2); // entrée -> G
+        carveT(map, 50, 40, 38, 58, TB.FLOOR, 2); // entrée -> D
+        carveT(map, 38, 20, 24, 36, TB.FLOOR, 2); // G -> centre
+        carveT(map, 38, 58, 24, 36, TB.FLOOR, 2); // D -> centre
+        carveT(map, 24, 36, 14, 37, TB.FLOOR, 2); // centre -> boss
+        carveT(map, 14, 37, 10, 20, TB.FLOOR, 2); // boss -> salle boss G
+        carveT(map, 14, 37, 10, 55, TB.FLOOR, 2); // boss -> salle boss D
+
+        // Tunnels secondaires pour enrichir l'exploration
+        carveT(map, 50, 40, 50, 62, TB.FLOOR, 2); // bras droit bas
+        carveT(map, 50, 62, 36, 68, TB.FLOOR, 2);
+        carveT(map, 36, 68, 24, 60, TB.FLOOR, 2);
+        carveT(map, 24, 60, 14, 55, TB.FLOOR, 2);
+        carveT(map, 50, 18, 36, 10, TB.FLOOR, 2); // bras gauche bas
+        carveT(map, 36, 10, 24, 14, TB.FLOOR, 2);
+        carveT(map, 24, 14, 10, 20, TB.FLOOR, 2);
+
+        // Quelques alcôves latérales (salles secondaires)
+        const alcoves = [{r:44,c:58,rr:3,rc:4},{r:44,c:20,rr:3,rc:4},{r:30,c:10,rr:3,rc:4},{r:30,c:68,rr:3,rc:4}];
+        for (const a of alcoves) fillE(map, a.r, a.c, a.rr, a.rc, TB.FLOOR);
+
+        // Quelques flaques de venin déco (TB.WATER = passable visuellement non bloquant)
+        fillE(map, 50, 40, 2, 3, TB.WATER);
+        fillE(map, 38, 20, 1, 2, TB.WATER);
+        fillE(map, 38, 58, 1, 2, TB.WATER);
+        fillE(map, 24, 36, 2, 3, TB.WATER);
+
+        startPos = ensurePassable(map, 40 * TSIZ + TSIZ/2, 51 * TSIZ + TSIZ/2);
+        bossPos  = ensurePassable(map, 37 * TSIZ + TSIZ/2, 14 * TSIZ + TSIZ/2);
+
+        // BFS depuis la position de départ pour n'avoir que des cellules accessibles
+        const cells = bfsPassable(map, 50, 40);
+        questPos = [
+          safeSpawnCell(cells, startPos.x, startPos.y, 220) || {x:20*TSIZ, y:38*TSIZ, collected:false},
+          safeSpawnCell(cells, startPos.x, startPos.y, 180) || {x:58*TSIZ, y:38*TSIZ, collected:false},
+          safeSpawnCell(cells, bossPos.x,  bossPos.y,  200) || {x:36*TSIZ, y:24*TSIZ, collected:false},
+          safeSpawnCell(cells, bossPos.x,  bossPos.y,  160) || {x:55*TSIZ, y:10*TSIZ, collected:false},
+        ].map(p => ({ ...p, collected: false }));
+      } else if (biome === 'crystal') {
+        // Désert de cristal : grande plaine ouverte avec structures géométriques régulières
+        fillR(map, 3, 3, ROWS - 3, COLS - 3, TB.FLOOR);
+        // Piliers de cristal (roches) en grille décalée
+        const pillarPositions = [];
+        for (let pr = 8; pr < ROWS - 8; pr += 10) {
+          for (let pc = 8; pc < COLS - 8; pc += 12) {
+            const jr = ri(-2, 2), jc = ri(-3, 3);
+            const pr2 = pr + jr, pc2 = pc + jc;
+            fillE(map, pr2, pc2, 2, 3, TB.ROCK);
+            pillarPositions.push([pr2, pc2]);
+          }
+        }
+        // Formations cristallines (patterns hexagonaux)
+        const hexCenters = [[25, 20], [25, 58], [12, 38], [38, 15], [38, 60], [50, 35]];
+        for (const [hr, hc] of hexCenters) {
+          for (let angle = 0; angle < 6; angle++) {
+            const a = angle * Math.PI / 3;
+            const er = Math.round(hr + Math.sin(a) * 5), ec = Math.round(hc + Math.cos(a) * 6);
+            fillE(map, Math.max(4, Math.min(ROWS-4, er)), Math.max(4, Math.min(COLS-4, ec)), 1, 2, TB.ICE);
+          }
+          fillE(map, hr, hc, 3, 4, TB.FLOOR); // centre accessible
+        }
+        // Fossés de fissures (lava/eau)
+        for (let i = 0; i < 4; i++) {
+          const fr = ri(15, 45), fc1 = ri(5, 20), fc2 = ri(55, 72);
+          carveLine(map, fr, fc1, fr, fc2, TB.LAVA);
+          carveLine(map, fr+1, fc1, fr+1, fc2, TB.LAVA);
+        }
+        // Chemins entre les formations
+        carveT(map, ROWS - 5, 38, 50, 35, TB.FLOOR, 1);
+        carveT(map, 50, 35, 38, 15, TB.FLOOR, 1);
+        carveT(map, 50, 35, 38, 60, TB.FLOOR, 1);
+        carveT(map, 38, 15, 25, 20, TB.FLOOR, 1);
+        carveT(map, 38, 60, 25, 58, TB.FLOOR, 1);
+        carveT(map, 25, 20, 12, 38, TB.FLOOR, 1);
+        carveT(map, 25, 58, 12, 38, TB.FLOOR, 1);
+        startPos = ensurePassable(map, 38 * TSIZ + TSIZ/2, (ROWS - 5) * TSIZ + TSIZ/2);
+        bossPos = ensurePassable(map, 38 * TSIZ + TSIZ/2, 10 * TSIZ + TSIZ/2);
+        const cells = bfsPassable(map, ROWS - 5, 38);
+        questPos = [
+          safeSpawnCell(cells, startPos.x, startPos.y, 200) || {x:20*TSIZ, y:38*TSIZ},
+          safeSpawnCell(cells, startPos.x, startPos.y, 180) || {x:60*TSIZ, y:38*TSIZ},
+          safeSpawnCell(cells, bossPos.x, bossPos.y, 200) || {x:25*TSIZ, y:25*TSIZ},
+          safeSpawnCell(cells, bossPos.x, bossPos.y, 180) || {x:58*TSIZ, y:25*TSIZ},
+          safeSpawnCell(cells, startPos.x, startPos.y, 250) || {x:38*TSIZ, y:20*TSIZ}
+        ].map(p => ({ ...p, collected: false }));
+      } else if (biome === 'forest') {
         for (let r = 3; r < ROWS - 3; r++)for (let c = 3; c < COLS - 3; c++) {
           const n = fbm(c * 0.08 + seed * 0.1, r * 0.08 + seed * 0.1), n2 = fbm(c * 0.15 + 50 + seed * 0.05, r * 0.15 + 50 + seed * 0.05), n3 = fbm(c * 0.05 + 100, r * 0.05 + 100);
           if (n > 0.63) map[r][c] = TB.TREE; else if (n > 0.56 && n2 > 0.55) map[r][c] = TB.MUSHROOM;
@@ -1453,7 +1612,9 @@
       const icons = {
         forest: ['🌲', '🌿', '🍄', '🌸', '🌺', '💎', '🪨', '🌳', '🦋', '🌾', '🍃'],
         castle: ['💎', '🪦', '🕸️', '⚔️', '🛡️', '🧱'],
-        mountain: ['🏔️', '❄️', '🦅', '🪨', '💎', '🌟', '⛰️', '🧊', '🌬️']
+        mountain: ['🏔️', '❄️', '🦅', '🪨', '💎', '🌟', '⛰️', '🧊', '🌬️'],
+        webs: ['🕸️', '🦴', '💀', '🩸', '🕷️', '🌑'],
+        crystal: ['💠', '🔷', '✨', '🌟', '💎', '🔵', '🌀']
       };
       const arr = icons[biome] || icons.forest;
       const { map } = mapD;
@@ -1466,8 +1627,8 @@
       return d;
     }
     function genAmbient(biome) {
-      const p = []; const count = biome === 'forest' ? 40 : biome === 'castle' ? 25 : 30;
-      const icons = biome === 'forest' ? ['✨', '🍃'] : biome === 'castle' ? ['💫', '🔥'] : ['❄️', '✦'];
+      const p = []; const count = biome === 'forest' ? 40 : biome === 'castle' ? 25 : biome === 'webs' ? 35 : biome === 'crystal' ? 45 : 30;
+      const icons = biome === 'forest' ? ['firefly', 'leaf_fall'] : biome === 'castle' ? ['candle', 'spark'] : biome === 'webs' ? ['web_strand', 'web_spore'] : biome === 'crystal' ? ['ice_crystal', 'snowflake'] : ['snowflake', 'ice_crystal'];
       for (let i = 0; i < count; i++)p.push({ x: Math.random() * WW, y: Math.random() * WH, icon: icons[i % icons.length], spd: 0.3 + Math.random() * 0.5, off: Math.random() * Math.PI * 2, alpha: 0.2 + Math.random() * 0.35, sz: 8 + Math.random() * 8 });
       return p;
     }
@@ -2038,6 +2199,329 @@
           GS.shake = 18; screenFlash(255, 0, 0, 0.6, 500); sBossRage();
           break;
         }
+        // ---- PATTERN NEW: Void Spiral (spirale de projectiles void qui s'enroule) ----
+        case 'void_spiral': {
+          const totalProj = b.rageMode ? 24 : 16;
+          for (let i = 0; i < totalProj; i++) {
+            setTimeout(() => {
+              if (b.state === 'dead' || b.state === 'dying') return;
+              const spiralAngle = i / totalProj * Math.PI * 4; // 2 rotations
+              const speed = 2.8 + (i / totalProj) * 1.5;
+              GS.bossProjectiles.push({ x: b.x, y: b.y, vx: Math.cos(spiralAngle) * speed, vy: Math.sin(spiralAngle) * speed, icon: '🌀', sz: 20, life: 85, r: 12, dmg: 2, cls: 'spin' });
+            }, i * 60);
+          }
+          GS.bossWarnings.push({ x: b.x, y: b.y, r: 130, life: 30, maxLife: 30, type: 'ring', color: '#9900ff' });
+          screenFlash(150, 0, 255, 0.35, 400); sBossWave();
+          break;
+        }
+        // ---- PATTERN NEW: Shadow Clone (boss crée 3 clones fantômes qui attaquent) ----
+        case 'shadow_clone': {
+          for (let i = 0; i < 3; i++) {
+            setTimeout(() => {
+              if (b.state === 'dead' || b.state === 'dying') return;
+              const ang = (i / 3) * Math.PI * 2;
+              const cx = b.x + Math.cos(ang) * 90, cy = b.y + Math.sin(ang) * 90;
+              GS.bossWarnings.push({ x: cx, y: cy, r: 40, life: 35, maxLife: 35, type: 'circle', color: '#6600cc' });
+              // Clone shoots toward player after brief delay
+              setTimeout(() => {
+                if (b.state === 'dead' || b.state === 'dying') return;
+                const p2 = GS.p; const tAng = Math.atan2(p2.y - cy, p2.x - cx);
+                for (let j = -1; j <= 1; j++) {
+                  const a2 = tAng + j * 0.3;
+                  GS.bossProjectiles.push({ x: cx, y: cy, vx: Math.cos(a2) * 4.5, vy: Math.sin(a2) * 4.5, icon: '💜', sz: 22, life: 75, r: 12, dmg: b.rageMode ? 3 : 2, cls: 'spin' });
+                }
+                GS.atks.push({ worldX: cx, worldY: cy, icon: '🌀', sz: 36, life: 15, maxLife: 15, vx: 0, vy: 0 });
+              }, 500);
+            }, i * 300);
+          }
+          screenFlash(100, 0, 200, 0.3, 500); sBossBeam();
+          break;
+        }
+        // ---- PATTERN NEW: Ground Crack (fissures au sol qui convergent vers le joueur) ----
+        case 'ground_crack': {
+          const p3 = GS.p;
+          for (let i = 0; i < (b.rageMode ? 5 : 3); i++) {
+            setTimeout(() => {
+              if (b.state === 'dead' || b.state === 'dying') return;
+              const offsetAng = (i / (b.rageMode ? 5 : 3)) * Math.PI * 2;
+              const startX = b.x + Math.cos(offsetAng) * 120;
+              const startY = b.y + Math.sin(offsetAng) * 120;
+              // Warning line from start toward player
+              GS.bossWarnings.push({ x: startX, y: startY, r: 80, life: 40, maxLife: 40, type: 'beam_warn', angle: Math.atan2(p3.y - startY, p3.x - startX), color: '#ff6600' });
+              setTimeout(() => {
+                if (b.state === 'dead' || b.state === 'dying') return;
+                // Fire crack projectile
+                const cAng = Math.atan2(p3.y - startY, p3.x - startX);
+                for (let k = -1; k <= 1; k++) {
+                  const a3 = cAng + k * 0.2;
+                  GS.bossProjectiles.push({ x: startX, y: startY, vx: Math.cos(a3) * 5.5, vy: Math.sin(a3) * 5.5, icon: '☄️', sz: 20, life: 60, r: 13, dmg: b.rageMode ? 4 : 3, cls: 'fire' });
+                }
+                GS.shake = 8;
+              }, 600);
+            }, i * 200);
+          }
+          screenFlash(255, 100, 0, 0.4, 600); sBossBeam();
+          break;
+        }
+        // ---- PATTERN NEW: Chain Lightning (éclairs en chaîne autour du boss) ----
+        case 'chain_lightning': {
+          const p4 = GS.p;
+          // Boss charges briefly then unleashes arc lightning
+          b.beamCharging = true; b.beamChargeTimer = 55;
+          b.beamTargetAngle = Math.atan2(p4.y - b.y, p4.x - b.x);
+          b.beamSweepDir = b.rageMode ? 2 : 1; b.beamDmgCD = 0;
+          for (let i = 0; i < 3; i++) {
+            setTimeout(() => {
+              if (b.state === 'dead' || b.state === 'dying') return;
+              GS.bossWarnings.push({ x: b.x, y: b.y, r: 50 + i * 40, life: 40, maxLife: 40, type: 'ring', color: '#00ffff' });
+            }, i * 150);
+          }
+          GS.bossWarnings.push({ x: b.x, y: b.y, r: 280, life: 50, maxLife: 50, type: 'beam_warn', angle: b.beamTargetAngle, color: '#00eeff' });
+          screenFlash(0, 220, 255, 0.3, 900); sBossBeam();
+          setTimeout(() => {
+            if (b.state === 'dead' || b.state === 'dying' || !b.beamCharging) return;
+            b.beamCharging = false; b.beamActive = true; b.beamTimer = b.rageMode ? 140 : 100;
+            b.beamAngle = b.beamTargetAngle - 0.4;
+            // Additional scatter bolts
+            for (let j = 0; j < (b.rageMode ? 8 : 5); j++) {
+              const ang5 = Math.random() * Math.PI * 2;
+              GS.bossProjectiles.push({ x: b.x, y: b.y, vx: Math.cos(ang5) * 3.5, vy: Math.sin(ang5) * 3.5, icon: '⚡', sz: 22, life: 70, r: 12, dmg: 2, cls: 'ice' });
+            }
+            screenFlash(0, 255, 255, 0.6, 300); GS.shake = 14;
+          }, 900);
+          break;
+        }
+        // ---- PATTERN NEW: Dark Nova (explosion sombre massive centrée sur le boss) ----
+        case 'dark_nova': {
+          // Big charge-up, then massive explosion
+          screenFlash(50, 0, 80, 0.5, 1500);
+          for (let i = 0; i < 4; i++) {
+            setTimeout(() => {
+              if (b.state === 'dead' || b.state === 'dying') return;
+              GS.bossWarnings.push({ x: b.x, y: b.y, r: 40 + i * 50, life: 55, maxLife: 55, type: 'ring', color: '#cc00ff' });
+            }, i * 250);
+          }
+          sBossRage();
+          setTimeout(() => {
+            if (b.state === 'dead' || b.state === 'dying') return;
+            // Massive radial burst: 20 projectiles
+            const numProj = b.rageMode ? 28 : 20;
+            for (let i = 0; i < numProj; i++) {
+              const ang6 = (i / numProj) * Math.PI * 2;
+              const speed2 = 3.5 + Math.random() * 2;
+              GS.bossProjectiles.push({ x: b.x, y: b.y, vx: Math.cos(ang6) * speed2, vy: Math.sin(ang6) * speed2, icon: '💜', sz: 24, life: 90, r: 14, dmg: b.rageMode ? 4 : 3, cls: 'spin' });
+            }
+            GS.shake = 25; screenFlash(180, 0, 255, 0.85, 400);
+            // Point-blank damage
+            if (dst(b, GS.p) < 120) damagePlayer(b.rageMode ? 5 : 3, 'spin');
+            for (let k = 0; k < 8; k++) GS.atks.push({ worldX: b.x + (Math.random() - 0.5) * 100, worldY: b.y + (Math.random() - 0.5) * 100, icon: '💥', sz: 30 + Math.random() * 15, life: 20, maxLife: 20, vx: 0, vy: 0 });
+          }, 1400);
+          b.patternTimer += 160; // extra cooldown
+          break;
+        }
+        // ---- ARAKHNE: Web Snare (filet qui capture et ralentit) ----
+        case 'web_snare': {
+          const p5 = GS.p;
+          // Lance 3 fils vers le joueur qui convergent
+          for (let i = 0; i < 3; i++) {
+            setTimeout(() => {
+              if (b.state === 'dead' || b.state === 'dying') return;
+              const offset = (i - 1) * 0.5;
+              const ang = Math.atan2(p5.y - b.y, p5.x - b.x) + offset;
+              GS.bossProjectiles.push({ x: b.x, y: b.y, vx: Math.cos(ang) * 5, vy: Math.sin(ang) * 5, icon: '🕸️', sz: 26, life: 80, r: 16, dmg: b.rageMode ? 3 : 2, cls: 'spin' });
+            }, i * 150);
+          }
+          // Grande toile piège au sol sous le joueur
+          GS.bossWarnings.push({ x: p5.x, y: p5.y, r: 70, life: 40, maxLife: 40, type: 'circle', color: '#880088' });
+          setTimeout(() => {
+            if (b.state === 'dead' || b.state === 'dying') return;
+            if (dst({ x: p5.x, y: p5.y }, GS.p) < 90) damagePlayer(b.rageMode ? 4 : 2, 'spin');
+          }, 700);
+          screenFlash(100, 0, 100, 0.3, 400); sBossWave();
+          break;
+        }
+        // ---- ARAKHNE: Venom Burst (crachat de venin radial) ----
+        case 'venom_burst': {
+          const numV = b.rageMode ? 14 : 10;
+          for (let i = 0; i < numV; i++) {
+            setTimeout(() => {
+              if (b.state === 'dead' || b.state === 'dying') return;
+              const a = (i / numV) * Math.PI * 2;
+              GS.bossProjectiles.push({ x: b.x, y: b.y, vx: Math.cos(a) * 3.5, vy: Math.sin(a) * 3.5, icon: '☠️', sz: 20, life: 90, r: 12, dmg: 2, cls: 'spin' });
+            }, i * 50);
+          }
+          GS.bossWarnings.push({ x: b.x, y: b.y, r: 100, life: 22, maxLife: 22, type: 'ring', color: '#44aa00' });
+          screenFlash(0, 150, 0, 0.3, 300); sBossWave();
+          break;
+        }
+        // ---- ARAKHNE: Silk Storm (tempête de fils depuis tous côtés) ----
+        case 'silk_storm': {
+          const p6 = GS.p;
+          for (let i = 0; i < (b.rageMode ? 8 : 5); i++) {
+            setTimeout(() => {
+              if (b.state === 'dead' || b.state === 'dying') return;
+              // Depuis les bords de l'écran vers le joueur
+              const edgeAngle = (i / (b.rageMode ? 8 : 5)) * Math.PI * 2;
+              const ex = p6.x + Math.cos(edgeAngle) * 250, ey = p6.y + Math.sin(edgeAngle) * 250;
+              const toAng = Math.atan2(p6.y - ey, p6.x - ex);
+              GS.bossWarnings.push({ x: ex, y: ey, r: 45, life: 35, maxLife: 35, type: 'beam_warn', angle: toAng, color: '#cc44cc' });
+              setTimeout(() => {
+                if (b.state === 'dead' || b.state === 'dying') return;
+                for (let j = -1; j <= 1; j++) {
+                  const a2 = toAng + j * 0.2;
+                  GS.bossProjectiles.push({ x: ex, y: ey, vx: Math.cos(a2) * 6, vy: Math.sin(a2) * 6, icon: '🕸️', sz: 22, life: 60, r: 12, dmg: b.rageMode ? 3 : 2, cls: 'spin' });
+                }
+              }, 600);
+            }, i * 200);
+          }
+          screenFlash(150, 0, 150, 0.35, 800); sBossBeam();
+          break;
+        }
+        // ---- ARAKHNE: Brood Summon (invoque des araignées) ----
+        case 'brood_summon': {
+          for (let i = 0; i < 6; i++) {
+            const ang = (i / 6) * Math.PI * 2;
+            const ex = b.x + Math.cos(ang) * 80, ey = b.y + Math.sin(ang) * 80;
+            GS.atks.push({ worldX: ex, worldY: ey, icon: '🕷️', sz: 28, life: 20, maxLife: 20, vx: 0, vy: 0 });
+          }
+          // Projectiles depuis les positions des araignées invoquées
+          setTimeout(() => {
+            if (b.state === 'dead' || b.state === 'dying') return;
+            for (let i = 0; i < 6; i++) {
+              const ang = (i / 6) * Math.PI * 2;
+              const ex = b.x + Math.cos(ang) * 80, ey = b.y + Math.sin(ang) * 80;
+              const tAng = Math.atan2(GS.p.y - ey, GS.p.x - ex);
+              GS.bossProjectiles.push({ x: ex, y: ey, vx: Math.cos(tAng) * 4.5, vy: Math.sin(tAng) * 4.5, icon: '☠️', sz: 18, life: 75, r: 11, dmg: 2, cls: 'spin' });
+            }
+          }, 400);
+          GS.shake = 6; screenFlash(80, 0, 80, 0.3, 500); sBossWave();
+          break;
+        }
+        // ---- ZARVETH: Crystal Shard (éclats de cristal depuis le sol) ----
+        case 'crystal_shard': {
+          const p7 = GS.p;
+          const numShards = b.rageMode ? 8 : 5;
+          for (let i = 0; i < numShards; i++) {
+            setTimeout(() => {
+              if (b.state === 'dead' || b.state === 'dying') return;
+              const tx = p7.x + (Math.random() - 0.5) * 180;
+              const ty = p7.y + (Math.random() - 0.5) * 180;
+              GS.bossWarnings.push({ x: tx, y: ty, r: 42, life: 38, maxLife: 38, type: 'circle', color: '#00ccff' });
+              setTimeout(() => {
+                if (b.state === 'dead' || b.state === 'dying') return;
+                // Éclats partant vers l'extérieur
+                for (let j = 0; j < 4; j++) {
+                  const a = j * Math.PI / 2 + Math.random() * 0.5;
+                  GS.bossProjectiles.push({ x: tx, y: ty, vx: Math.cos(a) * 5.5, vy: Math.sin(a) * 5.5, icon: '💠', sz: 20, life: 55, r: 12, dmg: b.rageMode ? 3 : 2, cls: 'ice' });
+                }
+                GS.atks.push({ worldX: tx, worldY: ty, icon: '💥', sz: 38, life: 18, maxLife: 18, vx: 0, vy: 0 });
+                if (dst({ x: tx, y: ty }, p7) < 50) damagePlayer(2, 'ice');
+              }, 650);
+            }, i * 180);
+          }
+          screenFlash(0, 150, 255, 0.35, 600); sBossBeam();
+          break;
+        }
+        // ---- ZARVETH: Prism Beam (rayon prismatique dévastateur) ----
+        case 'prism_beam': {
+          b.beamCharging = true; b.beamChargeTimer = 65;
+          b.beamTargetAngle = Math.atan2(GS.p.y - b.y, GS.p.x - b.x);
+          b.beamSweepDir = b.rageMode ? 2 : 1; b.beamDmgCD = 0;
+          for (let i = 0; i < 3; i++) {
+            setTimeout(() => {
+              if (b.state === 'dead' || b.state === 'dying') return;
+              GS.bossWarnings.push({ x: b.x, y: b.y, r: 55 + i * 45, life: 55, maxLife: 55, type: 'ring', color: '#00eeff' });
+            }, i * 180);
+          }
+          GS.bossWarnings.push({ x: b.x, y: b.y, r: 320, life: 60, maxLife: 60, type: 'beam_warn', angle: b.beamTargetAngle, color: '#88ffff' });
+          screenFlash(0, 200, 255, 0.35, 1000); sBossBeam();
+          setTimeout(() => {
+            if (b.state === 'dead' || b.state === 'dying' || !b.beamCharging) return;
+            b.beamCharging = false; b.beamActive = true; b.beamTimer = b.rageMode ? 130 : 95;
+            b.beamAngle = b.beamTargetAngle - 0.45;
+            // Projections latérales arc-en-ciel
+            for (let j = 0; j < (b.rageMode ? 6 : 4); j++) {
+              const ang = b.beamTargetAngle + (j % 2 === 0 ? 1 : -1) * (j * 0.35 + 0.3);
+              GS.bossProjectiles.push({ x: b.x, y: b.y, vx: Math.cos(ang) * 4, vy: Math.sin(ang) * 4, icon: '💠', sz: 22, life: 70, r: 12, dmg: 2, cls: 'ice' });
+            }
+            screenFlash(0, 255, 255, 0.55, 300); GS.shake = 13;
+          }, 1100);
+          break;
+        }
+        // ---- ZARVETH: Quake Stomp (séisme qui fissure le sol en croix) ----
+        case 'quake_stomp': {
+          GS.bossWarnings.push({ x: b.x, y: b.y, r: 200, life: 30, maxLife: 30, type: 'ring', color: '#ffee00' });
+          sBossRage();
+          setTimeout(() => {
+            if (b.state === 'dead' || b.state === 'dying') return;
+            GS.shake = 22;
+            screenFlash(255, 220, 0, 0.6, 350);
+            // 4 lignes de fissures dans les 4 directions cardinales
+            for (let dir = 0; dir < 4; dir++) {
+              const a = dir * Math.PI / 2;
+              for (let dist = 1; dist <= (b.rageMode ? 7 : 5); dist++) {
+                const delay = dist * 80;
+                setTimeout(() => {
+                  if (b.state === 'dead' || b.state === 'dying') return;
+                  const ex = b.x + Math.cos(a) * dist * 55;
+                  const ey = b.y + Math.sin(a) * dist * 55;
+                  GS.atks.push({ worldX: ex, worldY: ey, icon: '💥', sz: 35, life: 16, maxLife: 16, vx: 0, vy: 0 });
+                  if (dst({ x: ex, y: ey }, GS.p) < 45) damagePlayer(b.rageMode ? 4 : 3, 'fire');
+                }, delay);
+              }
+            }
+          }, 500);
+          break;
+        }
+        // ---- ZARVETH: Mirror Barrage (copies miroir du projectile) ----
+        case 'mirror_barrage': {
+          const numMirrors = b.rageMode ? 6 : 4;
+          for (let i = 0; i < numMirrors; i++) {
+            setTimeout(() => {
+              if (b.state === 'dead' || b.state === 'dying') return;
+              const mirrorAng = (i / numMirrors) * Math.PI * 2;
+              const mx = b.x + Math.cos(mirrorAng) * 70, my = b.y + Math.sin(mirrorAng) * 70;
+              // Chaque miroir tire vers le joueur
+              const tAng = Math.atan2(GS.p.y - my, GS.p.x - mx);
+              for (let k = -1; k <= 1; k++) {
+                GS.bossProjectiles.push({ x: mx, y: my, vx: Math.cos(tAng + k * 0.3) * 5.2, vy: Math.sin(tAng + k * 0.3) * 5.2, icon: '🔷', sz: 20, life: 70, r: 12, dmg: b.rageMode ? 3 : 2, cls: 'ice' });
+              }
+              GS.atks.push({ worldX: mx, worldY: my, icon: '✨', sz: 25, life: 14, maxLife: 14, vx: 0, vy: 0 });
+            }, i * 220);
+          }
+          screenFlash(100, 200, 255, 0.3, 500); sBossWave();
+          break;
+        }
+        // ---- ZARVETH: Refraction Nova (explosion prismatique géante) ----
+        case 'refraction_nova': {
+          screenFlash(0, 100, 200, 0.5, 1800);
+          for (let i = 0; i < 5; i++) {
+            setTimeout(() => {
+              if (b.state === 'dead' || b.state === 'dying') return;
+              GS.bossWarnings.push({ x: b.x, y: b.y, r: 35 + i * 45, life: 60, maxLife: 60, type: 'ring', color: '#00ddff' });
+            }, i * 280);
+          }
+          sBossRage();
+          setTimeout(() => {
+            if (b.state === 'dead' || b.state === 'dying') return;
+            const numR = b.rageMode ? 24 : 18;
+            for (let i = 0; i < numR; i++) {
+              const ang = (i / numR) * Math.PI * 2;
+              const spd = 3.8 + Math.random() * 2;
+              GS.bossProjectiles.push({ x: b.x, y: b.y, vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd, icon: '💠', sz: 24, life: 95, r: 14, dmg: b.rageMode ? 4 : 3, cls: 'ice' });
+            }
+            // Rafales de cristaux secondaires décalées
+            for (let i = 0; i < numR; i++) {
+              const ang = (i / numR) * Math.PI * 2 + Math.PI / numR;
+              GS.bossProjectiles.push({ x: b.x, y: b.y, vx: Math.cos(ang) * 2.5, vy: Math.sin(ang) * 2.5, icon: '🔷', sz: 18, life: 75, r: 11, dmg: 2, cls: 'ice' });
+            }
+            GS.shake = 28; screenFlash(0, 200, 255, 0.9, 500);
+            if (dst(b, GS.p) < 130) damagePlayer(b.rageMode ? 5 : 3, 'ice');
+            for (let k = 0; k < 10; k++) GS.atks.push({ worldX: b.x + (Math.random()-0.5)*120, worldY: b.y + (Math.random()-0.5)*120, icon: '💥', sz: 28+Math.random()*15, life: 20, maxLife: 20, vx: 0, vy: 0 });
+          }, 1700);
+          b.patternTimer += 180;
+          break;
+        }
         // ---- PATTERN 11: Aerial Slam (Dragon takes flight, picks target, CRASHES DOWN) ----
         case 'aerial_slam': {
           if (b.aerialActive) break; // already in flight
@@ -2323,11 +2807,39 @@
     // ============================================================
     function renderMap() {
       const { cam, map: { map } } = GS;
+      const biome = LEVELS[curLvl].biome;
       const sc = Math.max(0, Math.floor(cam.x / TSIZ) - 1), ec = Math.min(COLS - 1, Math.ceil((cam.x + canvas.width) / TSIZ) + 1);
       const sr = Math.max(0, Math.floor(cam.y / TSIZ) - 1), er = Math.min(ROWS - 1, Math.ceil((cam.y + canvas.height) / TSIZ) + 1);
       for (let r = sr; r <= er; r++)for (let c = sc; c <= ec; c++) {
         const px = Math.round(c * TSIZ - cam.x), py = Math.round(r * TSIZ - cam.y);
-        C.drawImage(buildTile(map[r][c], tileFrame), px, py, TSIZ, TSIZ);
+        const t = map[r][c];
+        C.drawImage(buildTile(t, tileFrame), px, py, TSIZ, TSIZ);
+        // Overlay biome pour biomes sombres — rend le sol visible
+        if (biome === 'webs') {
+          if (t === TB.FLOOR) {
+            // Sol de toile : légère teinte violette-verte pour le distinguer des murs
+            C.fillStyle = 'rgba(40,60,30,0.32)';
+            C.fillRect(px, py, TSIZ, TSIZ);
+          } else if (t === TB.DARK || t === TB.WALL) {
+            // Murs : légère texture violette pour qu'on voit qu'il y a un mur
+            C.fillStyle = 'rgba(60,10,80,0.25)';
+            C.fillRect(px, py, TSIZ, TSIZ);
+            // Contour subtil pour délimiter les murs
+            C.strokeStyle = 'rgba(80,20,100,0.18)';
+            C.lineWidth = 1;
+            C.strokeRect(px+0.5, py+0.5, TSIZ-1, TSIZ-1);
+          } else if (t === TB.WATER) {
+            // Venin : teinte verte
+            C.fillStyle = 'rgba(20,80,10,0.3)';
+            C.fillRect(px, py, TSIZ, TSIZ);
+          }
+        } else if (biome === 'crystal') {
+          if (t === TB.FLOOR) {
+            // Sol cristallin : légère teinte bleue-cyan
+            C.fillStyle = 'rgba(0,40,60,0.20)';
+            C.fillRect(px, py, TSIZ, TSIZ);
+          }
+        }
       }
     }
 
@@ -2378,12 +2890,27 @@
           ctx.stroke();
         }
         ctx.fillStyle = 'rgba(220,240,255,0.9)'; ctx.fillRect(sx - 1, sy - 1, 2, 2);
-      } else if (type === 'ice_crystal') {
-        // Cristal de glace flottant
-        ctx.fillStyle = `rgba(140,200,255,${0.4 + 0.3 * Math.sin(f * 0.07)})`;
-        ctx.save(); ctx.translate(sx, sy); ctx.rotate(f * 0.02);
-        ctx.fillRect(-sz * 0.5, -1, sz, 2); ctx.fillRect(-1, -sz * 0.5, 2, sz);
-        ctx.restore();
+      } else if (type === 'web_strand') {
+        // Fil de toile qui tombe lentement
+        ctx.strokeStyle = `rgba(200,220,170,${0.3 + 0.15 * Math.sin(f * 0.06 + sz)})`;
+        ctx.lineWidth = 0.8;
+        const sway = Math.sin(f * 0.04 + sz) * 3;
+        ctx.beginPath();
+        ctx.moveTo(sx, sy - sz);
+        ctx.quadraticCurveTo(sx + sway, sy, sx + sway * 0.5, sy + sz); ctx.stroke();
+        // Petite araignée au bout du fil
+        ctx.fillStyle = `rgba(20,15,20,${0.6 + 0.2 * Math.sin(f * 0.1)})`;
+        ctx.beginPath(); ctx.arc(sx + sway * 0.5, sy + sz, 2, 0, Math.PI * 2); ctx.fill();
+      } else if (type === 'web_spore') {
+        // Spore lumineuse verte (venin en suspension)
+        const glow = (Math.sin(f * 0.11 + sz) + 1) * 0.5;
+        ctx.fillStyle = `rgba(60,220,40,${0.15 + 0.25 * glow})`;
+        ctx.shadowColor = '#40ff20'; ctx.shadowBlur = 6 + glow * 6;
+        ctx.beginPath(); ctx.arc(sx, sy, sz * 0.35, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+        // Point central
+        ctx.fillStyle = `rgba(180,255,100,${0.5 + 0.3 * glow})`;
+        ctx.fillRect(sx - 1, sy - 1, 2, 2);
       }
       ctx.restore();
     }
@@ -2397,13 +2924,8 @@
         const sx = p.x - cam.x, sy = p.y - cam.y;
         if (sx < -30 || sx > canvas.width + 30 || sy < -30 || sy > canvas.height + 30) continue;
         const a = p.alpha * (0.5 + 0.5 * Math.sin(GS.frame * 0.03 + p.off));
-        // Choisir le type selon le biome et l'index
-        const types = biome === 'forest'
-          ? ['firefly', 'leaf_fall']
-          : biome === 'castle'
-            ? ['spark', 'candle']
-            : ['snowflake', 'ice_crystal'];
-        const type = types[Math.floor(p.off * 100) % 2];
+        // Utiliser le type stocké dans la particule
+        const type = p.icon || 'firefly';
         drawAmbientParticle(C, sx, sy, type, p.sz, a);
       }
     }
@@ -2567,6 +3089,99 @@
       }
     }
 
+    // ─── Décor Toile (biome webs) ─────────────────────────────────
+    function drawDecoWebs(ctx, sx, sy, bob, scale) {
+      const s = Math.max(1, Math.round(scale * TSIZ * 0.75 / 16));
+      const f = GS.frame;
+      const variant = Math.floor(Math.abs(sx * 7 + sy * 13)) % 5;
+
+      if (variant === 0) {
+        // Grande toile d'araignée dans un coin
+        const pulse = (Math.sin(f * 0.05 + sx * 0.01) + 1) * 0.5;
+        ctx.strokeStyle = `rgba(200,220,180,${0.25 + 0.1 * pulse})`;
+        ctx.lineWidth = 0.8;
+        // Fils radiaux
+        for (let i = 0; i < 8; i++) {
+          const a = (i / 8) * Math.PI * 2;
+          ctx.beginPath(); ctx.moveTo(sx, sy + bob);
+          ctx.lineTo(sx + Math.cos(a) * 18 * s, sy + bob + Math.sin(a) * 18 * s); ctx.stroke();
+        }
+        // Anneaux concentriques
+        for (let r = 4; r <= 18; r += 4) {
+          ctx.beginPath(); ctx.arc(sx, sy + bob, r * s, 0, Math.PI * 2); ctx.stroke();
+        }
+        // Araignée au centre
+        ctx.fillStyle = '#111';
+        ctx.beginPath(); ctx.arc(sx, sy + bob, 2 * s, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#cc1100';
+        ctx.fillRect(sx - s, sy + bob, s, 2 * s); // motif ventre
+
+      } else if (variant === 1) {
+        // Crâne pixel art avec toile
+        ctx.fillStyle = '#c8c0a0';
+        ctx.fillRect(sx - 3 * s, sy - 4 * s + bob, 6 * s, 5 * s); // crâne
+        ctx.fillRect(sx - 4 * s, sy - 2 * s + bob, 8 * s, s);     // maxillaire
+        ctx.fillStyle = '#000';
+        ctx.fillRect(sx - 2 * s, sy - 3 * s + bob, s, s);           // œil G
+        ctx.fillRect(sx + s, sy - 3 * s + bob, s, s);                // œil D
+        // Petite toile sur le crâne
+        ctx.strokeStyle = 'rgba(200,220,180,0.4)'; ctx.lineWidth = 0.6;
+        ctx.beginPath(); ctx.arc(sx - 3 * s, sy - 4 * s + bob, 5 * s, Math.PI, 0); ctx.stroke();
+
+      } else if (variant === 2) {
+        // Ossements avec fils de toile
+        ctx.fillStyle = '#b8b098';
+        ctx.save(); ctx.translate(sx, sy + bob); ctx.rotate(0.3);
+        ctx.fillRect(-6 * s, -s * 0.5, 12 * s, s);
+        ctx.restore();
+        ctx.save(); ctx.translate(sx, sy + bob); ctx.rotate(-0.3);
+        ctx.fillRect(-6 * s, -s * 0.5, 12 * s, s);
+        ctx.restore();
+        // Fils
+        ctx.strokeStyle = 'rgba(180,200,160,0.3)'; ctx.lineWidth = 0.7;
+        for (let i = 0; i < 3; i++) {
+          ctx.beginPath();
+          ctx.moveTo(sx - 6 * s + i * 4 * s, sy - 12 * s + bob);
+          ctx.lineTo(sx - 4 * s + i * 4 * s, sy + bob); ctx.stroke();
+        }
+
+      } else if (variant === 3) {
+        // Cocon petit (décor)
+        ctx.fillStyle = '#c8d0b0';
+        ctx.beginPath(); ctx.ellipse(sx, sy + bob, 4 * s, 6 * s, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = 'rgba(200,220,180,0.5)'; ctx.lineWidth = 0.7;
+        for (let i = -2; i <= 2; i++) {
+          ctx.beginPath();
+          ctx.moveTo(sx - 4 * s, sy + bob + i * 2.5 * s);
+          ctx.lineTo(sx + 4 * s, sy + bob + i * 2.5 * s + s); ctx.stroke();
+        }
+        // Yeux lumineux si pulse élevé
+        const p2 = (Math.sin(f * 0.07 + sx) + 1) * 0.5;
+        if (p2 > 0.65) {
+          ctx.fillStyle = `rgba(60,255,20,${(p2 - 0.65) * 2})`;
+          ctx.fillRect(sx - 2 * s, sy + bob - s, s, s);
+          ctx.fillRect(sx + s, sy + bob - s, s, s);
+        }
+
+      } else {
+        // Stalactite de résine / toile qui tombe
+        ctx.fillStyle = '#2a2218';
+        ctx.fillRect(sx - s, sy - 10 * s + bob, 2 * s, 10 * s);
+        // Gouttes
+        const dropY = (f * 0.4 + sx) % (10 * s);
+        ctx.fillStyle = 'rgba(180,220,80,0.5)';
+        ctx.beginPath(); ctx.ellipse(sx, sy - 10 * s + bob + dropY, s * 0.8, s, 0, 0, Math.PI * 2); ctx.fill();
+        // Toile autour
+        ctx.strokeStyle = 'rgba(200,220,180,0.25)'; ctx.lineWidth = 0.7;
+        for (let i = 0; i < 4; i++) {
+          const a = i * 0.7;
+          ctx.beginPath();
+          ctx.moveTo(sx, sy - 8 * s + bob);
+          ctx.lineTo(sx + Math.cos(a) * 10 * s, sy - 8 * s + bob + Math.sin(a) * 6 * s); ctx.stroke();
+        }
+      }
+    }
+
     function renderDecos() {
       const { cam, decos } = GS;
       const biome = LEVELS[curLvl].biome;
@@ -2577,6 +3192,7 @@
         C.save(); C.globalAlpha = 0.85;
         if (biome === 'forest') drawDecoForest(C, sx, sy, bob, d.scale);
         else if (biome === 'castle') drawDecoCastle(C, sx, sy, bob, d.scale);
+        else if (biome === 'webs') drawDecoWebs(C, sx, sy, bob, d.scale);
         else drawDecoMountain(C, sx, sy, bob, d.scale);
         C.restore();
       }
@@ -2585,6 +3201,93 @@
     // ============================================================
     // QUEST ITEMS
     // ============================================================
+
+    // ─── Dessin pixel art : Cocon d'araignée ─────────────────────
+    function drawCocon(ctx, cx, cy, bob) {
+      const f = GS.frame;
+      const pulse = (Math.sin(f * 0.08) + 1) * 0.5;
+      const s = 1;
+
+      ctx.save(); ctx.translate(cx, cy + bob);
+
+      // Lueur verte malsaine
+      const glow = ctx.createRadialGradient(0, 0, 2, 0, 0, 28);
+      glow.addColorStop(0, `rgba(60,200,30,${0.18 + 0.12 * pulse})`);
+      glow.addColorStop(1, 'transparent');
+      ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(0, 0, 28, 0, Math.PI * 2); ctx.fill();
+
+      // Fils de toile autour (7 fils en étoile)
+      ctx.strokeStyle = `rgba(200,220,180,${0.25 + 0.1 * pulse})`;
+      ctx.lineWidth = 0.8;
+      for (let i = 0; i < 7; i++) {
+        const a = (i / 7) * Math.PI * 2;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * 22, Math.sin(a) * 22); ctx.stroke();
+      }
+      // Anneaux concentriques de toile
+      for (let r = 6; r <= 20; r += 5) {
+        ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.stroke();
+      }
+
+      // Corps du cocon (forme ovoïde)
+      ctx.fillStyle = '#d4ddc0';
+      ctx.beginPath(); ctx.ellipse(0, 0, 9, 13, 0, 0, Math.PI * 2); ctx.fill();
+
+      // Bandages de toile (stries diagonales)
+      ctx.strokeStyle = `rgba(180,200,160,0.85)`;
+      ctx.lineWidth = 1.5;
+      for (let i = -3; i <= 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(-9, i * 3.5);
+        ctx.lineTo(9, i * 3.5 + 4); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(-9, i * 3.5);
+        ctx.lineTo(9, i * 3.5 - 4); ctx.stroke();
+      }
+      // Clip ellipse
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-in';
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.ellipse(0, 0, 9, 13, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+
+      // Ombre ventrale
+      ctx.fillStyle = 'rgba(80,100,60,0.35)';
+      ctx.beginPath(); ctx.ellipse(0, 4, 7, 9, 0, 0, Math.PI * 2); ctx.fill();
+
+      // Reflet lumineux
+      ctx.fillStyle = `rgba(255,255,240,${0.3 + 0.15 * pulse})`;
+      ctx.beginPath(); ctx.ellipse(-2, -5, 3, 5, -0.4, 0, Math.PI * 2); ctx.fill();
+
+      // Yeux qui pulsent dans la fente (chose vivante dedans...)
+      if (pulse > 0.5) {
+        ctx.fillStyle = `rgba(80,255,20,${(pulse - 0.5) * 1.6})`;
+        ctx.fillRect(-4, -1, 3, 2);
+        ctx.fillRect(1, -1, 3, 2);
+      }
+
+      // Petite araignée gardienne posée dessus
+      const legO = Math.floor(f / 8) % 2;
+      ctx.fillStyle = '#111';
+      ctx.beginPath(); ctx.arc(0, -14, 3, 0, Math.PI * 2); ctx.fill(); // corps
+      ctx.fillStyle = '#222';
+      ctx.beginPath(); ctx.arc(0, -17, 2, 0, Math.PI * 2); ctx.fill(); // tête
+      // yeux micro
+      ctx.fillStyle = '#44ffaa';
+      ctx.fillRect(-2, -18, 1, 1); ctx.fillRect(1, -18, 1, 1);
+      // pattes mini
+      ctx.strokeStyle = '#333'; ctx.lineWidth = 0.8;
+      for (let i = 0; i < 4; i++) {
+        const side = i < 2 ? -1 : 1;
+        const y = -16 + (i % 2) * 2 + legO;
+        ctx.beginPath();
+        ctx.moveTo(side * 2, -14);
+        ctx.lineTo(side * (6 + i % 2 * 2), y);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
     function renderQItems() {
       const { cam, qItems } = GS; const lv = LEVELS[curLvl];
       C.textAlign = 'center'; C.textBaseline = 'middle';
@@ -2593,12 +3296,21 @@
         const sx = qi.x - cam.x, sy = qi.y - cam.y;
         if (Math.abs(sx) > canvas.width / 2 + 80 || Math.abs(sy) > canvas.height / 2 + 80) continue;
         const bob = Math.sin(GS.frame * 0.07 + qi.x) * 6;
+
+        const qi2 = lv.questItem;
+
+        // Cocon : rendu spécial sans halo doré
+        if (qi2 === '🕸️') {
+          drawCocon(C, sx, sy, bob);
+          continue;
+        }
+
+        // Halo doré générique
         const ag = C.createRadialGradient(sx, sy + bob, 0, sx, sy + bob, 30);
         ag.addColorStop(0, 'rgba(255,215,0,0.4)'); ag.addColorStop(1, 'transparent');
         C.fillStyle = ag; C.beginPath(); C.arc(sx, sy + bob, 30, 0, Math.PI * 2); C.fill();
         C.save(); C.shadowColor = '#ffd700'; C.shadowBlur = 22;
         // Dessin pixel art selon le type d'objet de quête
-        const qi2 = lv.questItem;
         if (qi2 === '🥇') {
           // Médaillon doré
           C.fillStyle = '#ffd700'; C.beginPath(); C.arc(sx, sy + bob, 10, 0, Math.PI * 2); C.fill();
@@ -2725,6 +3437,44 @@
     // ============================================================
     // MONSTERS RENDER
     // ============================================================
+
+    // ─── Helper : aura d'état animé sous le monstre ───────────────
+    function drawMonsterStateAura(ctx, sx, sy, m, alpha) {
+      const f = GS.frame;
+      const state = m.state;
+      const r = (m.r || 14) * 1.4;
+
+      if (state === 'aggro' || state === 'attack') {
+        // Aura rouge pulsante en aggro
+        const pulse = (Math.sin(f * 0.22) + 1) * 0.5;
+        ctx.save(); ctx.globalAlpha = alpha * (0.35 + 0.25 * pulse);
+        const ag = ctx.createRadialGradient(sx, sy, 0, sx, sy, r * 1.8);
+        ag.addColorStop(0, 'rgba(255,30,0,0.6)');
+        ag.addColorStop(0.6, 'rgba(200,0,0,0.2)');
+        ag.addColorStop(1, 'transparent');
+        ctx.fillStyle = ag; ctx.beginPath(); ctx.arc(sx, sy, r * 1.8, 0, Math.PI * 2); ctx.fill();
+        // Petites étincelles de rage tournant autour
+        const numSparks = 5;
+        for (let i = 0; i < numSparks; i++) {
+          const a = (i / numSparks) * Math.PI * 2 + f * 0.08;
+          const sparkR = r * (1.1 + 0.2 * Math.sin(f * 0.15 + i));
+          const px = sx + Math.cos(a) * sparkR, py = sy + Math.sin(a) * sparkR;
+          ctx.globalAlpha = alpha * (0.6 + 0.4 * pulse);
+          ctx.fillStyle = i % 2 === 0 ? '#ff4400' : '#ffaa00';
+          ctx.shadowColor = '#ff3300'; ctx.shadowBlur = 5;
+          ctx.fillRect(px - 2, py - 2, 3, 3);
+        }
+        ctx.restore();
+      } else if (state === 'idle' || state === 'wander') {
+        // Légère respiration sous l'ennemi — shadow douce
+        const breathe = (Math.sin(f * 0.05 + m.x * 0.01) + 1) * 0.5;
+        ctx.save(); ctx.globalAlpha = alpha * (0.08 + 0.06 * breathe);
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.beginPath(); ctx.ellipse(sx, sy + r * 0.6, r * 0.9, r * 0.3, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+    }
+
     function renderMons() {
       const { cam, mons, boss } = GS; const all = [...mons]; if (boss) all.push(boss);
       for (const m of all) {
@@ -2735,9 +3485,14 @@
         const alpha = dying ? Math.max(0, m.dyingTimer / 22) : 1;
         const bob = dying ? 0 : Math.sin(GS.frame * 0.07 + m.x * 0.01) * 2;
 
+        // Aura d'état pour les monstres normaux (pas boss)
+        if (!m.boss && !dying) drawMonsterStateAura(C, sx, sy + bob, m, alpha);
+
         C.save();
         C.globalAlpha = alpha;
         if (m.hitFlash > 0) C.filter = 'brightness(3.5) saturate(0)';
+
+        // Scale animation par état (respiration / rage)
 
         const frame = getMonFrame(m);
         const dir = getMonDir(m);
@@ -2756,13 +3511,17 @@
             C.scale(1, 0.3);
             if (lvlType === 'demon') drawDemon(C, 0, 0, dir, frame, 2.8, 1, m.rageMode);
             else if (lvlType === 'king') drawKingDoubt(C, 0, 0, dir, frame, 2.8, 1, m.rageMode);
-            else drawDragon(C, 0, 0, dir, frame, 3.0, 1, m.rageMode, 0);
+            else if (lvlType === 'spider') drawSpider(C, 0, 0, frame, 2.8, 1, m.rageMode);
+            else if (lvlType === 'crystal') drawCrystal(C, 0, 0, dir, frame, 2.8, 1, m.rageMode);
+            else drawDragon(C, 0, 0, dir, frame, 3.2, 1, m.rageMode, 0);
             C.restore();
           }
 
           if (lvlType === 'demon') drawDemon(C, sx, sy + bob + aerialOff, dir, frame, 2.8, 1, m.rageMode);
           else if (lvlType === 'king') drawKingDoubt(C, sx, sy + bob + aerialOff, dir, frame, 2.8, 1, m.rageMode);
-          else drawDragon(C, sx, sy + bob, dir, frame, 3.0, 1, m.rageMode, aerialOff);
+          else if (lvlType === 'spider') drawSpider(C, sx, sy + bob + aerialOff, frame, 2.8, 1, m.rageMode);
+          else if (lvlType === 'crystal') drawCrystal(C, sx, sy + bob + aerialOff, dir, frame, 2.8, 1, m.rageMode);
+          else drawDragon(C, sx, sy + bob, dir, frame, 3.2, 1, m.rageMode, aerialOff);
 
           // Aura boss
           C.save(); C.globalAlpha = alpha * (m.rageMode ? 0.35 : 0.18);
@@ -2781,44 +3540,212 @@
           }
 
         } else {
-          // ── MONSTRES NORMAUX ──
+          // ── MONSTRES NORMAUX ── animations spécifiques par type
           const type = getMonsterType(m);
-          if (type === 'wolf') drawWolf(C, sx, sy + bob, dir, frame, 1.8, 1);
-          else if (type === 'bat') drawBat(C, sx, sy + bob, frame % 2, 1.5, 1);
-          else if (type === 'spider') drawSpider(C, sx, sy + bob, frame % 2, 1.5, 1);
-          else if (type === 'leaf') drawLeafMonster(C, sx, sy + bob, frame % 2, 1.7, 1);
-          else if (type === 'skeleton') drawSkeleton(C, sx, sy + bob, dir, frame, 1.8, 1);
-          else if (type === 'zombie') drawZombie(C, sx, sy + bob, dir, frame, 1.8, 1);
-          else if (type === 'ghost') drawGhost(C, sx, sy + bob, frame % 2, 1.7, 1);
-          else if (type === 'knight') drawKnight(C, sx, sy + bob, dir, frame, 1.8, 1);
-          else if (type === 'iceGiant') drawIceGiant(C, sx, sy + bob, dir, frame, 2.0, 1);
-          else if (type === 'griffon') drawGriffon(C, sx, sy + bob, dir, frame, 1.7, 1);
-          else if (type === 'golem') drawGolem(C, sx, sy + bob, dir, frame, 2.0, 1);
-          else if (type === 'elemental') drawElemental(C, sx, sy + bob, frame % 2, 1.7, 1);
-          else {
-            // fallback absolu (ne devrait pas arriver)
+          const f = GS.frame;
+          const isAggro = m.state === 'aggro' || m.state === 'attack';
+
+          C.save();
+          C.translate(sx, sy + bob);
+
+          if (type === 'wolf') {
+            // Le loup : tremblement de tête en aggro
+            if (isAggro) {
+              const shk = Math.sin(f * 0.55) * 1.8;
+              C.translate(shk, 0);
+            }
+            drawWolf(C, 0, 0, dir, frame, 1.8, 1);
+
+          } else if (type === 'bat') {
+            // La chauve-souris : flap rapide en aggro, lent en idle
+            const batFrame = isAggro ? Math.floor(f / 3) % 2 : Math.floor(f / 8) % 2;
+            // Oscillation verticale
+            const batFloat = Math.sin(f * (isAggro ? 0.25 : 0.08)) * (isAggro ? 5 : 2);
+            C.translate(0, batFloat);
+            drawBat(C, 0, 0, batFrame, 1.5, 1);
+
+          } else if (type === 'spider') {
+            // L'araignée : tremble et grossit en aggro
+            if (isAggro) {
+              const spScale = 1 + Math.abs(Math.sin(f * 0.3)) * 0.1;
+              C.scale(spScale, spScale);
+            }
+            drawSpiderMob(C, 0, 0, frame % 2, 1.5, 1);
+
+          } else if (type === 'leaf') {
+            // L'entité feuille : rotation oscillante
+            const leafRot = Math.sin(f * 0.06 + m.x * 0.01) * (isAggro ? 0.25 : 0.10);
+            C.rotate(leafRot);
+            drawLeafMonster(C, 0, 0, frame % 2, 1.7, 1);
+
+          } else if (type === 'skeleton') {
+            // Le squelette : claque des dents (micro-bob de tête) en idle, se recroqueville en aggro
+            if (isAggro) {
+              C.translate(Math.sin(f * 0.4) * 2, 0);
+            }
+            drawSkeleton(C, 0, 0, dir, frame, 1.8, 1);
+
+          } else if (type === 'zombie') {
+            // Le zombie : mouvement saccadé
+            if (isAggro) {
+              const jerk = Math.floor(f / 4) % 3 === 0 ? 2 : 0;
+              C.translate(jerk, 0);
+            }
+            drawZombie(C, 0, 0, dir, frame, 1.8, 1);
+
+          } else if (type === 'ghost') {
+            // Le fantôme : oscillation sinusoïdale + stretch en aggro
+            if (isAggro) {
+              const stretch = 1 + Math.sin(f * 0.2) * 0.12;
+              C.scale(1 / stretch, stretch);
+            }
+            drawGhost(C, 0, 0, frame % 2, 1.7, 1);
+
+          } else if (type === 'knight') {
+            // Le chevalier : pas lourd, tremble en aggro
+            if (isAggro) {
+              C.translate(0, Math.abs(Math.sin(f * 0.18)) * -2);
+            }
+            drawKnight(C, 0, 0, dir, frame, 1.8, 1);
+
+          } else if (type === 'iceGiant') {
+            // Le géant de glace : rotation lente imposante
+            const iceSwing = Math.sin(f * 0.04) * (isAggro ? 0.12 : 0.04);
+            C.rotate(iceSwing);
+            drawIceGiant(C, 0, 0, dir, frame, 2.0, 1);
+
+          } else if (type === 'griffon') {
+            // Le griffon : battement d'ailes + saut en aggro
+            if (isAggro) {
+              C.translate(0, Math.sin(f * 0.3) * -4);
+            }
+            drawGriffon(C, 0, 0, dir, frame, 1.7, 1);
+
+          } else if (type === 'golem') {
+            // Le golem : tremblement lent
+            const golemShk = isAggro ? Math.sin(f * 0.22) * 3 : 0;
+            C.translate(golemShk, 0);
+            drawGolem(C, 0, 0, dir, frame, 2.0, 1);
+
+          } else if (type === 'elemental') {
+            // L'élémental : rotation + pulsation
+            const elRot = f * (isAggro ? 0.04 : 0.015);
+            C.rotate(elRot);
+            drawElemental(C, 0, 0, frame % 2, 1.7, 1);
+
+          } else if (type === 'spiderVenom') {
+            // Araignée vénéneuse : tremble et pulse en vert
+            if (isAggro) {
+              const spScale = 1 + Math.abs(Math.sin(f * 0.4)) * 0.15;
+              C.scale(spScale, spScale);
+            }
+            C.filter = 'hue-rotate(80deg) saturate(2) brightness(1.2)';
+            drawSpiderMob(C, 0, 0, frame % 2, 1.6, 1);
+
+          } else if (type === 'scorpion') {
+            // Scorpion géant : marche lourde, queue dressée en aggro
+            if (isAggro) {
+              C.translate(0, Math.abs(Math.sin(f * 0.18)) * -3);
+            }
+            // Scorpion dessiné via un squelette re-coloré en orange/brun
+            C.filter = 'hue-rotate(30deg) saturate(2.5) brightness(0.85)';
+            drawSkeleton(C, 0, 0, dir, frame, 1.6, 1);
+
+          } else if (type === 'beetle') {
+            // Coléoptère sombre : golem lent re-coloré en violet foncé
+            const beetleShk = isAggro ? Math.sin(f * 0.18) * 2 : 0;
+            C.translate(beetleShk, 0);
+            C.filter = 'hue-rotate(270deg) saturate(2) brightness(0.75)';
+            drawGolem(C, 0, 0, dir, frame, 1.7, 1);
+
+          } else if (type === 'cricket') {
+            // Chasseur silencieux : bat rapide + très agile
+            const cricketFloat = Math.sin(f * (isAggro ? 0.35 : 0.1)) * (isAggro ? 6 : 2);
+            C.translate(0, cricketFloat);
+            C.filter = 'hue-rotate(180deg) saturate(1.8) brightness(1.1)';
+            drawBat(C, 0, 0, frame % 2, 1.6, 1);
+
+          } else if (type === 'eclatVivant') {
+            // Éclat Vivant : oscillation + rotation légère
+            const elv = Math.sin(f * (isAggro ? 0.2 : 0.07)) * (isAggro ? 4 : 2);
+            C.translate(0, elv);
+            if (isAggro) { const spScale = 1 + Math.abs(Math.sin(f * 0.25)) * 0.15; C.scale(spScale, spScale); }
+            drawEclatVivant(C, 0, 0, dir, frame, 1.6, 1);
+
+          } else if (type === 'golemCristal') {
+            // Golem de Cristal : pas lourd, tremblement imposant en aggro
+            if (isAggro) { C.translate(0, Math.abs(Math.sin(f * 0.15)) * -2); }
+            const gShk = isAggro ? Math.sin(f * 0.2) * 2 : 0;
+            C.translate(gShk, 0);
+            drawGolemCristal(C, 0, 0, dir, frame, 1.8, 1);
+
+          } else if (type === 'lueurPrismatique') {
+            // Lueur Prismatique : flottement rapide en aggro
+            const lFloat = Math.sin(f * (isAggro ? 0.28 : 0.09)) * (isAggro ? 5 : 2);
+            C.translate(0, lFloat);
+            if (isAggro) { const lScale = 1 + Math.sin(f * 0.18) * 0.1; C.scale(lScale, lScale); }
+            drawLueurPrismatique(C, 0, 0, frame % 2, 1.5, 1);
+
+          } else if (type === 'vortexVerre') {
+            // Vortex de Verre : spin rapide en aggro
+            if (isAggro) {
+              const vRot = Math.sin(f * 0.12) * 0.18;
+              C.rotate(vRot);
+            }
+            drawVortexVerre(C, 0, 0, frame % 2, 1.6, 1);
+
+          } else {
             C.textAlign = 'center'; C.textBaseline = 'middle';
-            C.font = '20px serif'; C.fillStyle = '#fff'; C.fillText('?', sx, sy + bob);
+            C.font = '20px serif'; C.fillStyle = '#fff'; C.fillText('?', 0, 0);
           }
-        }
 
-        C.restore();
+          C.restore();
 
-        // HP bar
-        if (!dying && m.hp < m.maxHp) {
+        } // fin else monstres normaux
+
+        C.restore(); // restore du C.save() principal du monstre
+
+        // HP bar — visible si HP < max OU si en aggro/attaque
+        const showHp = !dying && (m.hp < m.maxHp || m.state === 'aggro' || m.state === 'attack');
+        if (showHp) {
           const bw = m.boss ? 72 : 38, bh = m.boss ? 9 : 5;
           const bx = sx - bw / 2, by = sy - (m.boss ? 55 : 28);
+          const hpAlpha = m.hp < m.maxHp ? 1 : (0.5 + 0.5 * Math.sin(GS.frame * 0.2));
+          C.save(); C.globalAlpha = hpAlpha;
           C.fillStyle = 'rgba(0,0,0,0.8)'; C.fillRect(bx - 1, by - 1, bw + 2, bh + 2);
           C.fillStyle = '#2a0000'; C.fillRect(bx, by, bw, bh);
           const pct = m.hp / m.maxHp;
           C.fillStyle = pct > 0.6 ? '#44ff44' : pct > 0.3 ? '#ffaa00' : '#ff2222';
           C.fillRect(bx, by, bw * pct, bh);
           C.fillStyle = 'rgba(255,255,255,0.18)'; C.fillRect(bx, by, bw * pct, bh / 2);
+          C.restore();
           if (m.boss) {
             C.save(); C.font = '6px "Press Start 2P"';
             C.fillStyle = m.rageMode ? '#ff4444' : '#ff8888';
             C.textAlign = 'center';
             C.fillText(m.name + (m.rageMode ? ' ⚡RAGE' : m.phase > 0 ? ` P${m.phase + 1}` : ''), sx, sy - 68);
+            C.restore();
+          }
+        }
+
+        // Indicateurs d'état pour monstres normaux
+        if (!m.boss && !dying) {
+          // Point d'exclamation quand le monstre repère le joueur (transition idle->aggro)
+          if (m.state === 'aggro' && !m._wasAggro) {
+            m._wasAggro = true; m._aggroAlert = 22;
+          } else if (m.state !== 'aggro') {
+            m._wasAggro = false;
+          }
+          if (m._aggroAlert > 0) {
+            m._aggroAlert--;
+            const alertA = m._aggroAlert / 22;
+            const alertY = sy - (m.r || 14) * 2.2 - (1 - alertA) * 12;
+            C.save();
+            C.globalAlpha = alertA;
+            C.font = 'bold 14px "Press Start 2P"';
+            C.textAlign = 'center'; C.textBaseline = 'middle';
+            C.fillStyle = '#ffdd00'; C.shadowColor = '#ff8800'; C.shadowBlur = 12;
+            C.fillText('!', sx, alertY);
             C.restore();
           }
         }
@@ -2953,6 +3880,19 @@
           C.beginPath(); C.arc(sx, sy, sz * 0.2, 0, Math.PI * 2); C.fill();
           C.fillStyle = '#000';
           C.beginPath(); C.arc(sx, sy, sz * 0.1, 0, Math.PI * 2); C.fill();
+        } else if (a.icon === '🕷️') {
+          // Spawning araignée — petite silhouette avec pattes
+          C.shadowColor = '#44ff88'; C.shadowBlur = 10;
+          C.fillStyle = '#1a1a1a';
+          C.beginPath(); C.arc(sx, sy, sz * 0.3, 0, Math.PI * 2); C.fill();
+          C.strokeStyle = '#2a2a2a'; C.lineWidth = 1.5;
+          for (let leg = 0; leg < 8; leg++) {
+            const a2 = (leg / 8) * Math.PI * 2;
+            C.beginPath(); C.moveTo(sx, sy);
+            C.lineTo(sx + Math.cos(a2) * sz * 0.5, sy + Math.sin(a2) * sz * 0.4); C.stroke();
+          }
+          C.fillStyle = `rgba(60,255,100,${fa * 0.6})`;
+          C.beginPath(); C.arc(sx, sy, sz * 0.15, 0, Math.PI * 2); C.fill();
         } else {
           // Fallback : carré coloré générique
           C.fillStyle = '#ffd700'; C.shadowColor = '#ffd700'; C.shadowBlur = 10;
@@ -3046,39 +3986,86 @@
           C.strokeStyle = '#8888ff'; C.lineWidth = 2;
           C.beginPath(); C.arc(0, 0, pr.sz * 0.5, 0, Math.PI * 2); C.stroke();
           C.fillStyle = '#8888ff'; C.fillRect(-1, -7, 2, 7); C.fillRect(0, -2, 5, 2);
+        } else if (pr.icon === '🕸️') {
+          // Projectile toile araignée — sphère de soie avec fils
+          const spin = GS.frame * 0.12;
+          C.shadowColor = '#aaffcc'; C.shadowBlur = 8;
+          // Anneaux de toile
+          C.strokeStyle = `rgba(200,230,190,${0.7})`;
+          C.lineWidth = 1.2;
+          C.beginPath(); C.arc(0, 0, pr.sz * 0.5, 0, Math.PI * 2); C.stroke();
+          C.beginPath(); C.arc(0, 0, pr.sz * 0.3, 0, Math.PI * 2); C.stroke();
+          // Fils radiaux qui tournent
+          C.lineWidth = 0.8;
+          for (let i = 0; i < 6; i++) {
+            const a2 = spin + (i / 6) * Math.PI * 2;
+            C.beginPath(); C.moveTo(0, 0);
+            C.lineTo(Math.cos(a2) * pr.sz * 0.5, Math.sin(a2) * pr.sz * 0.5); C.stroke();
+          }
+          // Centre gluant
+          C.fillStyle = `rgba(220,240,180,0.85)`;
+          C.beginPath(); C.arc(0, 0, pr.sz * 0.15, 0, Math.PI * 2); C.fill();
         } else {
+          // Fallback : carré coloré générique
           C.fillStyle = '#ff4400'; C.shadowColor = '#ff4400';
           C.fillRect(-pr.sz * 0.4, -pr.sz * 0.4, pr.sz * 0.8, pr.sz * 0.8);
         }
         C.restore();
-      }
-    }
+      } // fin for bossProjectiles
+    } // fin renderProjectiles
 
     // ============================================================
-    // LIGHTING
+    // LIGHTING + RENDER DISTANCE (Fog of War progressif)
     // ============================================================
+
+    // Render distance config par biome
     function renderLighting() {
-      const { p, cam } = GS; const sx = p.x - cam.x, sy = p.y - cam.y;
+      const { p, cam } = GS;
+      const sx = p.x - cam.x, sy = p.y - cam.y;
       const biome = LEVELS[curLvl].biome;
-      const vg = C.createRadialGradient(sx, sy, canvas.width * 0.14, sx, sy, canvas.width * 0.65);
-      const outerA = biome === 'castle' ? 0.62 : biome === 'mountain' ? 0.52 : 0.42;
-      vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, `rgba(0,0,0,${outerA})`);
-      C.fillStyle = vg; C.fillRect(0, 0, canvas.width, canvas.height);
+      const W = canvas.width, H = canvas.height;
+
+      // ── Vignette douce sur les bords (purement esthétique, pas de render distance)
+      const vSize = Math.min(W, H);
+      const outerA = biome === 'castle' ? 0.50 : biome === 'webs' ? 0.45 : biome === 'crystal' ? 0.38 : biome === 'mountain' ? 0.38 : 0.32;
+      const vg = C.createRadialGradient(sx, sy, vSize * 0.22, sx, sy, vSize * 0.82);
+      vg.addColorStop(0, 'rgba(0,0,0,0)');
+      vg.addColorStop(1, `rgba(0,0,0,${outerA})`);
+      C.fillStyle = vg; C.fillRect(0, 0, W, H);
+
+      // ── Lueur ambiante autour du joueur (couleur par biome)
       if (GS.lightPulse > 0) GS.lightPulse--;
-      const lr = 220 + GS.lightPulse * 10;
+      const breathe = Math.sin(GS.frame * 0.022) * 6;
+      const lr = 260 + GS.lightPulse * 14 + breathe;
+      const lc = biome === 'castle'   ? 'rgba(100,110,230,'
+               : biome === 'mountain' ? 'rgba(160,215,255,'
+               : biome === 'webs'     ? 'rgba(70,200,50,'
+               : biome === 'crystal'  ? 'rgba(0,205,255,'
+               :                        'rgba(255,210,80,';
       const lg = C.createRadialGradient(sx, sy, 0, sx, sy, lr);
-      const lc = biome === 'castle' ? 'rgba(100,100,200,' : biome === 'mountain' ? 'rgba(150,200,255,' : 'rgba(255,220,100,';
-      lg.addColorStop(0, lc + '0.13)'); lg.addColorStop(0.5, lc + '0.04)'); lg.addColorStop(1, 'transparent');
-      C.fillStyle = lg; C.fillRect(0, 0, canvas.width, canvas.height);
-      // Time stop tint
+      lg.addColorStop(0, lc + '0.18)');
+      lg.addColorStop(0.45, lc + '0.07)');
+      lg.addColorStop(1, 'transparent');
+      C.fillStyle = lg; C.fillRect(0, 0, W, H);
+
+      // ── Tinte de biome (ambiance globale légère)
+      if (biome === 'webs')    { C.fillStyle = 'rgba(15,0,25,0.16)';  C.fillRect(0, 0, W, H); }
+      if (biome === 'crystal') { C.fillStyle = 'rgba(0,8,22,0.12)';   C.fillRect(0, 0, W, H); }
+      if (biome === 'castle')  { C.fillStyle = 'rgba(4,4,18,0.10)';   C.fillRect(0, 0, W, H); }
+
+      // ── Time stop
       if (GS.timeStop) {
         C.fillStyle = `rgba(50,50,200,${0.15 + 0.05 * Math.sin(GS.frame * 0.1)})`;
-        C.fillRect(0, 0, canvas.width, canvas.height);
+        C.fillRect(0, 0, W, H);
       }
-      const edge = 8; C.fillStyle = 'rgba(0,0,0,0.25)';
-      C.fillRect(0, 64, edge, canvas.height - 64); C.fillRect(canvas.width - edge, 64, edge, canvas.height - 64);
-      C.fillRect(0, canvas.height - edge, canvas.width, edge);
+
+      // ── Liseret sombre discret sur les bords de l'écran
+      C.fillStyle = 'rgba(0,0,0,0.18)';
+      const e = 5;
+      C.fillRect(0, 64, e, H - 64); C.fillRect(W - e, 64, e, H - 64);
+      C.fillRect(0, H - e, W, e);
     }
+
 
     // ============================================================
     // MINIMAP
@@ -3092,7 +4079,7 @@
       const tC = {
         0: '#2a7a2a', 1: '#a07830', 2: '#1a4a8a', 3: '#555', 4: '#1a3a1a', 5: '#3a8a3a',
         6: '#1e4a20', 7: '#252440', 8: '#16163a', 9: '#d0e8f8', 10: '#7aaac8', 11: '#cc2200',
-        12: '#090914', 13: '#7a5020', 14: '#3a9a3a', 15: '#3a8c30', 16: '#c8a060', 17: '#1e5a2a'
+        12: '#1a1430', 13: '#7a5020', 14: '#3a9a3a', 15: '#3a8c30', 16: '#c8a060', 17: '#1e5a2a'
       };
       for (let r = 0; r < ROWS; r += step)for (let c = 0; c < COLS; c += step) {
         MC.fillStyle = tC[map[r][c]] || '#333'; MC.fillRect(c * sx * TSIZ, r * sy * TSIZ, (step * sx * TSIZ) + 1, (step * sy * TSIZ) + 1);
@@ -3128,7 +4115,8 @@
       document.getElementById('hud-lvl').textContent = `Niv. ${p.lvl}`;
       document.getElementById('hud-weapon').textContent = p.weapon;
       const done = lv.questType === 'kill' ? p.qKills : p.qItems;
-      document.getElementById('hud-quest').textContent = `${lv.quest} (${Math.min(done, lv.questCount)}/${lv.questCount})`;
+      const questStr = Array.isArray(lv.quest) ? lv.quest[0] : lv.quest;
+      document.getElementById('hud-quest').textContent = `${questStr} (${Math.min(done, lv.questCount)}/${lv.questCount})`;
     }
 
     // ============================================================
@@ -3180,15 +4168,21 @@
     // ============================================================
     function showLT() {
       const lv = LEVELS[curLvl];
+      const isLast = (curLvl >= LEVELS.length - 1);
       document.getElementById('lt-icon').textContent = lv.rewardIcon;
-      document.getElementById('lt-title').textContent = curLvl >= 2 ? '🏆 VICTOIRE FINALE !' : 'NIVEAU ACCOMPLI !';
-      document.getElementById('lt-zone').textContent = lv.name + ' — Terminé !';
+      document.getElementById('lt-title').textContent = isLast ? '🏆 VICTOIRE FINALE !' : 'NIVEAU ACCOMPLI !';
+      document.getElementById('lt-zone').textContent = (Array.isArray(lv.name) ? lv.name[0] : lv.name) + ' — Terminé !';
       document.getElementById('lt-reward').textContent = lv.reward;
-      if (curLvl >= 2) {
+      // Supprimer les boutons dynamiques précédents pour éviter les doublons
+      document.querySelectorAll('#leveltrans .lt-dyn-btn').forEach(b => b.remove());
+      if (isLast) {
         document.getElementById('lt-btn').style.display = 'none';
-        const vb = document.createElement('button'); vb.className = 'lt-next-btn'; vb.textContent = '🌟 VOIR LA FIN';
+        const vb = document.createElement('button');
+        vb.className = 'lt-next-btn lt-dyn-btn'; vb.textContent = '🌟 VOIR LA FIN';
         vb.onclick = () => { document.getElementById('leveltrans').style.display = 'none'; showVic(); };
         document.getElementById('leveltrans').appendChild(vb);
+      } else {
+        document.getElementById('lt-btn').style.display = 'block';
       }
       document.getElementById('leveltrans').style.display = 'flex';
       sLvlUp(); fireworks();
@@ -3196,6 +4190,8 @@
     function goNextLevel() {
       document.getElementById('leveltrans').style.display = 'none';
       curLvl++; if (curLvl >= LEVELS.length) { showVic(); return; }
+      // Pré-rendre les tracks du niveau suivant si pas encore fait
+      if (typeof BossMusic !== 'undefined') BossMusic.preloadLevel(curLvl);
       loadLevel(curLvl);
     }
     function showVic() { document.getElementById('victory').style.display = 'flex'; sVic(); fireworks(); }
@@ -3206,9 +4202,24 @@
     function loadLevel(idx) {
       if (typeof BossMusic !== 'undefined') BossMusic.onLoadLevel(idx);
       const lv = LEVELS[idx];
-      const mapData = genMap(lv.biome);
-      GS.map = mapData; GS.decos = genDecos(mapData, lv.biome); GS.ambient = genAmbient(lv.biome);
-      GS.qItems = mapData.questPos; GS.mons = spawnMons(mapData, lv.biome, idx);
+      // Map new biomes to existing tileset biomes for map generation
+      const tilesetBiome = lv.biome === 'webs' ? 'webs' : lv.biome === 'crystal' ? 'crystal' : lv.biome;
+      const mapData = genMap(tilesetBiome);
+      // For MONS lookup, use the biome key (crypt/abyss supported)
+      const monsBiome = lv.biome;
+      GS.map = mapData; GS.decos = genDecos(mapData, tilesetBiome); GS.ambient = genAmbient(tilesetBiome);
+      // Expand questPos if level needs more items than default 3
+      const baseItems = mapData.questPos;
+      if (lv.questType === 'collect' && lv.questCount > baseItems.length) {
+        const sR = Math.floor(mapData.startPos.y / TSIZ), sC = Math.floor(mapData.startPos.x / TSIZ);
+        const cells = bfsPassable(mapData.map, sR, sC, 5000);
+        while (baseItems.length < lv.questCount) {
+          const sp = safeSpawnCell(cells, mapData.startPos.x, mapData.startPos.y, 150 + baseItems.length * 30);
+          if (!sp) break;
+          baseItems.push({ ...sp, collected: false });
+        }
+      }
+      GS.qItems = baseItems; GS.mons = spawnMons(mapData, monsBiome, idx);
       GS.boss = null; GS.bossSpawned = false; GS.bossDefeated = false;
       GS.projectiles = []; GS.bossProjectiles = []; GS.bossWarnings = []; GS.atks = []; GS.spinAnim = null;
       GS.timeStop = false; GS.timeStopTimer = 0;
@@ -3218,29 +4229,32 @@
       p.dashCD = 0; p.invincible = false; p.invincibleTimer = 0;
       if (idx > 0) { p.weapon = LEVELS[idx - 1].weapon; p.wPow = LEVELS[idx - 1].wPow; }
       p.hp = p.maxHp;
-      if (idx === 2) {
+      // Level 4 (Dragon Supreme) has pre-placed star like original dragon
+      if (idx === 4) {
         const bp = mapData.bossPos;
         GS.qItems = [{ x: bp.x, y: bp.y, collected: false }];
         GS.boss = {
           icon: lv.bossIcon, name: lv.bossName, hp: lv.bossHP, maxHp: lv.bossHP,
-          spd: 0.8, dmg: 5, x: bp.x - 80, y: bp.y, state: 'idle', dyingTimer: 0, atkCD: 0,
-          aggroR: 400, loseR: 620, wAngle: 0, wTimer: 0, hitFlash: 0, r: 26, boss: true, xp: 250,
+          spd: lv.bossSpeed || 0.9, dmg: 7, x: bp.x - 80, y: bp.y, state: 'idle', dyingTimer: 0, atkCD: 0,
+          aggroR: lv.bossAggroR || 400, loseR: 680, warnR: lv.bossWarnR || 0, warnZoneAlerted: false,
+          wAngle: 0, wTimer: 0, hitFlash: 0, r: 30, boss: true, xp: 400,
           phase: 0, phaseTimer: 0, patternTimer: 0, patterns: lv.bossPatterns || [],
           dashActive: false, dashTimer: 0, dashVx: 0, dashVy: 0, vx: 0, vy: 0,
           teleportCooldown: 0, rageMode: false, beamActive: false, beamTimer: 0, beamAngle: 0,
-          beamSweepDir: 1, timeStopActive: false
+          beamSweepDir: 1, timeStopActive: false, aerialActive: false, aerialYOff: 0
         };
         GS.bossSpawned = true;
-        // Setup boss HP bar
         document.getElementById('boss-hud').style.display = 'flex';
         document.getElementById('boss-hud-name').textContent = lv.bossName.toUpperCase();
         const pip = document.getElementById('boss-phase-wrap'); pip.innerHTML = '';
-        for (let i = 0; i < (lv.bossPhases || 2); i++) { const d = document.createElement('div'); d.className = 'boss-phase-pip' + (i === 0 ? ' active' : ''); d.id = `bpip${i}`; pip.appendChild(d); }
+        for (let i = 0; i < (lv.bossPhases || 3); i++) { const d = document.createElement('div'); d.className = 'boss-phase-pip' + (i === 0 ? ' active' : ''); d.id = `bpip${i}`; pip.appendChild(d); }
       }
       GS.cam.x = p.x - canvas.width / 2; GS.cam.y = p.y - canvas.height / 2;
       GS.cam.x = Math.max(0, Math.min(WW - canvas.width, GS.cam.x)); GS.cam.y = Math.max(0, Math.min(WH - canvas.height, GS.cam.y));
       updHUD(); tileCache.clear();
-      setTimeout(() => openDlg('📜', `NIVEAU ${idx + 1}`, [`${lv.name}`, `Objectif : ${lv.quest}`, 'En avant, héros !'], null), 700);
+      const nameLines = Array.isArray(lv.name) ? lv.name : [lv.name];
+      const questLine = Array.isArray(lv.quest) ? lv.quest[0] : lv.quest;
+      setTimeout(() => openDlg('📜', `NIVEAU ${idx + 1}`, [...nameLines, `Objectif : ${questLine}`, 'En avant, héros !'], null), 700);
     }
 
     function spawnMons(mapData, biome, idx) {
@@ -3495,65 +4509,106 @@
       ctx.restore();
     }
 
-    // ─── ARAIGNÉE ─────────────────────────────────────────────────
-    function drawSpider(ctx, cx, cy, frame, scale = 2, alpha = 1) {
+    // ─── ARAIGNÉE VÉNÉNEUSE (monstre normal) ─────────────────────
+    function drawSpiderMob(ctx, cx, cy, frame, scale = 2, alpha = 1) {
       const s = scale;
       ctx.save();
       ctx.translate(cx, cy);
       ctx.globalAlpha *= alpha;
 
-      const ox = -9 * s, oy = -8 * s;
-      const legOff = frame === 0 ? 0 : s;
+      const f = GS.frame;
+      // frame 0 = pattes pos A, frame 1 = pattes pos B
+      const legPhase = frame; // alterne 0/1
 
-      // Toile (fond)
-      ctx.strokeStyle = 'rgba(200,200,200,0.3)';
-      ctx.lineWidth = 0.5;
-      for (let i = 0; i < 3; i++) {
-        ctx.beginPath(); ctx.arc(0, oy + 2 * s, (4 + i * 3) * s, 0, Math.PI * 2); ctx.stroke();
+      // 8 pattes animées avec articulation en 2 segments
+      ctx.lineCap = 'round';
+      const legPairs = [
+        // [angle de base, longueur segment1, longueur segment2]
+        [-2.0, 7, 6],
+        [-2.5, 8, 7],
+        [2.0, 7, 6],
+        [2.5, 8, 7],
+      ];
+      for (let side = -1; side <= 1; side += 2) {
+        for (let li = 0; li < 4; li++) {
+          const [baseAng, l1, l2] = legPairs[li];
+          const ang = side > 0 ? baseAng : Math.PI - baseAng;
+          // Alternance des pattes (paires 0,2 vs 1,3)
+          const lift = (li % 2 === legPhase) ? 1 : -1;
+          const bendAmount = (li % 2 === legPhase) ? 0.6 : -0.3;
+
+          const x1 = side * 4 * s;
+          const y1 = -1 * s;
+          const kx = x1 + Math.cos(ang) * l1 * s;
+          const ky = y1 + Math.sin(ang) * l1 * s + bendAmount * s;
+          const ex = kx + Math.cos(ang + 0.4 * side) * l2 * s;
+          const ey = ky + Math.sin(ang + 0.3) * l2 * s - bendAmount * s * 0.5;
+
+          ctx.strokeStyle = li < 2 ? '#2a1a0a' : '#1a1a1a';
+          ctx.lineWidth = s * 0.9;
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(kx, ky);
+          ctx.lineTo(ex, ey);
+          ctx.stroke();
+
+          // Petite griffe au bout
+          ctx.strokeStyle = '#888';
+          ctx.lineWidth = 0.6 * s;
+          ctx.beginPath();
+          ctx.moveTo(ex, ey);
+          ctx.lineTo(ex + side * s, ey + s);
+          ctx.stroke();
+        }
       }
 
-      // Pattes (8 pattes)
-      ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = s;
-      const legAngles = [-0.7, -0.4, -0.15, 0.15, 0.4, 0.7, 1.0, 1.3].map((a, i) => i < 4 ? -Math.PI / 2 - a * 0.8 : Math.PI / 2 + (a - 0.7) * 0.8);
-      for (let i = 0; i < 8; i++) {
-        const side = i < 4 ? -1 : 1;
-        const li = i % 4;
-        const ang = (i < 4 ? [-0.8, -0.4, 0.0, 0.4][li] : [0.0, 0.4, 0.8, 1.2][li]);
-        const baseX = side * 3 * s;
-        const lLen = (7 + li) * s;
-        const bendY = legOff * (li % 2 === 0 ? 1 : -1);
-        ctx.beginPath();
-        ctx.moveTo(baseX, 0);
-        const midX = baseX + side * lLen * 0.5;
-        const midY = -4 * s + ang * 3 * s + bendY;
-        const endX = baseX + side * lLen;
-        const endY = 3 * s + ang * 2 * s - bendY;
-        ctx.quadraticCurveTo(midX, midY, endX, endY);
-        ctx.stroke();
-      }
-
-      // Corps (abdomen)
-      ctx.fillStyle = '#181818';
-      ctx.beginPath(); ctx.ellipse(0, 3 * s, 6 * s, 5 * s, 0, 0, Math.PI * 2); ctx.fill();
-      // Motif abdomen
-      ctx.fillStyle = '#cc2200';
-      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-2 * s, 5 * s); ctx.lineTo(0, 7 * s); ctx.lineTo(2 * s, 5 * s); ctx.closePath(); ctx.fill();
-      ctx.fillStyle = '#ff4400';
-      ctx.fillRect(-s, 3 * s, 2 * s, 2 * s);
+      // Abdomen — forme ovoïde avec motif venin
+      ctx.fillStyle = '#1a1214';
+      ctx.beginPath(); ctx.ellipse(0, 5 * s, 7 * s, 6 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // Motif sablier rouge (araignée veuvenoiré style)
+      ctx.fillStyle = '#cc1100';
+      ctx.beginPath();
+      ctx.moveTo(0, 2 * s); ctx.lineTo(-2.5 * s, 5 * s); ctx.lineTo(0, 8 * s); ctx.lineTo(2.5 * s, 5 * s);
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#ff3300';
+      ctx.fillRect(-s, 4 * s, 2 * s, 2 * s);
+      // Reflet abdomen
+      ctx.fillStyle = 'rgba(80,40,60,0.4)';
+      ctx.beginPath(); ctx.ellipse(-1.5 * s, 3 * s, 3 * s, 2 * s, -0.3, 0, Math.PI * 2); ctx.fill();
 
       // Céphalothorax
-      ctx.fillStyle = '#222';
-      ctx.beginPath(); ctx.ellipse(0, -3 * s, 4 * s, 4 * s, 0, 0, Math.PI * 2); ctx.fill();
-      // 8 yeux
-      ctx.fillStyle = '#44ffaa';
-      const eyePos = [[-2, -5], [0, -5], [2, -5], [-3, -3], [3, -3], [-1, -2], [1, -2], [0, -4]];
-      for (const [ex, ey] of eyePos) {
-        ctx.fillRect(ex * s, ey * s, s, s);
+      ctx.fillStyle = '#2a1a2a';
+      ctx.beginPath(); ctx.ellipse(0, -3 * s, 5 * s, 4.5 * s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#3a243a';
+      ctx.beginPath(); ctx.ellipse(-0.5 * s, -4 * s, 3 * s, 3 * s, 0, 0, Math.PI * 2); ctx.fill();
+
+      // 8 yeux en arc — luisants
+      const eyePulse = (Math.sin(f * 0.12) + 1) * 0.5;
+      ctx.fillStyle = `rgba(50,255,140,${0.7 + 0.3 * eyePulse})`;
+      const eyePositions = [[-3, -6], [-1.5, -7], [0, -7], [1.5, -7], [3, -6], [-2, -5], [0, -5], [2, -5]];
+      for (const [ex, ey] of eyePositions) {
+        ctx.beginPath(); ctx.arc(ex * s, ey * s, 0.7 * s, 0, Math.PI * 2); ctx.fill();
       }
-      // Crochets
-      ctx.fillStyle = '#ff2200';
-      ctx.fillRect(-2 * s, -8 * s, s, 3 * s);
-      ctx.fillRect(s, -8 * s, s, 3 * s);
+
+      // Chélicères (crochets à venin)
+      const chelAnim = Math.sin(f * 0.18) * 0.3;
+      ctx.fillStyle = '#1a0a00';
+      ctx.save();
+      ctx.translate(-1.5 * s, -8 * s); ctx.rotate(-0.3 + chelAnim);
+      ctx.fillRect(0, 0, s, 3 * s); ctx.restore();
+      ctx.save();
+      ctx.translate(0.5 * s, -8 * s); ctx.rotate(0.3 - chelAnim);
+      ctx.fillRect(0, 0, s, 3 * s); ctx.restore();
+      // Goutte de venin
+      if (eyePulse > 0.7) {
+        ctx.fillStyle = `rgba(80,255,20,${(eyePulse - 0.7) * 2})`;
+        ctx.beginPath(); ctx.arc(-1.5 * s, -5 * s, 1.2 * s, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(1.5 * s, -5 * s, 1.2 * s, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // Pédicule (liaison abdomen/céphalo)
+      ctx.fillStyle = '#1a1014';
+      ctx.beginPath(); ctx.ellipse(0, 1 * s, 2 * s, 1.5 * s, 0, 0, Math.PI * 2); ctx.fill();
 
       ctx.restore();
     }
@@ -4466,53 +5521,241 @@
       ctx.restore();
     }
 
-    // ─── SQUELETTE ────────────────────────────────────────────────
-    function drawSkeleton(ctx, cx, cy, dir, frame, scale = 1.8, alpha = 1) {
+    // ═══════════════════════════════════════════════════════════════
+    // ─── ARAKHNE LA TISSEUSE — Grande Araignée Démoniaque ──────────
+    // ═══════════════════════════════════════════════════════════════
+    function drawSpider(ctx, cx, cy, frame, scale = 2.6, alpha = 1, rageMode = false) {
       const s = scale; ctx.save(); ctx.translate(cx, cy); ctx.globalAlpha *= alpha;
-      if (dir < 0) { ctx.scale(-1, 1); }
-      const ox = -7 * s, oy = -12 * s;
-      const legOff = frame === 0 ? 0 : frame === 1 ? -s : s;
-      // Os crâne
-      ctx.fillStyle = '#e8e0c8';
-      ctx.fillRect(ox + 2 * s, oy + 0 * s, 10 * s, 8 * s);
-      ctx.fillRect(ox + 1 * s, oy + 2 * s, 12 * s, 6 * s);
-      // Yeux noirs
-      ctx.fillStyle = '#000';
-      ctx.fillRect(ox + 3 * s, oy + 2 * s, 3 * s, 3 * s);
-      ctx.fillRect(ox + 8 * s, oy + 2 * s, 3 * s, 3 * s);
-      // Nez
-      ctx.fillRect(ox + 6 * s, oy + 5 * s, 2 * s, s);
-      // Dents
-      ctx.fillStyle = '#e8e0c8';
-      ctx.fillRect(ox + 3 * s, oy + 7 * s, 8 * s, 2 * s);
-      ctx.fillStyle = '#222';
-      for (let i = 0; i < 3; i++) ctx.fillRect(ox + (4 + i * 2) * s, oy + 7 * s, s, 2 * s);
-      // Colonne
-      ctx.fillStyle = '#d4ccb0';
-      for (let i = 0; i < 3; i++) ctx.fillRect(ox + 6 * s, oy + (9 + i * 2) * s, 2 * s, s);
-      // Côtes
-      ctx.strokeStyle = '#d4ccb0'; ctx.lineWidth = s * 0.7;
-      for (let i = 0; i < 2; i++) {
-        ctx.beginPath(); ctx.moveTo(ox + 6 * s, oy + (10 + i * 2) * s); ctx.lineTo(ox + 2 * s, oy + (11 + i * 2) * s); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(ox + 8 * s, oy + (10 + i * 2) * s); ctx.lineTo(ox + 12 * s, oy + (11 + i * 2) * s); ctx.stroke();
+      const f = GS.frame;
+      const pulse = (Math.sin(f * 0.1) + 1) / 2;
+      const fastPulse = (Math.sin(f * 0.22) + 1) / 2;
+      const bodyBob = Math.sin(f * 0.07) * 2 * s;
+      const legWave = f * 0.12;
+
+      ctx.save(); ctx.translate(0, bodyBob);
+
+      // Aura venin
+      const venom = ctx.createRadialGradient(0, 0, 3*s, 0, 0, 32*s);
+      venom.addColorStop(0, rageMode ? `rgba(200,0,30,${0.3+0.15*pulse})` : `rgba(80,0,120,${0.22+0.12*pulse})`);
+      venom.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = venom;
+      ctx.beginPath(); ctx.arc(0, 0, 32*s, 0, Math.PI*2); ctx.fill();
+
+      // 8 pattes (4 de chaque côté)
+      const legColors = rageMode ? ['#5a0015','#8a0025','#4a0012'] : ['#1a0030','#2a0048','#180028'];
+      for (let side = -1; side <= 1; side += 2) {
+        for (let li = 0; li < 4; li++) {
+          const baseY = (li - 1.5) * 5 * s;
+          const wave = Math.sin(legWave + li * 0.8 + (side > 0 ? 0.4 : 0)) * 8 * s;
+          const kx = side * (12 + li * 3) * s;
+          const ex = side * (30 + li * 4) * s;
+          const ey = baseY + wave;
+          ctx.strokeStyle = legColors[li % 3]; ctx.lineWidth = 2.5 * s; ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(side * 10 * s, baseY);
+          ctx.quadraticCurveTo(kx, baseY - 8*s, ex, ey);
+          ctx.stroke();
+          ctx.fillStyle = rageMode ? '#ff0030' : '#6600aa';
+          ctx.beginPath(); ctx.arc(ex, ey, 2 * s, 0, Math.PI*2); ctx.fill();
+        }
       }
-      // Bras
-      ctx.fillStyle = '#d4ccb0';
-      ctx.fillRect(ox + 0 * s, oy + 9 * s, 2 * s, 6 * s);
-      ctx.fillRect(ox + 12 * s, oy + 9 * s, 2 * s, 6 * s);
-      // Mains
-      ctx.fillRect(ox - s, oy + 14 * s, 3 * s, 2 * s);
-      ctx.fillRect(ox + 12 * s, oy + 14 * s, 3 * s, 2 * s);
-      // Jambes
-      ctx.fillRect(ox + 3 * s, oy + 17 * s + legOff, 2 * s, 5 * s);
-      ctx.fillRect(ox + 9 * s, oy + 17 * s - legOff, 2 * s, 5 * s);
-      // Pieds
-      ctx.fillRect(ox + 2 * s, oy + 21 * s + legOff, 4 * s, s);
-      ctx.fillRect(ox + 8 * s, oy + 21 * s - legOff, 4 * s, s);
+
+      // Abdomen
+      const abdGrad = ctx.createRadialGradient(0, 8*s, 2*s, 0, 8*s, 12*s);
+      abdGrad.addColorStop(0, rageMode ? '#3a0010' : '#1a0040');
+      abdGrad.addColorStop(1, '#000');
+      ctx.fillStyle = abdGrad;
+      ctx.beginPath(); ctx.ellipse(0, 8*s, 12*s, 9*s, 0, 0, Math.PI*2); ctx.fill();
+      // Motif sablier venimeux
+      ctx.fillStyle = rageMode ? `rgba(255,0,40,${0.7+0.3*pulse})` : `rgba(160,0,255,${0.6+0.25*pulse})`;
+      ctx.beginPath();
+      ctx.moveTo(-4*s, 5*s); ctx.lineTo(4*s, 5*s); ctx.lineTo(2*s, 8*s); ctx.lineTo(4*s, 11*s); ctx.lineTo(-4*s, 11*s); ctx.lineTo(-2*s, 8*s);
+      ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = rageMode ? '#ff0044' : '#8800cc'; ctx.lineWidth = s;
+      ctx.beginPath(); ctx.ellipse(0, 8*s, 12*s, 9*s, 0, 0, Math.PI*2); ctx.stroke();
+
+      // Corps central
+      const bodyGrad = ctx.createRadialGradient(-2*s, -4*s, s, 0, 0, 10*s);
+      bodyGrad.addColorStop(0, rageMode ? '#4a0018' : '#1e0038');
+      bodyGrad.addColorStop(1, '#000');
+      ctx.fillStyle = bodyGrad;
+      ctx.beginPath(); ctx.ellipse(0, 0, 10*s, 8*s, 0, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = rageMode ? '#cc0030' : '#4400aa'; ctx.lineWidth = s*0.8;
+      ctx.beginPath(); ctx.ellipse(0, 0, 10*s, 8*s, 0, 0, Math.PI*2); ctx.stroke();
+
+      // 8 yeux (arrangement 2-4-2)
+      const eyeRows = [[-8, [-3.5, 3.5]], [-5, [-6, -2, 2, 6]], [-3, [-4, 4]]];
+      for (const [ey2, exs] of eyeRows) {
+        for (const ex2 of exs) {
+          ctx.fillStyle = '#000';
+          ctx.beginPath(); ctx.arc(ex2*s, ey2*s, 2*s, 0, Math.PI*2); ctx.fill();
+          ctx.fillStyle = rageMode ? `rgba(255,0,50,${0.8+0.2*fastPulse})` : `rgba(200,0,255,${0.7+0.25*pulse})`;
+          ctx.beginPath(); ctx.arc(ex2*s, ey2*s, 1.5*s, 0, Math.PI*2); ctx.fill();
+          ctx.fillStyle = `rgba(255,255,255,0.65)`;
+          ctx.beginPath(); ctx.arc(ex2*s-0.4*s, ey2*s-0.4*s, 0.5*s, 0, Math.PI*2); ctx.fill();
+        }
+      }
+
+      // Crochets venimeux
+      ctx.strokeStyle = rageMode ? '#ffaa00' : '#88ddaa'; ctx.lineWidth = 2*s; ctx.lineCap = 'round';
+      const fangDrip = Math.sin(f * 0.15) * 1.5 * s;
+      ctx.beginPath(); ctx.moveTo(-5*s, -2*s); ctx.quadraticCurveTo(-8*s, 1*s, -6*s, 5*s + fangDrip); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(5*s, -2*s); ctx.quadraticCurveTo(8*s, 1*s, 6*s, 5*s + fangDrip); ctx.stroke();
+      ctx.fillStyle = rageMode ? `rgba(255,120,0,${0.7+0.2*pulse})` : `rgba(80,255,100,${0.6+0.3*pulse})`;
+      if (pulse > 0.5) {
+        ctx.beginPath(); ctx.arc(-6*s, 5*s+fangDrip+s, s, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(6*s, 5*s+fangDrip+s, s, 0, Math.PI*2); ctx.fill();
+      }
+
+      // Fils orbitaux (rage)
+      if (rageMode) {
+        ctx.strokeStyle = `rgba(200,0,80,${0.4+0.2*pulse})`; ctx.lineWidth = s * 0.6;
+        for (let w = 0; w < 3; w++) {
+          const wa = f * 0.04 + w * 2.1, wr = (24 + w * 6) * s;
+          ctx.beginPath(); ctx.arc(0, 0, wr, wa, wa + Math.PI * 0.8); ctx.stroke();
+        }
+      }
+
+      ctx.restore();
       ctx.restore();
     }
 
-    // ─── ZOMBIE ───────────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════════════
+    // ─── ZARVETH LE COLOSSE PRISMATIQUE — Titan de Cristal ─────────
+    // ═══════════════════════════════════════════════════════════════
+    function drawCrystal(ctx, cx, cy, dir, frame, scale = 2.7, alpha = 1, rageMode = false) {
+      const s = scale; ctx.save(); ctx.translate(cx, cy); ctx.globalAlpha *= alpha;
+      if (dir === 1) ctx.scale(-1, 1);
+      const f = GS.frame;
+      const ox = -16 * s, oy = -22 * s;
+      const pulse = (Math.sin(f * 0.09) + 1) / 2;
+      const fastPulse = (Math.sin(f * 0.21) + 1) / 2;
+      const breathe = Math.sin(f * 0.06) * 1.5 * s;
+      const float = Math.sin(f * 0.045) * 2 * s;
+
+      ctx.save(); ctx.translate(0, float);
+
+      // Aura cristalline
+      const aura = ctx.createRadialGradient(0, 0, 5*s, 0, 0, 38*s);
+      aura.addColorStop(0, rageMode ? `rgba(255,100,0,${0.3+0.2*pulse})` : `rgba(0,180,255,${0.25+0.15*pulse})`);
+      aura.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = aura;
+      ctx.beginPath(); ctx.arc(0, 0, 38*s, 0, Math.PI*2); ctx.fill();
+
+      // Cristaux d'épaule
+      const crownC = rageMode ? ['#cc3300','#ee5500','#ff8800'] : ['#004488','#0066cc','#0088ff'];
+      for (let i = 0; i < 3; i++) {
+        ctx.fillStyle = crownC[i];
+        ctx.save(); ctx.translate(ox + (-2+i*2)*s, oy + (10-i*3)*s); ctx.rotate(-0.5-i*0.2);
+        const h=(8+i*3)*s, w=(4-i)*s;
+        ctx.beginPath(); ctx.moveTo(-w,h); ctx.lineTo(0,0); ctx.lineTo(w,h); ctx.closePath(); ctx.fill();
+        ctx.restore();
+        ctx.save(); ctx.translate(ox + (30+i*2)*s, oy + (10-i*3)*s); ctx.rotate(0.5+i*0.2);
+        ctx.fillStyle = crownC[i];
+        ctx.beginPath(); ctx.moveTo(-w,h); ctx.lineTo(0,0); ctx.lineTo(w,h); ctx.closePath(); ctx.fill();
+        ctx.restore();
+      }
+
+      // Corps hexagonal
+      const hx = ox + 16*s, hy = oy + 22*s, hr = 16*s;
+      const bodyGrad = ctx.createLinearGradient(ox, oy+10*s, ox+32*s, oy+35*s);
+      bodyGrad.addColorStop(0, rageMode ? '#3a1000' : '#001a40');
+      bodyGrad.addColorStop(1, rageMode ? '#100400' : '#00040e');
+      ctx.fillStyle = bodyGrad;
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const a = i * Math.PI/3 - Math.PI/6;
+        const px = hx + Math.cos(a) * hr, py = hy + Math.sin(a) * hr * (1 + breathe/(16*s));
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.closePath(); ctx.fill();
+      // Facettes
+      ctx.strokeStyle = rageMode ? `rgba(255,120,0,${0.4+0.3*pulse})` : `rgba(0,220,255,${0.35+0.25*pulse})`; ctx.lineWidth = s * 0.8;
+      for (let i = 0; i < 6; i++) {
+        const a = i * Math.PI/3 - Math.PI/6;
+        ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(hx+Math.cos(a)*hr*0.7, hy+Math.sin(a)*hr*0.7); ctx.stroke();
+      }
+      ctx.strokeStyle = rageMode ? `rgba(255,80,0,${0.6+0.3*pulse})` : `rgba(0,180,255,${0.5+0.3*pulse})`; ctx.lineWidth = s * 1.5;
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const a = i * Math.PI/3 - Math.PI/6;
+        const px = hx+Math.cos(a)*hr, py = hy+Math.sin(a)*hr;
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.closePath(); ctx.stroke();
+
+      // Gemme centrale
+      ctx.shadowColor = rageMode ? '#ff4400' : '#00ccff'; ctx.shadowBlur = 18 + pulse * 14;
+      ctx.fillStyle = rageMode ? `rgba(255,${60+80*fastPulse|0},0,0.95)` : `rgba(0,${160+80*fastPulse|0},255,0.95)`;
+      ctx.beginPath(); ctx.arc(hx, hy, (5+pulse*2)*s, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = `rgba(255,255,255,${0.7+0.3*fastPulse})`;
+      ctx.beginPath(); ctx.arc(hx-s, hy-s, 2*s, 0, Math.PI*2); ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Bras gauche
+      ctx.save(); ctx.translate(ox, oy+14*s);
+      const armL = Math.sin(f*0.07)*3*s;
+      ctx.fillStyle = rageMode ? '#1a0800' : '#001230';
+      ctx.fillRect(-3*s, 0, 7*s, 14*s);
+      ctx.fillStyle = rageMode ? '#ff5500' : '#0088ff';
+      ctx.beginPath(); ctx.moveTo(-3*s,2*s+armL); ctx.lineTo(-5*s,-3*s+armL); ctx.lineTo(-1*s,2*s+armL); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = rageMode ? '#2a0c00' : '#001838'; ctx.fillRect(-4*s,14*s,9*s,6*s);
+      ctx.restore();
+
+      // Bras droit
+      ctx.save(); ctx.translate(ox+32*s, oy+14*s);
+      const armR = -armL;
+      ctx.fillStyle = rageMode ? '#1a0800' : '#001230';
+      ctx.fillRect(-4*s, 0, 7*s, 14*s);
+      ctx.fillStyle = rageMode ? '#ff5500' : '#0088ff';
+      ctx.beginPath(); ctx.moveTo(3*s,2*s+armR); ctx.lineTo(5*s,-3*s+armR); ctx.lineTo(1*s,2*s+armR); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = rageMode ? '#2a0c00' : '#001838'; ctx.fillRect(-5*s,14*s,9*s,6*s);
+      ctx.restore();
+
+      // Tête
+      ctx.fillStyle = rageMode ? '#1a0600' : '#000e20';
+      ctx.fillRect(ox+8*s, oy, 16*s, 12*s);
+      for (let i = 0; i < 5; i++) {
+        const h = (5+(i%2)*4)*s;
+        ctx.fillStyle = crownC[i%3];
+        ctx.beginPath(); ctx.moveTo(ox+(8+i*3.5)*s, oy); ctx.lineTo(ox+(9.75+i*3.5)*s, oy-h); ctx.lineTo(ox+(11.5+i*3.5)*s, oy); ctx.closePath(); ctx.fill();
+      }
+      // 3 yeux en triangle
+      const eyeDat = [[-4,3],[0,0],[4,3]];
+      for (const [ex2, ey2] of eyeDat) {
+        const eB = (f%90)>3;
+        ctx.fillStyle = '#000'; ctx.fillRect(ox+(12+ex2)*s, oy+(4+ey2)*s, 5*s, eB?4*s:s);
+        ctx.fillStyle = rageMode ? `rgba(255,${80+60*fastPulse|0},0,0.95)` : `rgba(0,${180+70*fastPulse|0},255,0.95)`;
+        ctx.fillRect(ox+(13+ex2)*s, oy+(4+ey2)*s, 4*s, eB?3*s:s*0.8);
+        if (eB) { ctx.fillStyle='rgba(255,255,255,0.7)'; ctx.fillRect(ox+(13+ex2)*s, oy+(4+ey2)*s, s, s); }
+      }
+      ctx.fillStyle='#000'; ctx.fillRect(ox+10*s, oy+9*s, 12*s, 3*s);
+      ctx.fillStyle = rageMode?`rgba(255,60,0,${0.5+0.3*pulse})`:`rgba(0,200,255,${0.4+0.3*pulse})`;
+      for (let i=0;i<4;i++) ctx.fillRect(ox+(10+i*3)*s, oy+9*s, 2*s, 3*s);
+
+      // Jambes
+      const legPh = (f%32)/32, legL2 = Math.sin(legPh*Math.PI*2)*4*s;
+      ctx.fillStyle = rageMode?'#200800':'#001228';
+      ctx.fillRect(ox+6*s, oy+38*s+legL2, 7*s, 8*s);
+      ctx.fillRect(ox+19*s, oy+38*s-legL2, 7*s, 8*s);
+      ctx.fillStyle = rageMode?'#cc3300':'#0055aa';
+      ctx.fillRect(ox+4*s, oy+45*s+legL2, 10*s, 3*s);
+      ctx.fillRect(ox+17*s, oy+45*s-legL2, 10*s, 3*s);
+
+      // Particules (rage)
+      if (rageMode) {
+        for (let i=0;i<6;i++) {
+          const pa=f*0.05+i*1.05, pr=(20+Math.sin(f*0.12+i)*6)*s;
+          ctx.fillStyle=`rgba(255,${80+30*i},0,${0.5+0.3*Math.sin(f*0.18+i)})`;
+          ctx.beginPath(); ctx.arc(Math.cos(pa)*pr, Math.sin(pa)*pr*0.5, (1.5+Math.sin(f*0.15+i))*s, 0, Math.PI*2); ctx.fill();
+        }
+      }
+
+      ctx.restore(); // float
+      ctx.restore();
+    }
+
+        // ─── ZOMBIE ───────────────────────────────────────────────────
     function drawZombie(ctx, cx, cy, dir, frame, scale = 1.8, alpha = 1) {
       const s = scale; ctx.save(); ctx.translate(cx, cy); ctx.globalAlpha *= alpha;
       if (dir < 0) { ctx.scale(-1, 1); }
@@ -4555,6 +5798,69 @@
       ctx.fillStyle = '#1a3010';
       ctx.fillRect(ox + 2 * s, oy + 22 * s + legOff, 5 * s, 2 * s);
       ctx.fillRect(ox + 8 * s, oy + 22 * s - legOff, 5 * s, 2 * s);
+      ctx.restore();
+    }
+
+    // ─── SQUELETTE ────────────────────────────────────────────────
+    function drawSkeleton(ctx, cx, cy, dir, frame, scale = 1.8, alpha = 1) {
+      const s = scale; ctx.save(); ctx.translate(cx, cy); ctx.globalAlpha *= alpha;
+      if (dir < 0) ctx.scale(-1, 1);
+      const ox = -7 * s, oy = -14 * s;
+      const legOff = frame === 1 ? -s * 1.5 : frame === 2 ? s * 1.5 : 0;
+      const armOff = frame === 1 ? s : frame === 2 ? -s : 0;
+      // Jambes
+      ctx.fillStyle = '#d4ccb0';
+      ctx.fillRect(ox + 2 * s, oy + 19 * s + legOff,  3 * s, 6 * s);
+      ctx.fillRect(ox + 9 * s, oy + 19 * s - legOff,  3 * s, 6 * s);
+      // Pieds
+      ctx.fillStyle = '#bfb89a';
+      ctx.fillRect(ox + 1 * s, oy + 24 * s + legOff,  4 * s, 2 * s);
+      ctx.fillRect(ox + 8 * s, oy + 24 * s - legOff,  4 * s, 2 * s);
+      // Bassin
+      ctx.fillStyle = '#c8c0a0';
+      ctx.fillRect(ox + 1 * s, oy + 17 * s, 12 * s, 3 * s);
+      // Colonne vertébrale
+      ctx.fillStyle = '#d4ccb0';
+      for (let i = 0; i < 4; i++) ctx.fillRect(ox + 5 * s, oy + (9 + i * 2) * s, 4 * s, s);
+      // Cage thoracique
+      ctx.fillStyle = '#bfb89a';
+      ctx.fillRect(ox + 2 * s, oy + 8 * s, 10 * s, 9 * s);
+      ctx.fillStyle = '#0a0a08'; // ombre intérieure
+      for (let i = 0; i < 3; i++) {
+        ctx.fillRect(ox + 3 * s, oy + (9 + i * 2) * s, 3 * s, s);
+        ctx.fillRect(ox + 8 * s, oy + (9 + i * 2) * s, 3 * s, s);
+      }
+      // Épaules + bras
+      ctx.fillStyle = '#d4ccb0';
+      ctx.fillRect(ox - 1 * s, oy + 8 * s, 3 * s, 2 * s);  // épaule G
+      ctx.fillRect(ox + 12 * s, oy + 8 * s, 3 * s, 2 * s); // épaule D
+      // Avant-bras avec animation
+      ctx.fillRect(ox - 2 * s, oy + (10 + armOff) * s, 3 * s, 6 * s);
+      ctx.fillRect(ox + 13 * s, oy + (10 - armOff) * s, 3 * s, 6 * s);
+      // Mains
+      ctx.fillStyle = '#c8c0a0';
+      ctx.fillRect(ox - 3 * s, oy + (15 + armOff) * s, 4 * s, 2 * s);
+      ctx.fillRect(ox + 13 * s, oy + (15 - armOff) * s, 4 * s, 2 * s);
+      // Crâne
+      ctx.fillStyle = '#e0d8c0';
+      ctx.fillRect(ox + 2 * s, oy + 1 * s, 10 * s, 8 * s);
+      ctx.fillStyle = '#d4ccb0';
+      ctx.fillRect(ox + 1 * s, oy + 3 * s, 12 * s, 5 * s); // élargissement
+      // Mâchoire
+      ctx.fillStyle = '#c8c0a0';
+      ctx.fillRect(ox + 3 * s, oy + 7 * s, 8 * s, 3 * s);
+      // Dents
+      ctx.fillStyle = '#fff';
+      for (let i = 0; i < 4; i++) ctx.fillRect(ox + (3 + i * 2) * s, oy + 9 * s, s, s);
+      // Yeux creux
+      ctx.fillStyle = '#000';
+      ctx.fillRect(ox + 2 * s, oy + 2 * s, 3 * s, 3 * s);
+      ctx.fillRect(ox + 9 * s, oy + 2 * s, 3 * s, 3 * s);
+      // Lueur yeux
+      const glowPulse = (Math.sin(GS.frame * 0.09) + 1) / 2;
+      ctx.fillStyle = `rgba(0,220,100,${0.55 + 0.35 * glowPulse})`;
+      ctx.fillRect(ox + 3 * s, oy + 3 * s, s, s);
+      ctx.fillRect(ox + 10 * s, oy + 3 * s, s, s);
       ctx.restore();
     }
 
@@ -4833,6 +6139,212 @@
       ctx.restore();
     }
 
+    // ─── ÉCLAT VIVANT (crystal) — fragment de cristal animé ──────
+    function drawEclatVivant(ctx, cx, cy, dir, frame, scale = 1.6, alpha = 1) {
+      const s = scale; ctx.save(); ctx.translate(cx, cy); ctx.globalAlpha *= alpha;
+      if (dir < 0) ctx.scale(-1, 1);
+      const pulse = (Math.sin(GS.frame * 0.12) + 1) / 2;
+      const bob2 = Math.sin(GS.frame * 0.09) * 2 * s;
+      // Lueur de fond
+      ctx.fillStyle = `rgba(100,200,255,${0.15 + 0.1 * pulse})`;
+      ctx.beginPath(); ctx.ellipse(0, 4 * s, 12 * s, 7 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // Corps cristal — forme diamant pixelisée
+      const cy2 = bob2 - 10 * s;
+      ctx.fillStyle = '#55aaee';
+      // Losange central
+      ctx.beginPath();
+      ctx.moveTo(0, cy2 - 10 * s);
+      ctx.lineTo(8 * s, cy2 - 2 * s);
+      ctx.lineTo(0, cy2 + 8 * s);
+      ctx.lineTo(-8 * s, cy2 - 2 * s);
+      ctx.closePath(); ctx.fill();
+      // Face claire
+      ctx.fillStyle = `rgba(150,220,255,${0.6 + 0.3 * pulse})`;
+      ctx.beginPath();
+      ctx.moveTo(0, cy2 - 10 * s);
+      ctx.lineTo(8 * s, cy2 - 2 * s);
+      ctx.lineTo(0, cy2 - 1 * s);
+      ctx.closePath(); ctx.fill();
+      // Facette sombre
+      ctx.fillStyle = '#2266aa';
+      ctx.beginPath();
+      ctx.moveTo(-8 * s, cy2 - 2 * s);
+      ctx.lineTo(0, cy2 - 1 * s);
+      ctx.lineTo(0, cy2 + 8 * s);
+      ctx.closePath(); ctx.fill();
+      // Yeux lumineux
+      ctx.fillStyle = `rgba(0,220,255,${0.8 + 0.2 * pulse})`;
+      ctx.fillRect(-4 * s, cy2 - 5 * s, 2 * s, 2 * s);
+      ctx.fillRect(2 * s, cy2 - 5 * s, 2 * s, 2 * s);
+      // Éclats orbitaux (petits fragments tournants)
+      const spin = GS.frame * 0.04 + (frame * Math.PI * 0.6);
+      ctx.fillStyle = `rgba(170,230,255,${0.7 + 0.3 * pulse})`;
+      for (let i = 0; i < 3; i++) {
+        const a = spin + i * Math.PI * 2 / 3;
+        const ex = Math.cos(a) * 11 * s, ey = Math.sin(a) * 8 * s + bob2 - 2 * s;
+        ctx.fillRect(ex - s, ey - s, 2 * s, 2 * s);
+      }
+      ctx.restore();
+    }
+
+    // ─── GOLEM DE CRISTAL (crystal) — colosse de verre taillé ─────
+    function drawGolemCristal(ctx, cx, cy, dir, frame, scale = 1.8, alpha = 1) {
+      const s = scale; ctx.save(); ctx.translate(cx, cy); ctx.globalAlpha *= alpha;
+      if (dir < 0) ctx.scale(-1, 1);
+      const ox = -11 * s, oy = -18 * s;
+      const legOff = frame === 1 ? -s : frame === 2 ? s : 0;
+      const pulse = (Math.sin(GS.frame * 0.07) + 1) / 2;
+      // Aura prismatique
+      ctx.fillStyle = `rgba(80,180,255,${0.12 + 0.08 * pulse})`;
+      ctx.beginPath(); ctx.ellipse(0, 5 * s, 20 * s, 10 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // Jambes blocs cristal
+      ctx.fillStyle = '#2255aa';
+      ctx.fillRect(ox + 2 * s, oy + 28 * s + legOff, 7 * s, 8 * s);
+      ctx.fillRect(ox + 13 * s, oy + 28 * s - legOff, 7 * s, 8 * s);
+      ctx.fillStyle = '#3377cc';
+      ctx.fillRect(ox + 2 * s, oy + 27 * s + legOff, 7 * s, 2 * s);
+      ctx.fillRect(ox + 13 * s, oy + 27 * s - legOff, 7 * s, 2 * s);
+      // Corps massif
+      ctx.fillStyle = '#2266bb';
+      ctx.fillRect(ox + 1 * s, oy + 12 * s, 20 * s, 17 * s);
+      // Reflets prismatiques sur le torse
+      ctx.fillStyle = `rgba(120,200,255,${0.35 + 0.2 * pulse})`;
+      ctx.fillRect(ox + 3 * s, oy + 14 * s, 6 * s, 9 * s);
+      ctx.fillStyle = `rgba(80,160,255,${0.25 + 0.15 * pulse})`;
+      ctx.fillRect(ox + 12 * s, oy + 15 * s, 7 * s, 7 * s);
+      // Lignes de fracture
+      ctx.strokeStyle = `rgba(200,240,255,${0.5 + 0.3 * pulse})`; ctx.lineWidth = s * 0.6;
+      ctx.beginPath(); ctx.moveTo(ox + 5 * s, oy + 13 * s); ctx.lineTo(ox + 9 * s, oy + 22 * s); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(ox + 15 * s, oy + 14 * s); ctx.lineTo(ox + 12 * s, oy + 21 * s); ctx.stroke();
+      // Épaules cristal avec pointes
+      ctx.fillStyle = '#4488dd';
+      ctx.fillRect(ox - 3 * s, oy + 12 * s, 5 * s, 12 * s);
+      ctx.fillRect(ox + 20 * s, oy + 12 * s, 5 * s, 12 * s);
+      // Pointes d'épaule
+      ctx.fillStyle = '#aaddff';
+      ctx.beginPath(); ctx.moveTo(ox - 3 * s, oy + 12 * s); ctx.lineTo(ox - 1 * s, oy + 7 * s); ctx.lineTo(ox + 2 * s, oy + 12 * s); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(ox + 20 * s, oy + 12 * s); ctx.lineTo(ox + 22 * s, oy + 7 * s); ctx.lineTo(ox + 25 * s, oy + 12 * s); ctx.closePath(); ctx.fill();
+      // Tête hexagonale
+      ctx.fillStyle = '#1a4488';
+      ctx.fillRect(ox + 4 * s, oy + 3 * s, 14 * s, 10 * s);
+      ctx.fillRect(ox + 2 * s, oy + 5 * s, 18 * s, 6 * s);
+      // Crête de cristaux
+      ctx.fillStyle = '#88ccff';
+      for (let i = 0; i < 4; i++) {
+        ctx.beginPath();
+        ctx.moveTo(ox + (4 + i * 3.5) * s, oy + 3 * s);
+        ctx.lineTo(ox + (5.5 + i * 3.5) * s, oy - 2 * s);
+        ctx.lineTo(ox + (7 + i * 3.5) * s, oy + 3 * s);
+        ctx.closePath(); ctx.fill();
+      }
+      // Yeux prismatiques
+      ctx.fillStyle = `rgba(0,200,255,${0.9 + 0.1 * pulse})`;
+      ctx.fillRect(ox + 5 * s, oy + 5 * s, 5 * s, 4 * s);
+      ctx.fillRect(ox + 12 * s, oy + 5 * s, 5 * s, 4 * s);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(ox + 6 * s, oy + 5 * s, 2 * s, 2 * s);
+      ctx.fillRect(ox + 13 * s, oy + 5 * s, 2 * s, 2 * s);
+      // Bouche sévère
+      ctx.fillStyle = '#001133';
+      ctx.fillRect(ox + 5 * s, oy + 10 * s, 12 * s, 2 * s);
+      ctx.fillStyle = '#44aaff'; for (let i = 0; i < 4; i++) ctx.fillRect(ox + (6 + i * 3) * s, oy + 10 * s, 2 * s, 2 * s);
+      ctx.restore();
+    }
+
+    // ─── LUEUR PRISMATIQUE (crystal) — orbe lumineuse flottante ──
+    function drawLueurPrismatique(ctx, cx, cy, frame, scale = 1.5, alpha = 1) {
+      const s = scale; ctx.save(); ctx.translate(cx, cy); ctx.globalAlpha *= alpha;
+      const pulse = (Math.sin(GS.frame * 0.14) + 1) / 2;
+      const spin = GS.frame * 0.06;
+      const colors = ['#ff88ff', '#88ffff', '#ffff88', '#88ff88'];
+      const bob2 = Math.sin(GS.frame * 0.1) * 3 * s;
+      // Halo extérieur
+      const hg = ctx.createRadialGradient(0, bob2, 0, 0, bob2, 16 * s);
+      hg.addColorStop(0, `rgba(200,160,255,${0.4 + 0.2 * pulse})`);
+      hg.addColorStop(0.5, `rgba(150,100,255,${0.2 + 0.1 * pulse})`);
+      hg.addColorStop(1, 'transparent');
+      ctx.fillStyle = hg; ctx.beginPath(); ctx.arc(0, bob2, 16 * s, 0, Math.PI * 2); ctx.fill();
+      // Rayons prismatiques tournants
+      for (let i = 0; i < 6; i++) {
+        const a = spin + i * Math.PI / 3;
+        ctx.strokeStyle = colors[i % 4].replace(')', `,${0.5 + 0.3 * pulse})`).replace('rgb', 'rgba').replace('#ff88ff', `rgba(255,136,255,${0.5 + 0.3 * pulse})`).replace('#88ffff', `rgba(136,255,255,${0.4 + 0.3 * pulse})`).replace('#ffff88', `rgba(255,255,136,${0.45 + 0.3 * pulse})`).replace('#88ff88', `rgba(136,255,136,${0.4 + 0.3 * pulse})`);
+        ctx.strokeStyle = ['rgba(255,136,255,0.6)', 'rgba(136,255,255,0.6)', 'rgba(255,255,136,0.6)', 'rgba(136,255,136,0.6)', 'rgba(255,160,100,0.5)', 'rgba(160,136,255,0.6)'][i];
+        ctx.lineWidth = s * 0.8;
+        ctx.beginPath(); ctx.moveTo(Math.cos(a) * 5 * s, bob2 + Math.sin(a) * 5 * s);
+        ctx.lineTo(Math.cos(a) * 13 * s, bob2 + Math.sin(a) * 13 * s); ctx.stroke();
+      }
+      // Noyau central
+      ctx.fillStyle = `rgba(230,200,255,${0.85 + 0.1 * pulse})`;
+      ctx.beginPath(); ctx.arc(0, bob2, 5 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(-s, bob2 - s, 2 * s, 0, Math.PI * 2); ctx.fill();
+      // Cristaux flottants en orbite (pixelisés)
+      for (let i = 0; i < 4; i++) {
+        const a2 = spin * 1.5 + i * Math.PI / 2 + (frame * Math.PI * 0.4);
+        const r = (9 + Math.sin(GS.frame * 0.08 + i) * 2) * s;
+        const px = Math.cos(a2) * r, py = bob2 + Math.sin(a2) * r * 0.6;
+        ctx.fillStyle = colors[i];
+        ctx.fillRect(px - s, py - s, 2 * s, 3 * s);
+      }
+      // Yeux (petits points dans la lueur)
+      ctx.fillStyle = '#3300aa';
+      ctx.fillRect(-2 * s, bob2 - 2 * s, 2 * s, 2 * s);
+      ctx.fillRect(0 * s, bob2 - 2 * s, 2 * s, 2 * s);
+      ctx.restore();
+    }
+
+    // ─── VORTEX DE VERRE (crystal) — tourbillon de fragments ─────
+    function drawVortexVerre(ctx, cx, cy, frame, scale = 1.6, alpha = 1) {
+      const s = scale; ctx.save(); ctx.translate(cx, cy); ctx.globalAlpha *= alpha;
+      const pulse = (Math.sin(GS.frame * 0.1) + 1) / 2;
+      const spin = GS.frame * 0.07;
+      const bob2 = Math.sin(GS.frame * 0.08) * 2 * s;
+      // Ombre sol
+      ctx.fillStyle = `rgba(50,80,150,${0.15 + 0.05 * pulse})`;
+      ctx.beginPath(); ctx.ellipse(0, 8 * s, 14 * s, 5 * s, 0, 0, Math.PI * 2); ctx.fill();
+      // Anneau tourbillonnant extérieur
+      ctx.strokeStyle = `rgba(100,180,255,${0.4 + 0.2 * pulse})`; ctx.lineWidth = 2 * s;
+      ctx.beginPath(); ctx.arc(0, bob2, 13 * s, spin, spin + Math.PI * 1.6); ctx.stroke();
+      ctx.strokeStyle = `rgba(200,230,255,${0.3 + 0.2 * pulse})`; ctx.lineWidth = s;
+      ctx.beginPath(); ctx.arc(0, bob2, 10 * s, spin + Math.PI, spin + Math.PI * 2.6); ctx.stroke();
+      // Corps central — noyau sombre avec facettes
+      ctx.fillStyle = '#112244';
+      ctx.beginPath(); ctx.arc(0, bob2, 7 * s, 0, Math.PI * 2); ctx.fill();
+      // Facettes colorées du noyau
+      const nColors = ['#4499cc', '#2266aa', '#66bbee', '#336699'];
+      for (let i = 0; i < 4; i++) {
+        const a = spin * 0.5 + i * Math.PI / 2;
+        ctx.fillStyle = nColors[i];
+        ctx.beginPath();
+        ctx.moveTo(0, bob2);
+        ctx.arc(0, bob2, 7 * s, a, a + Math.PI * 0.5);
+        ctx.closePath(); ctx.fill();
+      }
+      // Reflet brillant
+      ctx.fillStyle = `rgba(180,230,255,${0.5 + 0.3 * pulse})`;
+      ctx.beginPath(); ctx.arc(-2 * s, bob2 - 2 * s, 3 * s, 0, Math.PI * 2); ctx.fill();
+      // Fragments de verre orbitaux
+      for (let i = 0; i < 6; i++) {
+        const a = spin * (i % 2 === 0 ? 1.2 : -0.8) + i * Math.PI / 3 + (frame * 0.3);
+        const r = (9 + i * 0.5) * s;
+        const px = Math.cos(a) * r, py = bob2 + Math.sin(a) * r * 0.7;
+        const sz = (1 + (i % 3)) * s;
+        ctx.fillStyle = i % 3 === 0 ? `rgba(150,220,255,${0.8 + 0.2 * pulse})` : i % 3 === 1 ? `rgba(200,240,255,${0.7 + 0.2 * pulse})` : `rgba(100,170,255,${0.75 + 0.2 * pulse})`;
+        // Pixel carré pour l'aspect pixelart
+        ctx.save(); ctx.translate(px, py); ctx.rotate(spin * 2 + i);
+        ctx.fillRect(-sz / 2, -sz / 2, sz, sz * 1.5);
+        ctx.restore();
+      }
+      // Yeux dans le vortex
+      ctx.fillStyle = `rgba(0,200,255,${0.9 + 0.1 * pulse})`;
+      ctx.fillRect(-3 * s, bob2 - 2 * s, 2 * s, 2 * s);
+      ctx.fillRect(1 * s, bob2 - 2 * s, 2 * s, 2 * s);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(-3 * s, bob2 - 2 * s, s, s);
+      ctx.fillRect(s, bob2 - 2 * s, s, s);
+      ctx.restore();
+    }
+
     // ─── Fonctions utilitaires pour obtenir frame/dir par monstre ─
     function getMonFrame(m) {
       if (!m._animFrame) { m._animFrame = 0; m._animTimer = 0; }
@@ -4871,11 +6383,23 @@
       if (n === 'Griffon') return 'griffon';
       if (n === 'Golem') return 'golem';
       if (n === 'Élémental') return 'elemental';
+      // webs biome monsters
+      if (n === 'Araignée Vénéneuse') return 'spiderVenom';
+      if (n === 'Scorpion Géant') return 'scorpion';
+      if (n === 'Coléoptère Sombre') return 'beetle';
+      if (n === 'Chasseur Silencieux') return 'cricket';
+      // crystal biome monsters
+      if (n === 'Éclat Vivant') return 'eclatVivant';
+      if (n === 'Golem de Cristal') return 'golemCristal';
+      if (n === 'Lueur Prismatique') return 'lueurPrismatique';
+      if (n === 'Vortex de Verre') return 'vortexVerre';
       return null;
     }
     function getBossType(lvl) {
       if (lvl === 0) return 'demon';
       if (lvl === 1) return 'king';
+      if (lvl === 2) return 'spider';
+      if (lvl === 3) return 'crystal';
       return 'dragon';
     }
 
@@ -4943,17 +6467,83 @@
     // ============================================================
     function startGame() {
       document.getElementById('title').style.display = 'none';
-      document.getElementById('game').style.display = 'block';
-      document.getElementById('hud').style.display = 'flex';
-      document.getElementById('minimap-wrap').style.display = 'block';
-      // Toujours afficher les contrôles (mobile ET PC)
-      document.getElementById('mobilecontrols').style.display = 'block';
-      gRun = true; isDead = false; curLvl = 0;
-      const p = GS.p; p.hp = 6; p.maxHp = 6; p.xp = 0; p.lvl = 1; p.wPow = 1;
-      p.weapon = '⚔️ Épée Rouillée'; p.atkCDs = [0, 0, 0, 0];
-      p.dashCD = 0; p.invincible = false; p.invincibleTimer = 0;
+
+      const loadScreen = document.getElementById('loadscreen');
+      loadScreen.style.display = 'flex';
+      const loadBar = document.getElementById('load-bar-fill');
+      const loadMsg = document.getElementById('load-msg');
+
       BossMusic.init();
-      loadLevel(0); loop();
+
+      let rendered = 0;
+      const tracks = ['b0-0', 'b0-1', 'b0-2'];
+      const msgMap = {'b0-0':'🎵 Ambiance...', 'b0-1':'⚔️ Musique combat...', 'b0-2':'🔥 Musique rage...'};
+
+      function launchGame() {
+        loadScreen.style.display = 'none';
+        document.getElementById('game').style.display = 'block';
+        document.getElementById('hud').style.display = 'flex';
+        document.getElementById('minimap-wrap').style.display = 'block';
+        document.getElementById('mobilecontrols').style.display = 'block';
+        gRun = true; isDead = false; curLvl = 0;
+        const p = GS.p; p.hp = 6; p.maxHp = 6; p.xp = 0; p.lvl = 1; p.wPow = 1;
+        p.weapon = '⚔️ Épée Rouillée'; p.atkCDs = [0,0,0,0];
+        p.dashCD = 0; p.invincible = false; p.invincibleTimer = 0;
+        loadLevel(0); loop();
+        setTimeout(() => BossMusic.preloadLevel(1), 2000);
+        setTimeout(() => BossMusic.preloadLevel(2), 6000);
+        setTimeout(() => BossMusic.preloadLevel(3), 11000);
+        setTimeout(() => BossMusic.preloadLevel(4), 16000);
+        setupDevHelpers();
+      }
+
+      // Rendre chaque track séquentiellement avec mise à jour visuelle
+      async function renderAll() {
+        for (let i = 0; i < tracks.length; i++) {
+          loadMsg.textContent = msgMap[tracks[i]];
+          loadBar.style.width = (i / tracks.length * 90) + '%';
+          try {
+            await BossMusic.renderOne(tracks[i]);
+          } catch(e) {
+            console.warn('Rendu échoué pour', tracks[i], e);
+          }
+          rendered++;
+        }
+        loadBar.style.width = '100%';
+        loadMsg.textContent = '✅ Prêt !';
+        await new Promise(r => setTimeout(r, 400));
+        launchGame();
+      }
+
+      renderAll();
+    }
+
+    function setupDevHelpers() {
+      window.devGoto = (n) => {
+        n = Math.max(0, Math.min(n, LEVELS.length - 1));
+        isDead = false; gRun = true;
+        const p = GS.p; p.hp = p.maxHp; p.invincible = false;
+        if (n > 0) { p.weapon = LEVELS[n-1].weapon; p.wPow = LEVELS[n-1].wPow; }
+        curLvl = n; loadLevel(n);
+        console.log(`%c🎮 Niveau ${n+1} — ${Array.isArray(LEVELS[n].name) ? LEVELS[n].name[0] : LEVELS[n].name}`, 'color:#ffd700;font-weight:bold');
+      };
+      window.devKillBoss = () => {
+        if (GS.boss && GS.boss.state !== 'dead') { GS.boss.hp = 1; console.log('%c💀 Boss à 1 HP !', 'color:#ff4444'); }
+        else console.log('Pas de boss actif.');
+      };
+      window.devGodMode = (on=true) => {
+        GS.p.invincible = on; GS.p.invincibleTimer = on ? 999999 : 0;
+        console.log(`%c${on ? '🛡 God mode ON' : '🛡 God mode OFF'}`, 'color:#00ffcc');
+      };
+      window.devHelp = () => console.log(
+        '%cCommandes dev disponibles :\n' +
+        '  devGoto(n)      → aller directement au niveau n (0 à 4)\n' +
+        '  devKillBoss()   → met le boss actif à 1 HP\n' +
+        '  devGodMode()    → invincibilité ON\n' +
+        '  devGodMode(false) → invincibilité OFF',
+        'color:#aaffaa;font-size:13px;font-family:monospace'
+      );
+      console.log('%c🛠 DEV MODE actif — tape devHelp() pour les commandes', 'color:#ffd700;font-weight:bold;font-size:14px');
     }
 
   </script>
@@ -4966,13 +6556,19 @@
 // ─────────────────────────────────────────────────────────────
 // CONSTANTES
 // ─────────────────────────────────────────────────────────────
-const MUSIC_SR = 48000;
+const MUSIC_SR = 22050;
+const MAX_FREQ = MUSIC_SR / 2 - 50; // limite de Nyquist avec marge
 
 // ─────────────────────────────────────────────────────────────
-// PRIMITIVES AUDIO
+// PRIMITIVES AUDIO — volumes assainis, anti-saturation
 // ─────────────────────────────────────────────────────────────
+
 function m_osc(oc, type, freq, t0, dur, peak, opts={}) {
-  const { atk=0.01, dec=0.04, sus=0.75, rel=0.1, detune=0, lp=null, lpQ=1, pan=0 } = opts;
+  let { atk=0.01, dec=0.04, sus=0.75, rel=0.1, detune=0, lp=null, lpQ=1, pan=0 } = opts;
+  peak = Math.min(peak, 0.65); // cap global
+  const minDur = atk + dec + rel;
+  if (minDur > dur) { const s = dur / minDur; atk *= s; dec *= s; rel *= s; }
+  atk = Math.max(atk, 0.002); dec = Math.max(dec, 0.002); rel = Math.max(rel, 0.002);
   const o=oc.createOscillator(), g=oc.createGain();
   o.type=type; o.frequency.value=freq; o.detune.value=detune;
   let node=o;
@@ -4980,17 +6576,23 @@ function m_osc(oc, type, freq, t0, dur, peak, opts={}) {
   if (pan!==0) { const p=oc.createStereoPanner(); p.pan.value=pan; node.connect(p); node=p; }
   node.connect(g); g.connect(oc.destination);
   const t1=t0+atk, t2=t1+dec, t3=t0+dur-rel, t4=t0+dur;
-  g.gain.setValueAtTime(0,0);
-  g.gain.setValueAtTime(0,t0);
-  g.gain.linearRampToValueAtTime(peak,t1);
-  g.gain.linearRampToValueAtTime(peak*sus,t2);
-  g.gain.setValueAtTime(peak*sus, Math.max(t2,t3));
-  g.gain.linearRampToValueAtTime(0,t4);
+  g.gain.setValueAtTime(0, Math.max(0, t0-0.001));
+  g.gain.linearRampToValueAtTime(peak, t1);
+  g.gain.linearRampToValueAtTime(peak*sus, t2);
+  g.gain.setValueAtTime(peak*sus, Math.max(t2, t3));
+  g.gain.linearRampToValueAtTime(0, t4);
   o.start(t0); o.stop(t4+0.05);
 }
 
-function m_distOsc(oc, freq, t0, dur, peak, drive=180, opts={}) {
-  const { atk=0.008, rel=0.08, lp=700, pan=0, type='sawtooth' } = opts;
+function m_distOsc(oc, freq, t0, dur, peak, drive=120, opts={}) {
+  // Drive plafonné à 160 max pour éviter la saturation excessive
+  drive = Math.min(drive, 160);
+  peak = Math.min(peak, 0.35);
+  const { lp=700, pan=0, type='sawtooth' } = opts;
+  let { atk=0.008, rel=0.06 } = opts;
+  const total = atk + rel;
+  if (total > dur) { const s = dur / total; atk *= s; rel *= s; }
+  atk = Math.max(atk, 0.003); rel = Math.max(rel, 0.003);
   const o=oc.createOscillator(); o.type=type; o.frequency.value=freq;
   const ws=oc.createWaveShaper();
   const k=drive, n=512, curve=new Float32Array(n);
@@ -5002,15 +6604,15 @@ function m_distOsc(oc, freq, t0, dur, peak, drive=180, opts={}) {
   if (pan!==0) { const p=oc.createStereoPanner(); p.pan.value=pan; g.connect(p); node=p; }
   node.connect(oc.destination);
   o.connect(ws); ws.connect(f); f.connect(g);
-  g.gain.setValueAtTime(0,0);
-  g.gain.setValueAtTime(0,t0);
-  g.gain.linearRampToValueAtTime(peak,t0+atk);
-  g.gain.setValueAtTime(peak,t0+dur-rel);
-  g.gain.linearRampToValueAtTime(0,t0+dur);
+  g.gain.setValueAtTime(0, Math.max(0, t0-0.001));
+  g.gain.linearRampToValueAtTime(peak, t0+atk);
+  g.gain.setValueAtTime(peak, t0+dur-rel);
+  g.gain.linearRampToValueAtTime(0, t0+dur);
   o.start(t0); o.stop(t0+dur+0.05);
 }
 
 function m_noise(oc, t0, dur, peak, opts={}) {
+  peak = Math.min(peak, 0.40);
   const { atk=0.002, rel=0.15, ftype='bandpass', freq=600, Q=1.5, pan=0, pink=false } = opts;
   const len=Math.ceil(MUSIC_SR*(dur+0.1));
   const buf=oc.createBuffer(1,len,MUSIC_SR);
@@ -5031,85 +6633,95 @@ function m_noise(oc, t0, dur, peak, opts={}) {
   let node=g;
   if (pan!==0) { const p=oc.createStereoPanner(); p.pan.value=pan; g.connect(p); node=p; }
   node.connect(oc.destination); src.connect(flt); flt.connect(g);
-  g.gain.setValueAtTime(0,0);
-  g.gain.setValueAtTime(0,t0);
-  g.gain.linearRampToValueAtTime(peak,t0+atk);
-  g.gain.setValueAtTime(peak,t0+dur*0.25);
-  g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+  g.gain.setValueAtTime(0, Math.max(0, t0-0.001));
+  g.gain.linearRampToValueAtTime(peak, t0+atk);
+  g.gain.setValueAtTime(peak, t0+dur*0.25);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
   src.start(t0); src.stop(t0+dur+0.1);
 }
 
-function m_kick(oc, t0, peak=0.9, p0=120, p1=40, opts={}) {
+function m_kick(oc, t0, peak=0.7, p0=110, p1=38, opts={}) {
+  peak = Math.min(peak, 0.80);
   const { dec=0.38, pan=0 } = opts;
   const o=oc.createOscillator(); o.type='sine';
   const g=oc.createGain();
   let node=g;
   if (pan!==0) { const p=oc.createStereoPanner(); p.pan.value=pan; g.connect(p); node=p; }
   node.connect(oc.destination); o.connect(g);
-  o.frequency.setValueAtTime(p0,t0);
-  o.frequency.exponentialRampToValueAtTime(p1,t0+dec*0.5);
-  g.gain.setValueAtTime(0,0);
-  g.gain.setValueAtTime(peak,t0);
-  g.gain.exponentialRampToValueAtTime(0.0001,t0+dec);
+  o.frequency.setValueAtTime(p0, t0);
+  o.frequency.exponentialRampToValueAtTime(Math.max(p1,0.01), t0+dec*0.5);
+  g.gain.setValueAtTime(0, Math.max(0,t0-0.001));
+  g.gain.linearRampToValueAtTime(peak, t0+0.004);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0+dec);
   o.start(t0); o.stop(t0+dec+0.05);
-  m_noise(oc,t0,0.007,peak*0.4,{atk:0.001,ftype:'highpass',freq:3000,Q:1,pan});
+  m_noise(oc,t0,0.007,peak*0.3,{atk:0.002,ftype:'highpass',freq:2800,Q:1,pan});
 }
 
-function m_taiko(oc, t0, peak=1.0, opts={}) {
+function m_taiko(oc, t0, peak=0.75, opts={}) {
+  peak = Math.min(peak, 0.85);
   const { p0=85, p1=28, dec=0.6, pan=0 } = opts;
   const o=oc.createOscillator(); o.type='sine';
   const comp=oc.createDynamicsCompressor();
-  comp.threshold.value=-20; comp.ratio.value=14;
+  comp.threshold.value=-18; comp.ratio.value=10; comp.attack.value=0.003; comp.release.value=0.1;
   const g=oc.createGain();
   let node=g;
   if (pan!==0) { const p=oc.createStereoPanner(); p.pan.value=pan; g.connect(p); node=p; }
   node.connect(oc.destination);
   o.connect(comp); comp.connect(g);
-  o.frequency.setValueAtTime(p0,t0);
-  o.frequency.exponentialRampToValueAtTime(p1,t0+dec*0.55);
-  g.gain.setValueAtTime(0,0);
-  g.gain.setValueAtTime(peak,t0);
-  g.gain.exponentialRampToValueAtTime(0.0001,t0+dec);
+  o.frequency.setValueAtTime(p0, t0);
+  o.frequency.exponentialRampToValueAtTime(Math.max(p1,0.01), t0+dec*0.55);
+  g.gain.setValueAtTime(0, Math.max(0,t0-0.001));
+  g.gain.linearRampToValueAtTime(peak, t0+0.005);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0+dec);
   o.start(t0); o.stop(t0+dec+0.05);
-  m_noise(oc,t0,0.018,peak*0.25,{atk:0.001,ftype:'lowpass',freq:100,Q:0.5,pan});
+  m_noise(oc,t0,0.016,peak*0.18,{atk:0.001,ftype:'lowpass',freq:90,Q:0.5,pan});
 }
 
-function m_snare(oc, t0, peak=0.6, opts={}) {
-  const { bf=200, bd=0.14, nd=0.18, ng=0.7, pan=0 } = opts;
+function m_snare(oc, t0, peak=0.45, opts={}) {
+  peak = Math.min(peak, 0.55);
+  const { bf=200, bd=0.14, nd=0.18, ng=0.65, pan=0 } = opts;
   const o=oc.createOscillator(); o.type='triangle'; o.frequency.value=bf;
   const gb=oc.createGain(); gb.connect(oc.destination); o.connect(gb);
-  gb.gain.setValueAtTime(0,0);
-  gb.gain.setValueAtTime(peak*0.4,t0);
-  gb.gain.exponentialRampToValueAtTime(0.0001,t0+bd);
+  gb.gain.setValueAtTime(0, Math.max(0,t0-0.001));
+  gb.gain.linearRampToValueAtTime(peak*0.35, t0+0.003);
+  gb.gain.exponentialRampToValueAtTime(0.0001, t0+bd);
   o.start(t0); o.stop(t0+bd+0.05);
-  m_noise(oc,t0,nd,peak*ng,{atk:0.001,ftype:'bandpass',freq:2200,Q:0.8,pan});
+  m_noise(oc,t0,nd,peak*ng,{atk:0.001,ftype:'bandpass',freq:2000,Q:0.7,pan});
 }
 
-function m_hihat(oc, t0, peak=0.2, open=false, pan=0) {
-  const dur=open?0.3:0.065;
-  m_noise(oc,t0,dur,peak,{atk:0.001,ftype:'highpass',freq:7000,Q:1.0,pan});
+function m_hihat(oc, t0, peak=0.14, open=false, pan=0) {
+  peak = Math.min(peak, 0.20);
+  const dur=open?0.28:0.055;
+  m_noise(oc,t0,dur,peak,{atk:0.001,ftype:'highpass',freq:6500,Q:0.9,pan});
 }
 
-function m_bell(oc, freq, t0, peak=0.25, dec=2.0, pan=0) {
-  const ptls=[[1,1],[2.756,0.42],[5.404,0.2],[8.931,0.1],[13.35,0.05]];
+function m_bell(oc, freq, t0, peak=0.18, dec=2.0, pan=0) {
+  peak = Math.min(peak, 0.22);
+  const ptls=[[1,1],[2.756,0.38],[5.404,0.16],[8.931,0.08]];
   for (const [r,a] of ptls) {
-    const o=oc.createOscillator(); o.type='sine'; o.frequency.value=freq*r;
+    const f = freq*r;
+    if (f > MAX_FREQ) continue;
+    const o=oc.createOscillator(); o.type='sine'; o.frequency.value=f;
     const g=oc.createGain();
     let node=g;
     if (pan!==0) { const p=oc.createStereoPanner(); p.pan.value=pan; g.connect(p); node=p; }
     node.connect(oc.destination); o.connect(g);
-    g.gain.setValueAtTime(0,0);
-    g.gain.setValueAtTime(peak*a,t0);
-    g.gain.exponentialRampToValueAtTime(0.0001,t0+Math.max(0.05, dec*(1-r*0.04)));
+    g.gain.setValueAtTime(0, Math.max(0, t0-0.001));
+    g.gain.linearRampToValueAtTime(peak*a, t0+0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0+Math.max(0.05, dec*(1-r*0.04)));
     o.start(t0); o.stop(t0+dec+0.1);
   }
 }
 
-function m_strings(oc, freq, t0, dur, peak=0.12, opts={}) {
-  const { atk=0.25, rel=0.5, lp=900, pan=0, vRate=4, vDepth=3 } = opts;
+function m_strings(oc, freq, t0, dur, peak=0.10, opts={}) {
+  peak = Math.min(peak, 0.12);
+  let { atk=0.25, rel=0.5, lp=900, pan=0, vRate=4, vDepth=3 } = opts;
+  lp = Math.min(lp, MAX_FREQ); // jamais au-dessus de Nyquist
+  if (atk + rel > dur) { const s = dur / (atk + rel); atk *= s; rel *= s; }
+  atk = Math.max(atk, 0.005); rel = Math.max(rel, 0.005);
   for (let v=0;v<3;v++) {
     const o=oc.createOscillator(); o.type='sawtooth';
-    o.frequency.value=freq; o.detune.value=(v-1)*7;
+    o.frequency.value=freq; o.detune.value=(v-1)*6;
     const lfo=oc.createOscillator(); lfo.frequency.value=vRate+v*0.3;
     const lg=oc.createGain(); lg.gain.value=vDepth;
     lfo.connect(lg); lg.connect(o.frequency);
@@ -5118,51 +6730,56 @@ function m_strings(oc, freq, t0, dur, peak=0.12, opts={}) {
     let node=g;
     if (pan!==0) { const p=oc.createStereoPanner(); p.pan.value=pan; g.connect(p); node=p; }
     node.connect(oc.destination); o.connect(f); f.connect(g);
-    g.gain.setValueAtTime(0,0);
-    g.gain.setValueAtTime(0,t0);
-    g.gain.linearRampToValueAtTime(peak/3,t0+atk);
-    g.gain.setValueAtTime(peak/3,t0+dur-rel);
-    g.gain.linearRampToValueAtTime(0,t0+dur);
+    g.gain.setValueAtTime(0, Math.max(0, t0-0.001));
+    g.gain.linearRampToValueAtTime(peak/3, t0+atk);
+    g.gain.setValueAtTime(peak/3, t0+dur-rel);
+    g.gain.linearRampToValueAtTime(0, t0+dur);
     lfo.start(t0); lfo.stop(t0+dur+0.1);
     o.start(t0); o.stop(t0+dur+0.1);
   }
 }
 
-function m_drone(oc, freq, t0, dur, peak=0.4, opts={}) {
-  const { atk=2.0, rel=2.0, lp=180, harm=2 } = opts;
+function m_drone(oc, freq, t0, dur, peak=0.35, opts={}) {
+  peak = Math.min(peak, 0.50);
+  let { atk=2.0, rel=2.0, lp=180, harm=2 } = opts;
+  if (atk + rel > dur) { const s = dur / (atk + rel) * 0.95; atk *= s; rel *= s; }
   for (let h=0;h<=harm;h++) {
+    const f = freq*(h===0?1:h+1);
+    if (f > MAX_FREQ) continue;
     const o=oc.createOscillator();
-    o.type=h===0?'sine':'sawtooth'; o.frequency.value=freq*(h===0?1:h+1);
-    const f=oc.createBiquadFilter(); f.type='lowpass'; f.frequency.value=lp/(h+1)*1.2;
-    const g=oc.createGain(); g.connect(oc.destination); o.connect(f); f.connect(g);
-    const lvl=peak/(h*1.5+1);
-    g.gain.setValueAtTime(0,0);
-    g.gain.setValueAtTime(0,t0);
-    g.gain.linearRampToValueAtTime(lvl,t0+atk);
-    g.gain.setValueAtTime(lvl,t0+dur-rel);
-    g.gain.linearRampToValueAtTime(0,t0+dur);
+    o.type=h===0?'sine':'sawtooth'; o.frequency.value=f;
+    const flt=oc.createBiquadFilter(); flt.type='lowpass'; flt.frequency.value=lp/(h+1)*1.2;
+    const g=oc.createGain(); g.connect(oc.destination); o.connect(flt); flt.connect(g);
+    const lvl=peak/(h*1.8+1);
+    g.gain.setValueAtTime(0, Math.max(0, t0-0.001));
+    g.gain.linearRampToValueAtTime(lvl, t0+atk);
+    g.gain.setValueAtTime(lvl, t0+dur-rel);
+    g.gain.linearRampToValueAtTime(0, t0+dur);
     o.start(t0); o.stop(t0+dur+0.1);
   }
 }
 
-function m_choir(oc, freq, t0, dur, peak=0.12, opts={}) {
-  const { atk=1.0, rel=1.5, dets=[-10,-5,0,5,10], lp=1200 } = opts;
+function m_choir(oc, freq, t0, dur, peak=0.10, opts={}) {
+  peak = Math.min(peak, 0.12);
+  let { atk=1.0, rel=1.5, dets=[-10,-5,0,5,10], lp=1200 } = opts;
+  if (atk + rel > dur) { const s = dur / (atk + rel) * 0.95; atk *= s; rel *= s; }
   for (const dt of dets) {
     const o=oc.createOscillator(); o.type='sine'; o.frequency.value=freq; o.detune.value=dt;
     const f=oc.createBiquadFilter(); f.type='lowpass'; f.frequency.value=lp;
     const g=oc.createGain(); g.connect(oc.destination);
     o.connect(f); f.connect(g);
-    g.gain.setValueAtTime(0,0);
-    g.gain.setValueAtTime(0,t0);
-    g.gain.linearRampToValueAtTime(peak/dets.length,t0+atk);
-    g.gain.setValueAtTime(peak/dets.length,t0+dur-rel);
-    g.gain.linearRampToValueAtTime(0,t0+dur);
+    g.gain.setValueAtTime(0, Math.max(0, t0-0.001));
+    g.gain.linearRampToValueAtTime(peak/dets.length, t0+atk);
+    g.gain.setValueAtTime(peak/dets.length, t0+dur-rel);
+    g.gain.linearRampToValueAtTime(0, t0+dur);
     o.start(t0); o.stop(t0+dur+0.1);
   }
 }
 
-function m_flute(oc, freq, t0, dur, peak=0.18, opts={}) {
-  const { vRate=5, vDepth=5, pan=0, breath=0.05 } = opts;
+function m_flute(oc, freq, t0, dur, peak=0.15, opts={}) {
+  peak = Math.min(peak, 0.18);
+  const { vRate=5, vDepth=4, pan=0, breath=0.04 } = opts;
+  dur = Math.max(dur, 0.06);
   const o=oc.createOscillator(); o.type='triangle'; o.frequency.value=freq;
   const lfo=oc.createOscillator(); lfo.frequency.value=vRate;
   const lg=oc.createGain(); lg.gain.value=vDepth;
@@ -5179,17 +6796,17 @@ function m_flute(oc, freq, t0, dur, peak=0.18, opts={}) {
   if (pan!==0) { const p=oc.createStereoPanner(); p.pan.value=pan; mg.connect(p); node=p; }
   node.connect(oc.destination);
   o.connect(mg); ns.connect(nhp); nhp.connect(ng); ng.connect(mg);
-  mg.gain.setValueAtTime(0,0);
-  mg.gain.setValueAtTime(0,t0);
-  mg.gain.linearRampToValueAtTime(peak,t0+0.07);
-  mg.gain.setValueAtTime(peak,t0+dur-0.12);
-  mg.gain.linearRampToValueAtTime(0,t0+dur);
+  mg.gain.setValueAtTime(0, Math.max(0, t0-0.001));
+  mg.gain.linearRampToValueAtTime(peak, t0+0.06);
+  mg.gain.setValueAtTime(peak, t0+dur-0.10);
+  mg.gain.linearRampToValueAtTime(0, t0+dur);
   lfo.start(t0); lfo.stop(t0+dur+0.1);
   ns.start(t0); ns.stop(t0+dur+0.1);
   o.start(t0); o.stop(t0+dur+0.1);
 }
 
-function m_wind(oc, t0, dur, peak=0.08) {
+function m_wind(oc, t0, dur, peak=0.07) {
+  peak = Math.min(peak, 0.10);
   const len=Math.ceil(MUSIC_SR*(dur+0.1));
   const buf=oc.createBuffer(2,len,MUSIC_SR);
   for (let ch=0;ch<2;ch++) {
@@ -5203,336 +6820,535 @@ function m_wind(oc, t0, dur, peak=0.08) {
     }
   }
   const src=oc.createBufferSource(); src.buffer=buf;
-  const bp=oc.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=700; bp.Q.value=0.5;
+  const bp=oc.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=650; bp.Q.value=0.5;
   const g=oc.createGain(); g.gain.value=1; g.connect(oc.destination);
   src.connect(bp); bp.connect(g); src.start(t0); src.stop(t0+dur+0.1);
 }
 
 // ─────────────────────────────────────────────────────────────
-// COMPOSITEURS DE TRACKS (1 par boss, 3 phases chacun)
-// Indices: 0=pré-boss ambient, 1=combat phase1, 2=rage phase2
+// COMPOSITEURS DE TRACKS
+// b0 = Vorgath (Forêt), b1 = Nytherion (Château)
+// b2 = Arakhne (Toile), b3 = Zarveth (Cristal), b4 = Thyrax (Sommet)
+// Phases: 0=ambiant pré-boss, 1=combat, 2=rage
 // ─────────────────────────────────────────────────────────────
 
 const MUSIC_TRACKS = {
 
-  // ───── BOSS 0 : Vorgath (Démon) ─────
-  // Phase 0: Pré-boss – Embers & Dread
-  'b0-0': { dur: 38.4, compose: async (oc, D) => {
-    const hb=60/50;
-    m_drone(oc,36.71,0,D,0.55,{atk:2.5,rel:2.5,lp:150,harm:1});
-    m_drone(oc,55.0,0,D,0.18,{atk:3.0,rel:3.0,lp:120,harm:0});
-    m_choir(oc,73.42,0,D,0.05,{atk:4.0,rel:4.0,lp:380,dets:[-14,-7,0,7,14]});
-    // Heartbeat
-    for (let b=0; b<Math.floor(D/hb); b++) {
-      const t=b*hb;
-      m_kick(oc,t,0.5,80,34,{dec:0.30,pan:0});
-      m_kick(oc,t+0.19,0.25,58,26,{dec:0.22,pan:0.1});
+  // ══════════════════════════════════════════════════════════════════════
+  // BOSS 0 — VORGATH LE BRÛLÉ  ·  Forêt des Souvenirs  ·  D mineur
+  // Calibre : léger — boss introductif, percussions tribales moderées
+  // ══════════════════════════════════════════════════════════════════════
+
+  'b0-0': { dur: 16.0, compose: async (oc, D) => {
+    // Pré-boss : battement de cœur + braises + drone forestier grave
+    m_drone(oc, 36.71, 0, D, 0.28, {atk:3.0, rel:3.0, lp:130, harm:1});
+    m_choir(oc, 73.42, 2.0, D-2.0, 0.05, {atk:5.0, rel:5.0, lp:260, dets:[-12,-6,0,6,12]});
+    // Battement de cœur (60 BPM)
+    const BEAT = 60/54;
+    for (let b = 0; b < Math.floor(D/BEAT); b++) {
+      const t = b * BEAT;
+      // Frappe 1
+      const o1 = oc.createOscillator(), g1 = oc.createGain();
+      o1.type = 'sine'; g1.connect(oc.destination); o1.connect(g1);
+      o1.frequency.setValueAtTime(60, t); o1.frequency.exponentialRampToValueAtTime(26, t + 0.28);
+      g1.gain.setValueAtTime(0, Math.max(0, t - 0.001));
+      g1.gain.linearRampToValueAtTime(0.28, t + 0.006);
+      g1.gain.exponentialRampToValueAtTime(0.0001, t + 0.32);
+      o1.start(t); o1.stop(t + 0.36);
+      // Écho
+      const o2 = oc.createOscillator(), g2 = oc.createGain();
+      o2.type = 'sine'; g2.connect(oc.destination); o2.connect(g2);
+      o2.frequency.setValueAtTime(48, t + 0.18); o2.frequency.exponentialRampToValueAtTime(22, t + 0.40);
+      g2.gain.setValueAtTime(0, t + 0.18);
+      g2.gain.linearRampToValueAtTime(0.11, t + 0.186);
+      g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.44);
+      o2.start(t + 0.18); o2.stop(t + 0.48);
     }
-    // Metallic rattle
-    for (let i=0;i<4;i++) {
-      const t=i*(D/4)+1.2;
-      m_noise(oc,t,0.6,0.06,{atk:0.002,ftype:'bandpass',freq:1600,Q:4.0,pan:(i%2===0?-0.35:0.35)});
+    // Braises — noise basse fréquence sporadique
+    for (let i = 0; i < 4; i++) {
+      const t = i * (D / 4) + 2.0;
+      if (t < D - 1) m_noise(oc, t, 2.8, 0.012, {atk:0.8, ftype:'bandpass', freq:240+i*25, Q:1.1, pan:(i%2===0?-0.28:0.28)});
     }
   }},
 
-  // Phase 1: Combat – Infernal Charge (CORRIGÉ)
-  'b0-1': { dur: 38.4, compose: async (oc, D) => {
-    const BEAT=60/100, BAR=BEAT*4, BARS=Math.floor(D/BAR);
-    // Sub drone continu
-    m_drone(oc,36.71,0,D,0.40,{atk:0.1,rel:0.3,lp:200,harm:2});
-    // Bass motif — utilise des durées courtes pour éviter le dépassement
-    const BP=[[0,0.20,73.42],[0.5,0.14,73.42],[1,0.25,87.31],[1.5,0.10,98.0],[2,0.20,65.41],[2.5,0.14,73.42],[3,0.30,55.0],[3.75,0.12,73.42]];
-    for (let b=0;b<BARS;b++) {
-      const tBar=b*BAR;
-      for (const [beat,d,f] of BP) {
-        const t0=tBar+beat*BEAT;
-        if (t0+d < D) m_distOsc(oc,f,t0,d,0.38,175,{lp:420,pan:0});
+  'b0-1': { dur: 16.0, compose: async (oc, D) => {
+    // Combat Vorgath — 98 BPM, tribal modéré
+    const BEAT = 60/98, BAR = BEAT*4, BARS = Math.floor(D/BAR);
+    m_drone(oc, 36.71, 0, D, 0.26, {atk:0.1, rel:0.3, lp:175, harm:2});
+    // Basse D mineur
+    const BP = [[0,0.17,73.42],[0.5,0.11,73.42],[1,0.20,87.31],[1.5,0.09,98.0],[2,0.17,65.41],[2.5,0.11,73.42],[3,0.24,55.0],[3.75,0.09,73.42]];
+    for (let b = 0; b < BARS; b++) {
+      const tB = b*BAR;
+      for (const [bt, d, f] of BP) { const t0=tB+bt*BEAT; if (t0+d<D) m_distOsc(oc, f, t0, d, 0.20, 85, {lp:350, pan:0}); }
+    }
+    // Cordes sombres (pas trop chargées)
+    const SP = [[0,73.42,BAR*1.4],[BAR*2,87.31,BAR*0.8],[BAR*4,73.42,BAR*1.6],[BAR*6,65.41,BAR*1.0]];
+    for (let r = 0; r < Math.floor(BARS/8); r++) {
+      for (const [b, f, d] of SP) {
+        const t0 = r*BAR*8+b; if (t0+d<D) m_strings(oc, f, t0, d, 0.06, {atk:0.09, rel:0.22, lp:540, pan:-0.22});
       }
     }
-    // Strings sombres — 2 répétitions max sur la durée
-    const SP=[[0,73.42,BAR*1.6],[BAR*2,87.31,BAR*0.85],[BAR*3,82.41,BAR*1.3],[BAR*4,73.42,BAR*2],[BAR*6,65.41,BAR*1.0],[BAR*7,73.42,BAR*0.8]];
-    const reps=Math.floor(BARS/8);
-    for (let r=0;r<reps;r++) {
-      for (const [bOff,f,d] of SP) {
-        const t0=r*BAR*8+bOff;
-        if (t0+d < D) {
-          m_strings(oc,f,t0,d,0.11,{atk:0.08,rel:0.25,lp:600,pan:-0.25});
-          m_strings(oc,f*1.5,t0,d*0.8,0.065,{atk:0.1,rel:0.2,lp:500,pan:0.25});
+    // Percussions tribales (légères)
+    for (let b = 0; b < BARS; b++) {
+      const t = b*BAR;
+      m_kick(oc, t, 0.62, 115, 33, {dec:0.40});
+      m_kick(oc, t+0.5*BEAT, 0.24, 80, 27, {dec:0.26});
+      m_kick(oc, t+2*BEAT, 0.57, 108, 31, {dec:0.37});
+      if (b%2===1) m_kick(oc, t+3.5*BEAT, 0.30, 80, 25, {dec:0.22});
+      m_taiko(oc, t, 0.44, {p0:70, p1:21, dec:0.48, pan:-0.28});
+      m_taiko(oc, t+2*BEAT, 0.36, {p0:64, p1:19, dec:0.42, pan:0.28});
+      m_snare(oc, t+BEAT, 0.30, {bf:168, bd:0.10, nd:0.13, ng:0.58, pan:0});
+      m_snare(oc, t+3*BEAT, 0.32, {bf:173, bd:0.11, nd:0.14, ng:0.60, pan:0});
+      for (let h = 0; h < 8; h++) m_hihat(oc, t+h*BEAT*0.5, (h%2===0?0.09:0.04), false, (h%2===0?-0.18:0.18));
+    }
+  }},
+
+  'b0-2': { dur: 14.0, compose: async (oc, D) => {
+    // Rage Vorgath — 115 BPM, un cran au-dessus
+    const BEAT = 60/115, BAR = BEAT*4, BARS = Math.floor(D/BAR);
+    m_drone(oc, 36.71, 0, D, 0.30, {atk:0.05, rel:0.18, lp:195, harm:2});
+    const BP2 = [[0,0.11,73.42],[0.25,0.06,73.42],[0.5,0.11,87.31],[0.75,0.06,98.0],[1,0.11,65.41],[1.25,0.06,73.42],[1.5,0.12,55.0],[2,0.11,73.42],[2.5,0.11,98.0],[3,0.11,65.41],[3.5,0.12,73.42]];
+    for (let b = 0; b < BARS; b++) {
+      const tB = b*BAR;
+      for (const [bt, d, f] of BP2) { const t0=tB+bt*BEAT; if (t0+d<D) m_distOsc(oc, f, t0, d, 0.21, 108, {lp:330}); }
+    }
+    const HP = [[0,293.66,0.10],[0.5,329.63,0.08],[1.0,392.0,0.13],[2.0,440.0,0.15],[3.0,392.0,0.20]];
+    for (let b = 0; b < BARS; b++) {
+      const tB = b*BAR;
+      for (const [bt, f, d] of HP) { const t0=tB+bt*BEAT; if (t0+d<D) m_distOsc(oc, f, t0, d, 0.09, 115, {lp:1150, pan:(b%2===0?-0.35:0.35), type:'sawtooth'}); }
+    }
+    for (let b = 0; b < BARS; b++) {
+      const t = b*BAR;
+      m_kick(oc, t, 0.65, 120, 36, {dec:0.29});
+      m_kick(oc, t+0.5*BEAT, 0.33, 88, 29, {dec:0.19});
+      m_kick(oc, t+2*BEAT, 0.65, 116, 34, {dec:0.29});
+      m_kick(oc, t+2.5*BEAT, 0.35, 88, 27, {dec:0.19});
+      m_snare(oc, t+BEAT, 0.40, {bf:228, bd:0.08, nd:0.17, ng:0.70, pan:0});
+      m_snare(oc, t+3*BEAT, 0.42, {bf:235, bd:0.08, nd:0.18, ng:0.72, pan:0});
+      m_taiko(oc, t, 0.40, {p0:70, p1:21, dec:0.33, pan:-0.32});
+      m_taiko(oc, t+2*BEAT, 0.34, {p0:64, p1:19, dec:0.31, pan:0.32});
+      for (let h = 0; h < 8; h++) m_hihat(oc, t+h*BEAT*0.5, (h%2===0?0.09:0.04), false, (h%3===0?-0.26:0.22));
+    }
+  }},
+
+  // ══════════════════════════════════════════════════════════════════════
+  // BOSS 1 — NYTHERION LE REVENANT  ·  Château des Épreuves  ·  A mineur
+  // Calibre : spectral, élaboré — légèrement plus riche et intense que b0
+  // ══════════════════════════════════════════════════════════════════════
+
+  'b1-0': { dur: 14.0, compose: async (oc, D) => {
+    m_wind(oc, 0, D, 0.065);
+    m_drone(oc, 55.0, 0, D, 0.18, {atk:3.5, rel:3.5, lp:200, harm:1});
+    m_choir(oc, 110.0, 0, D, 0.07, {atk:4.5, rel:4.5, lp:290, dets:[-13,-6,0,6,13]});
+    const bells = [[2.2,220,0.085,3.2,-0.44],[7.0,196,0.072,2.8,0.44],[12.0,261.63,0.060,2.6,-0.28],[16.5,220,0.072,3.0,0.28],[20.5,174.61,0.055,2.3,0]];
+    for (const [t, f, pk, d, pan] of bells) {
+      if (t < D-0.5) { m_bell(oc, f, t, pk, d, pan); if (t+1.4<D-0.5) m_bell(oc, f, t+1.4, pk*0.30, d*0.75, pan*0.45); }
+    }
+  }},
+
+  'b1-1': { dur: 16.0, compose: async (oc, D) => {
+    // Combat Nytherion — 90 BPM, chœurs fantômes + piano spectral
+    const BEAT = 60/90, BAR = BEAT*4, BARS = Math.floor(D/BAR);
+    m_drone(oc, 55.0, 0, D, 0.22, {atk:2.0, rel:2.0, lp:182, harm:1});
+    // Blocs d'accords de chœur (A mineur)
+    const CHORDS = [[55,65.41,82.41],[49,61.74,73.42],[43.65,55,65.41],[55,73.42,98]];
+    for (let i = 0; i < Math.floor(D/(BAR*4)); i++) {
+      const ch = CHORDS[i%CHORDS.length], t0 = i*BAR*4, dur = Math.min(BAR*4.2, D-t0);
+      for (const f of ch) if (t0 < D) m_choir(oc, f*4, t0, dur, 0.045, {atk:1.4, rel:2.6, lp:880, dets:[-7,-3,0,3,7]});
+    }
+    // Piano fantôme
+    const PM = [[0,440,1.0],[BEAT,392,0.8],[BEAT*2,349.23,1.3],[BEAT*3,293.66,1.7],[BAR*2,329.63,0.8],[BAR*2+BEAT*2,261.63,1.5],[BAR*3+BEAT,220,1.9]];
+    for (let r = 0; r < Math.floor(BARS/8); r++) {
+      for (const [b, f, d] of PM) {
+        const t0 = r*BAR*8+b; if (t0+d<D) m_osc(oc, 'sine', f, t0, d+0.7, 0.058, {atk:0.012, dec:0.07, sus:0.36, rel:d*0.44+0.22, pan:(r%2===0?0.10:-0.10)});
+      }
+    }
+    // Cordes spectrales
+    const SM = [[0,220,BAR*1.9],[BAR*2,196,BAR*1.6],[BAR*4,246.94,BAR*1.8],[BAR*6,220,BAR*1.6]];
+    for (let r = 0; r < Math.floor(BARS/8); r++) {
+      for (const [b, f, d] of SM) {
+        const t0 = r*BAR*8+b; if (t0+d<D) m_strings(oc, f, t0, d, 0.055, {atk:0.4, rel:0.9, lp:650, pan:-0.30, vRate:3.6, vDepth:2.2});
+      }
+    }
+    // Percussions légères
+    for (let b = 0; b < BARS; b++) {
+      const t = b*BAR;
+      m_kick(oc, t, 0.34, 80, 35, {dec:0.50});
+      if (b%2===0) m_kick(oc, t+2*BEAT, 0.26, 70, 29, {dec:0.40});
+      m_snare(oc, t+BEAT, 0.16, {bf:296, bd:0.06, nd:0.08, ng:0.26, pan:0});
+      m_snare(oc, t+3*BEAT, 0.18, {bf:290, bd:0.06, nd:0.08, ng:0.26, pan:0});
+      if (b%4===0) m_bell(oc, 880, t+BEAT*2, 0.048, 1.9, 0.46);
+    }
+  }},
+
+  'b1-2': { dur: 14.0, compose: async (oc, D) => {
+    // Rage Nytherion — cordes + chœurs déchaînés, percussions plus denses
+    const BEAT = 60/90, BAR = BEAT*4, BARS = Math.floor(D/BAR);
+    m_drone(oc, 55.0, 0, D, 0.28, {atk:0.5, rel:0.8, lp:198, harm:2});
+    const SR = [[0,220,BAR*1.5],[BAR*0.5,261.63,BAR*1.2],[BAR*2,246.94,BAR*1.5],[BAR*2.5,293.66,BAR*1.2],[BAR*4,329.63,BAR*1.6],[BAR*5,349.23,BAR*1.5],[BAR*6,392,BAR*1.2],[BAR*7,440,BAR*1.6]];
+    for (let r = 0; r < Math.floor(BARS/8); r++) {
+      for (const [b, f, d] of SR) {
+        const t0 = r*BAR*8+b; if (t0+d<D) {
+          m_strings(oc, f, t0, d, 0.085, {atk:0.18, rel:0.38, lp:870, pan:-0.26, vRate:4.0, vDepth:2.4});
+          m_strings(oc, f*2, t0+0.14, d*0.82, 0.050, {atk:0.13, rel:0.32, lp:1280, pan:0.26, vRate:4.3, vDepth:2.4});
         }
       }
     }
-    // Tambours tribaux
-    for (let b=0;b<BARS;b++) {
-      const t=b*BAR;
-      m_kick(oc,t,0.92,125,38,{dec:0.45});
-      m_kick(oc,t+0.5*BEAT,0.38,90,32,{dec:0.30});
-      m_kick(oc,t+2*BEAT,0.85,118,36,{dec:0.42});
-      if (b%2===1) m_kick(oc,t+3.5*BEAT,0.48,90,30,{dec:0.28});
-      m_taiko(oc,t,0.60,{p0:78,p1:26,dec:0.52,pan:-0.32});
-      m_taiko(oc,t+2*BEAT,0.52,{p0:72,p1:24,dec:0.46,pan:0.32});
-      m_snare(oc,t+BEAT,0.50,{bf:180,bd:0.12,nd:0.16,ng:0.8,pan:0});
-      m_snare(oc,t+3*BEAT,0.55,{bf:185,bd:0.13,nd:0.17,ng:0.8,pan:0});
-      for (let h=0;h<8;h++) m_hihat(oc,t+h*BEAT*0.5,(h%2===0?0.16:0.07),false,(h%2===0?-0.22:0.22));
-      if (b%4===3) m_hihat(oc,t+2.5*BEAT,0.12,true,0);
+    const CH2 = [[220,440,330],[196,392,293],[246.94,493.88,370],[261.63,523.25,392]];
+    for (let i = 0; i < Math.floor(D/(BAR*4)); i++) {
+      const t0 = i*BAR*4, dur = Math.min(BAR*4.2, D-t0);
+      for (const f of CH2[i%CH2.length]) if (t0<D) m_choir(oc, f, t0, dur, 0.050, {atk:1.0, rel:2.0, lp:1380, dets:[-9,-4,0,4,9]});
+    }
+    for (let b = 0; b < BARS; b++) {
+      const t = b*BAR;
+      m_kick(oc, t, 0.50, 92, 37, {dec:0.37});
+      m_kick(oc, t+2*BEAT, 0.43, 86, 33, {dec:0.32});
+      if (b%2===1) m_kick(oc, t+1.5*BEAT, 0.22, 68, 27, {dec:0.22});
+      m_snare(oc, t+BEAT, 0.34, {bf:190, bd:0.11, nd:0.16, ng:0.56, pan:0});
+      m_snare(oc, t+3*BEAT, 0.36, {bf:194, bd:0.12, nd:0.17, ng:0.58, pan:0});
+      if (b%2===0) for (let h = 0; h < 4; h++) m_hihat(oc, t+h*BEAT, 0.08, (h===2), h%2===0?-0.25:0.25);
+      if (b%4===0) m_bell(oc, 1318.51, t, 0.064, 1.2, 0.52);
+      if (b%4===2) m_bell(oc, 987.77, t+BEAT*2, 0.050, 0.95, -0.42);
     }
   }},
 
-  // Phase 2: Rage – The Burning Wrath (CORRIGÉ)
-  'b0-2': { dur: 32.0, compose: async (oc, D) => {
-    const BEAT=60/120, BAR=BEAT*4, BARS=Math.floor(D/BAR);
-    m_drone(oc,36.71,0,D,0.48,{atk:0.05,rel:0.2,lp:240,harm:2});
-    // Bass rapide
-    const BP2=[[0,0.14,73.42],[0.25,0.09,73.42],[0.5,0.14,87.31],[0.75,0.09,98.0],[1,0.14,65.41],[1.25,0.09,73.42],[1.5,0.16,55.0],[1.75,0.09,65.41],[2,0.14,73.42],[2.25,0.09,87.31],[2.5,0.14,98.0],[2.75,0.09,73.42],[3,0.14,65.41],[3.25,0.11,55.0],[3.5,0.16,73.42],[3.75,0.09,98.0]];
-    for (let b=0;b<BARS;b++) {
-      const tBar=b*BAR;
-      for (const [beat,d,f] of BP2) {
-        const t0=tBar+beat*BEAT;
-        if (t0+d < D) m_distOsc(oc,f,t0,d,0.36,220,{lp:380});
-      }
+  // ══════════════════════════════════════════════════════════════════════
+  // BOSS 2 — ARAKHNE LA TISSEUSE  ·  La Toile de l'Abomination  ·  E phrygien
+  // Calibre : plus sombre, organique, cliquetis chitineux — nettement plus intense que b1
+  // ══════════════════════════════════════════════════════════════════════
+
+  'b2-0': { dur: 14.0, compose: async (oc, D) => {
+    m_drone(oc, 41.2, 0, D, 0.30, {atk:2.5, rel:2.5, lp:78, harm:1});
+    m_drone(oc, 82.41, 1.0, D-1.0, 0.09, {atk:3.0, rel:2.0, lp:62, harm:0});
+    // Cliquetis de pattes arachniennes
+    for (let i = 0; i < 22; i++) {
+      const t = i*(D/22) + (Math.sin(i*1.7)*0.20);
+      if (t < D-0.08) m_noise(oc, t, 0.028, 0.076, {atk:0.001, ftype:'highpass', freq:3500+i*100, Q:7, pan:(i%2===0?-0.60:0.60)});
     }
-    // Layer haut distordu
-    const HP=[[0,293.66,0.13],[0.5,329.63,0.10],[1.0,392.0,0.16],[1.5,349.23,0.10],[2.0,440.0,0.18],[3.0,392.0,0.26]];
-    for (let b=0;b<BARS;b++) {
-      const tBar=b*BAR;
-      for (const [bt,f,d] of HP) {
-        const t0=tBar+bt*BEAT;
-        if (t0+d < D) m_distOsc(oc,f,t0,d,0.16,320,{lp:1400,pan:(b%2===0?-0.45:0.45),atk:0.005,rel:0.04,type:'sawtooth'});
-      }
+    // Vibrations de toile
+    for (let i = 0; i < 5; i++) {
+      const t = i*4.4+1.5; if (t < D-1.2) m_noise(oc, t, 1.5, 0.092, {atk:0.012, ftype:'lowpass', freq:72, Q:0.8, pink:true});
     }
-    // Drums métalliques
-    for (let b=0;b<BARS;b++) {
-      const t=b*BAR;
-      m_kick(oc,t,1.0,132,42,{dec:0.34});
-      m_kick(oc,t+0.5*BEAT,0.52,100,35,{dec:0.24});
-      m_kick(oc,t+BEAT,0.42,88,30,{dec:0.20});
-      m_kick(oc,t+2*BEAT,1.0,128,40,{dec:0.34});
-      m_kick(oc,t+2.5*BEAT,0.56,100,32,{dec:0.24});
-      m_kick(oc,t+3*BEAT,0.47,88,28,{dec:0.20});
-      m_snare(oc,t+BEAT,0.70,{bf:250,bd:0.1,nd:0.22,ng:1.0,pan:0});
-      m_snare(oc,t+3*BEAT,0.76,{bf:260,bd:0.1,nd:0.24,ng:1.0,pan:0});
-      m_bell(oc,880,t+BEAT,0.10,0.38,(b%2===0?-0.55:0.55));
-      if (b%2===0) m_bell(oc,1320,t+3*BEAT,0.065,0.28,0.6);
-      m_taiko(oc,t,0.65,{p0:80,p1:26,dec:0.38,pan:-0.4});
-      m_taiko(oc,t+2*BEAT,0.55,{p0:74,p1:24,dec:0.36,pan:0.4});
-      for (let h=0;h<16;h++) m_hihat(oc,t+h*BEAT*0.25,(h%4===0?0.19:h%2===0?0.10:0.055),false,(h%3===0?-0.35:0.28));
+    m_wind(oc, 0, D, 0.042);
+    // Bourdonnement de soie grave
+    for (let i = 0; i < 3; i++) {
+      const t = i*7.2+2.2; if (t < D-2) m_osc(oc, 'sine', 102+i*16, t, 2.0, 0.046, {atk:0.9, dec:0.3, sus:0.38, rel:0.9, lp:270});
     }
   }},
 
-  // ───── BOSS 1 : Nytherion (Roi) ─────
-  // Phase 0: Pré-boss – Empty Corridors
-  'b1-0': { dur: 21.3, compose: async (oc, D) => {
-    m_wind(oc,0,D,0.09);
-    m_drone(oc,55.0,0,D,0.18,{atk:3.5,rel:3.5,lp:220,harm:1});
-    m_choir(oc,110.0,0,D,0.065,{atk:4.0,rel:4.0,lp:320,dets:[-14,-7,0,7,14]});
-    const bells=[[2.2,220,0.12,3.5,-0.45],[6.8,196,0.10,3.0,0.45],[11.5,261.63,0.08,2.8,-0.3],[15.5,220,0.10,3.2,0.3],[19.0,174.61,0.07,2.5,0]];
-    for (const [t,f,p,d,pan] of bells) {
-      if (t<D) { m_bell(oc,f,t,p,d,pan); if (t+1.1<D) m_bell(oc,f,t+1.1,p*0.45,d*0.8,pan*0.5); }
+  'b2-1': { dur: 16.0, compose: async (oc, D) => {
+    // Combat Arakhne — 104 BPM, rythme organique irrégulier
+    const BEAT = 60/104, BAR = BEAT*4, BARS = Math.floor(D/BAR);
+    m_drone(oc, 41.2, 0, D, 0.27, {atk:0.14, rel:0.36, lp:142, harm:2});
+    // Basse E phrygien
+    const BPW = [[0,0.16,82.41],[0.5,0.10,82.41],[1,0.18,98.0],[1.5,0.09,92.5],[2,0.16,82.41],[3,0.18,73.42],[3.5,0.11,87.31]];
+    for (let b = 0; b < BARS; b++) {
+      const tB = b*BAR;
+      for (const [bt, d, f] of BPW) { const t0=tB+bt*BEAT; if (t0+d<D) m_distOsc(oc, f, t0, d, 0.22, 90, {lp:260, type:'sine'}); }
     }
-  }},
-
-  // Phase 1: Combat – Haunted Reign
-  'b1-1': { dur: 42.67, compose: async (oc, D) => {
-    const BEAT=60/90, BAR=BEAT*4, BARS=Math.floor(D/BAR);
-    m_drone(oc,55.0,0,D,0.26,{atk:2.0,rel:2.0,lp:200,harm:1});
-    // Choir chords
-    const CHORDS=[[55,65.41,82.41],[49,61.74,73.42],[43.65,55,65.41],[55,73.42,98]];
-    const numChordCycles=Math.floor(D/(BAR*4));
-    for (let i=0;i<numChordCycles;i++) {
-      const ch=CHORDS[i%CHORDS.length], t0=i*BAR*4;
-      const chDur=Math.min(BAR*4.5, D-t0);
-      for (const f of ch) {
-        if (t0+chDur > 0 && t0 < D) m_choir(oc,f*4,t0,chDur,0.055,{atk:1.3,rel:2.8,lp:1000,dets:[-8,-4,0,4,8]});
-      }
-    }
-    // Piano motif
-    const PM=[[0,440,1.3],[BEAT,392,0.9],[BEAT*2,349.23,1.6],[BEAT*3,293.66,2.1],[BAR*2,329.63,1.0],[BAR*2+BEAT,293.66,0.85],[BAR*2+BEAT*2,261.63,1.9],[BAR*3,246.94,0.7],[BAR*3+BEAT,220,2.5]];
-    const reps=Math.floor(BARS/8);
-    for (let r=0;r<reps;r++) {
-      for (const [b,f,d] of PM) {
-        const t0=r*BAR*8+b;
-        if (t0+d < D) m_osc(oc,'sine',f,t0,d+1.0,0.08,{atk:0.012,dec:0.08,sus:0.4,rel:d*0.5+0.3,pan:(r%2===0?0.1:-0.1)});
-      }
-    }
-    // Strings
-    const SM=[[0,220,BAR*2.5],[BAR*2,196,BAR*1.9],[BAR*4,246.94,BAR*2.2],[BAR*6,220,BAR*2.0]];
-    for (let r=0;r<Math.floor(BARS/8);r++) {
-      for (const [b,f,d] of SM) {
-        const t0=r*BAR*8+b;
-        if (t0+d < D) m_strings(oc,f,t0,d,0.075,{atk:0.4,rel:1.0,lp:700,pan:-0.35,vRate:3.8,vDepth:2.5});
-      }
-    }
-    // Percussion légère
-    for (let b=0;b<BARS;b++) {
-      const t=b*BAR;
-      m_kick(oc,t,0.40,88,40,{dec:0.58});
-      if (b%2===0) m_kick(oc,t+2*BEAT,0.30,78,34,{dec:0.46});
-      m_snare(oc,t+BEAT,0.18,{bf:320,bd:0.07,nd:0.09,ng:0.3,pan:0});
-      m_snare(oc,t+3*BEAT,0.20,{bf:310,bd:0.07,nd:0.09,ng:0.3,pan:0});
-      if (b%4===0) m_bell(oc,880,t+BEAT*2,0.06,2.4,0.5);
-    }
-  }},
-
-  // Phase 2: Rage – The Revenant's Throne
-  'b1-2': { dur: 42.67, compose: async (oc, D) => {
-    const BEAT=60/90, BAR=BEAT*4, BARS=Math.floor(D/BAR);
-    m_drone(oc,55.0,0,D,0.32,{atk:0.5,rel:0.8,lp:220,harm:2});
-    const SR2=[[0,220,BAR*1.8],[BAR*0.5,261.63,BAR*1.5],[BAR*2,246.94,BAR*1.8],[BAR*2.5,293.66,BAR*1.5],[BAR*4,329.63,BAR*2],[BAR*5,349.23,BAR*1.8],[BAR*6,392,BAR*1.5],[BAR*7,440,BAR*2]];
-    for (let r=0;r<Math.floor(BARS/8);r++) {
-      for (const [b,f,d] of SR2) {
-        const t0=r*BAR*8+b;
-        if (t0+d < D) {
-          m_strings(oc,f,t0,d,0.12,{atk:0.18,rel:0.45,lp:950,pan:-0.3,vRate:4.2,vDepth:3.0});
-          m_strings(oc,f*2,t0+0.18,d*0.9,0.075,{atk:0.14,rel:0.38,lp:1500,pan:0.3,vRate:4.5,vDepth:3.0});
+    // Cordes arachniennes dissonantes
+    const CW = [[0,164.81,0.58,0.068],[BEAT,185.0,0.44,0.058],[BEAT*2,174.61,0.68,0.068],[BEAT*3,155.56,0.50,0.058]];
+    for (let b = 0; b < BARS; b++) {
+      const tB = b*BAR;
+      for (const [bt, fr, d, g] of CW) {
+        const t0 = tB+bt; if (t0+d<D) {
+          m_strings(oc, fr, t0, d, g, {atk:0.04, rel:0.15, lp:640, pan:(b%2===0?-0.38:0.38), vRate:6, vDepth:3.0});
+          if (b%3===0) m_flute(oc, fr*2, t0+0.08, d*0.52, 0.036, {vRate:7, vDepth:4.8, pan:(b%2===0?0.30:-0.30)});
         }
       }
     }
-    // Choir
-    const numCycles=Math.floor(D/(BAR*4));
-    const CHORDS2=[[220,440,330],[196,392,293],[246.94,493.88,370],[261.63,523.25,392]];
-    for (let i=0;i<numCycles;i++) {
-      const t0=i*BAR*4;
-      const chDur=Math.min(BAR*4.5, D-t0);
-      for (const f of CHORDS2[i%CHORDS2.length]) {
-        if (t0 < D) m_choir(oc,f,t0,chDur,0.065,{atk:1.0,rel:2.2,lp:1600,dets:[-10,-5,0,5,10]});
-      }
-    }
-    // Percussion plus dense
-    for (let b=0;b<BARS;b++) {
-      const t=b*BAR;
-      m_kick(oc,t,0.65,100,42,{dec:0.42});
-      m_kick(oc,t+2*BEAT,0.60,95,38,{dec:0.38});
-      if (b%2===1) m_kick(oc,t+1.5*BEAT,0.30,78,32,{dec:0.28});
-      m_snare(oc,t+BEAT,0.45,{bf:200,bd:0.13,nd:0.2,ng:0.7,pan:0});
-      m_snare(oc,t+3*BEAT,0.50,{bf:205,bd:0.14,nd:0.22,ng:0.75,pan:0});
-      if (b%2===0) for (let h=0;h<4;h++) m_hihat(oc,t+h*BEAT,0.10,(h===2),h%2===0?-0.3:0.3);
-      if (b%4===0) m_bell(oc,1318.51,t,0.085,1.5,0.6);
-      if (b%4===2) m_bell(oc,987.77,t+BEAT*2,0.065,1.2,-0.5);
+    // Percussions organiques irrégulières
+    for (let b = 0; b < BARS; b++) {
+      const t = b*BAR;
+      m_taiko(oc, t, 0.56, {p0:86, p1:27, dec:0.31, pan:-0.26});
+      m_taiko(oc, t+0.5*BEAT, 0.22, {p0:98, p1:33, dec:0.16, pan:0.46});
+      m_taiko(oc, t+1.5*BEAT, 0.42, {p0:80, p1:25, dec:0.26, pan:0.26});
+      m_taiko(oc, t+2*BEAT, 0.56, {p0:86, p1:27, dec:0.31, pan:0.26});
+      m_taiko(oc, t+2.75*BEAT, 0.20, {p0:94, p1:35, dec:0.15, pan:-0.46});
+      m_taiko(oc, t+3*BEAT, 0.46, {p0:82, p1:25, dec:0.23, pan:-0.26});
+      // Cliquetis haute fréquence
+      for (let h = 0; h < 8; h++) m_noise(oc, t+h*BEAT*0.5, 0.018, 0.046, {atk:0.001, ftype:'highpass', freq:3900+h*145, Q:5, pan:(h%2===0?-0.36:0.36)});
+      if (b%3===0) m_bell(oc, 880, t+BEAT*0.25, 0.036, 0.70, 0.42);
+      if (b%3===1) m_bell(oc, 659.25, t+BEAT*2.25, 0.030, 0.60, -0.42);
     }
   }},
 
-  // ───── BOSS 2 : Thyrax (Dragon) ─────
-  // Phase 0: Pré-boss – Mountain Silence
-  'b2-0': { dur: 19.2, compose: async (oc, D) => {
-    m_wind(oc,0,D,0.11);
-    m_drone(oc,41.2,0,D,0.58,{atk:3.0,rel:3.0,lp:140,harm:1});
-    m_drone(oc,55.0,1.5,D-1.5,0.16,{atk:3.5,rel:2.5,lp:100,harm:0});
-    const tTimes=[1.2, 10.5];
-    for (const tt of tTimes) if (tt<D-2) {
-      m_noise(oc,tt,2.8,0.30,{atk:0.012,ftype:'lowpass',freq:80,Q:0.6,pink:true});
-      m_noise(oc,tt,3.8,0.12,{atk:0.06,ftype:'bandpass',freq:200,Q:0.5});
+  'b2-2': { dur: 14.0, compose: async (oc, D) => {
+    // Rage Arakhne — 126 BPM, frenétique acide
+    const BEAT = 60/126, BAR = BEAT*4, BARS = Math.floor(D/BAR);
+    m_drone(oc, 41.2, 0, D, 0.34, {atk:0.08, rel:0.17, lp:162, harm:3});
+    const BRW = [[0,0.09,82.41],[0.25,0.06,82.41],[0.5,0.08,98.0],[0.75,0.06,82.41],[1,0.09,73.42],[1.5,0.08,82.41],[2,0.09,92.5],[2.5,0.07,110.0],[3,0.09,82.41],[3.5,0.07,61.74]];
+    for (let b = 0; b < BARS; b++) {
+      const tB = b*BAR;
+      for (const [bt, d, fr] of BRW) { const t0=tB+bt*BEAT; if (t0+d<D) m_distOsc(oc, fr, t0, d, 0.24, 118, {lp:298, type:'sawtooth'}); }
+    }
+    const SW2 = [[0,329.63,0.13],[BEAT*0.5,311.13,0.10],[BEAT,349.23,0.17],[BEAT*1.5,329.63,0.11],[BEAT*2,311.13,0.15],[BEAT*2.5,369.99,0.21],[BEAT*3,349.23,0.13]];
+    for (let b = 0; b < BARS; b++) {
+      const tB = b*BAR;
+      for (const [bt, fr, d] of SW2) {
+        const t0 = tB+bt; if (t0+d<D) m_strings(oc, fr, t0, d, 0.048, {atk:0.020, rel:0.042, lp:1680, pan:(b%2===0?-0.40:0.40), vRate:7, vDepth:3.0});
+      }
+    }
+    for (let b = 0; b < BARS; b++) {
+      const t = b*BAR;
+      m_taiko(oc, t, 0.70, {p0:94, p1:29, dec:0.25, pan:-0.26});
+      m_taiko(oc, t+0.25*BEAT, 0.26, {p0:84, p1:35, dec:0.16, pan:0.46});
+      m_taiko(oc, t+0.75*BEAT, 0.32, {p0:98, p1:33, dec:0.17, pan:0.26});
+      m_taiko(oc, t+BEAT, 0.44, {p0:90, p1:29, dec:0.23, pan:0.18});
+      m_taiko(oc, t+1.5*BEAT, 0.25, {p0:84, p1:27, dec:0.17, pan:-0.36});
+      m_taiko(oc, t+2*BEAT, 0.70, {p0:94, p1:29, dec:0.25, pan:0.26});
+      m_taiko(oc, t+3*BEAT, 0.48, {p0:90, p1:29, dec:0.20, pan:0.18});
+      m_snare(oc, t+BEAT, 0.40, {bf:222, bd:0.06, nd:0.13, ng:0.68, pan:0});
+      m_snare(oc, t+3*BEAT, 0.42, {bf:229, bd:0.07, nd:0.14, ng:0.70, pan:0});
+      for (let h = 0; h < 8; h++) m_noise(oc, t+h*BEAT*0.5, 0.013, (h%2===0?0.068:0.032), {atk:0.001, ftype:'highpass', freq:3600+h*190, Q:4, pan:(h%3===0?-0.46:0.36)});
     }
   }},
 
-  // Phase 1: Combat – Ancient Fury (CORRIGÉ)
-  'b2-1': { dur: 38.4, compose: async (oc, D) => {
-    const BEAT=60/100, BAR=BEAT*4, BARS=Math.floor(D/BAR);
-    m_drone(oc,41.2,0,D,0.48,{atk:0.15,rel:0.4,lp:200,harm:2});
-    m_drone(oc,61.74,0,D,0.16,{atk:0.5,rel:0.4,lp:180,harm:0});
-    // Bass modal
-    const BP3=[[0,0.22,82.41],[1,0.22,82.41],[1.5,0.17,98.0],[2,0.26,73.42],[3,0.22,82.41],[3.5,0.14,87.31]];
-    for (let b=0;b<BARS;b++) {
-      const tBar=b*BAR;
-      for (const [beat,d,f] of BP3) {
-        const t0=tBar+beat*BEAT;
-        if (t0+d < D) m_distOsc(oc,f,t0,d,0.32,145,{lp:300,type:'sine'});
+  // ══════════════════════════════════════════════════════════════════════
+  // BOSS 3 — ZARVETH LE COLOSSE PRISMATIQUE  ·  Désert de Cristal  ·  C# mineur
+  // Calibre : froid + tranchant + puissant — encore plus intense que b2
+  // ══════════════════════════════════════════════════════════════════════
+
+  'b3-0': { dur: 14.0, compose: async (oc, D) => {
+    m_drone(oc, 34.65, 0, D, 0.33, {atk:3.5, rel:3.5, lp:116, harm:1});
+    m_drone(oc, 51.91, 1.5, D-1.5, 0.10, {atk:4.0, rel:3.0, lp:88, harm:0});
+    // Tintements cristallins nets
+    const bt = [1.0,3.6,6.5,9.4,12.8,16.2,20.0,23.5];
+    for (let i = 0; i < bt.length; i++) {
+      const t = bt[i]; if (t < D-1) {
+        m_bell(oc, 1396.91, t, 0.040, 2.6, i%2===0?-0.46:0.46);
+        m_bell(oc, 1661.22, t+0.07, 0.024, 2.0, i%2===0?0.28:-0.28);
+        if (i%3===0 && t+0.20<D-1) m_bell(oc, 2093.0, t+0.17, 0.015, 1.5, 0);
       }
     }
-    // Flûte bambou — E mineur pentatonique
-    const FP=[
-      [[0,164.81,0.7,0.15],[BEAT*1.5,196.0,0.5,0.13],[BEAT*3,220.0,1.3,0.14]],
-      [[0,246.94,0.65,0.14],[BEAT*1,220.0,0.85,0.12],[BEAT*2.5,196.0,1.6,0.13]],
-      [[0,164.81,0.45,0.11],[BEAT*2,185.0,0.9,0.13],[BEAT*3.5,164.81,0.55,0.10]],
-      [[0,220.0,0.5,0.14],[BEAT*1.5,246.94,0.42,0.12],[BEAT*2.5,220.0,0.62,0.11],[BEAT*3.5,196.0,1.9,0.13]]
-    ];
-    for (let r=0;r<Math.floor(BARS/8);r++) {
-      for (let pi=0;pi<FP.length;pi++) {
-        const t0=r*BAR*8+pi*BAR*2;
-        for (const [b,f,d,g] of FP[pi]) {
-          if (t0+b+d < D) m_flute(oc,f,t0+b,d,g,{vRate:4.5,vDepth:5,pan:(pi%2===0?-0.22:0.22)});
+    // Craquements cristallins
+    for (let i = 0; i < 6; i++) {
+      const tt = i*3.8+2.2; if (tt < D-1.5) {
+        m_noise(oc, tt, 0.40, 0.068, {atk:0.003, ftype:'bandpass', freq:2400+i*200, Q:9, pan:(i%2===0?-0.38:0.38)});
+        if (tt+0.10<D-1) m_noise(oc, tt+0.09, 0.26, 0.034, {atk:0.002, ftype:'bandpass', freq:3800+i*160, Q:12, pan:(i%2===0?0.26:-0.26)});
+      }
+    }
+    m_wind(oc, 0, D, 0.038);
+    m_osc(oc, 'sine', 523.25, 3.0, D-3.5, 0.020, {atk:2.0, dec:0.5, sus:0.58, rel:2.0, lp:1550});
+  }},
+
+  'b3-1': { dur: 16.0, compose: async (oc, D) => {
+    // Combat Zarveth — 96 BPM, géométrique, martelé
+    const BEAT = 60/96, BAR = BEAT*4, BARS = Math.floor(D/BAR);
+    m_drone(oc, 34.65, 0, D, 0.30, {atk:0.12, rel:0.30, lp:154, harm:2});
+    // Basse C# mineur (triangle = froid)
+    const BPC = [[0,0.18,69.30],[0.5,0.11,69.30],[1,0.16,87.31],[1.5,0.09,82.41],[2,0.18,69.30],[3,0.18,61.74],[3.5,0.11,77.78]];
+    for (let b = 0; b < BARS; b++) {
+      const tB = b*BAR;
+      for (const [bt, d, f] of BPC) { const t0=tB+bt*BEAT; if (t0+d<D) m_distOsc(oc, f, t0, d, 0.24, 84, {lp:244, type:'triangle'}); }
+    }
+    // Mélodie cristalline
+    const MC = [[0,554.37,0.48,0.064],[BEAT,493.88,0.38,0.056],[BEAT*2,587.33,0.80,0.070],[BEAT*3,554.37,0.48,0.058]];
+    for (let b = 0; b < BARS; b += 2) {
+      const tB = b*BAR;
+      for (const [bt, fr, d, g] of MC) {
+        const t0 = tB+bt; if (t0+d<D) {
+          m_bell(oc, fr, t0, g, d+0.2, 0.28);
+          m_flute(oc, fr*0.5, t0+0.05, d*0.70, 0.054, {vRate:3.5, vDepth:2.6, pan:(b%4===0?-0.28:0.28)});
         }
       }
     }
-    // Taiko puissant
-    for (let b=0;b<BARS;b++) {
-      const t=b*BAR;
-      m_taiko(oc,t,1.0,{p0:88,p1:28,dec:0.62,pan:-0.28});
-      m_taiko(oc,t+2*BEAT,0.85,{p0:82,p1:25,dec:0.56,pan:0.28});
-      m_taiko(oc,t+BEAT*0.75,0.36,{p0:112,p1:50,dec:0.34,pan:0.52});
-      m_taiko(oc,t+BEAT*2.5,0.34,{p0:106,p1:48,dec:0.30,pan:-0.52});
-      if (b%2===1) m_taiko(oc,t+BEAT*3.5,0.46,{p0:96,p1:40,dec:0.36,pan:0});
-      m_snare(oc,t+BEAT,0.24,{bf:420,bd:0.06,nd:0.1,ng:0.5,pan:-0.3});
-      m_snare(oc,t+BEAT*3,0.26,{bf:400,bd:0.06,nd:0.1,ng:0.5,pan:0.3});
-      if (b%4===0) m_bell(oc,784,t+BEAT,0.09,1.2,0.42);
-      if (b%4===2) m_bell(oc,659.25,t+BEAT*3,0.075,1.0,-0.42);
+    // Cordes de verre froides
+    const CC = [[0,138.59,1.2,0.062],[BAR,164.81,1.2,0.058],[BAR*2,155.56,1.2,0.062],[BAR*3,138.59,1.5,0.068]];
+    for (let r = 0; r < Math.floor(BARS/4); r++) {
+      for (const [b, fr, d, g] of CC) {
+        const t0 = r*BAR*4+b; if (t0+d<D) m_strings(oc, fr, t0, d, g, {atk:0.20, rel:0.48, lp:690, pan:-0.18, vRate:3.4, vDepth:1.9});
+      }
+    }
+    // Percussions cristallines
+    for (let b = 0; b < BARS; b++) {
+      const t = b*BAR;
+      m_kick(oc, t, 0.62, 98, 37, {dec:0.34});
+      m_kick(oc, t+2*BEAT, 0.56, 94, 33, {dec:0.30});
+      if (b%2===1) m_kick(oc, t+BEAT*1.5, 0.24, 78, 29, {dec:0.22});
+      m_snare(oc, t+BEAT, 0.34, {bf:302, bd:0.09, nd:0.15, ng:0.58, pan:0});
+      m_snare(oc, t+3*BEAT, 0.36, {bf:310, bd:0.10, nd:0.16, ng:0.60, pan:0});
+      for (let h = 0; h < 4; h++) m_noise(oc, t+h*BEAT, 0.050, 0.070, {atk:0.003, ftype:'bandpass', freq:3200+h*260, Q:11, pan:(h%2===0?-0.30:0.30)});
+      if (b%4===0) m_bell(oc, 1046.5, t+BEAT, 0.052, 0.95, 0.40);
+      if (b%4===2) m_bell(oc, 830.61, t+BEAT*3, 0.044, 0.75, -0.40);
     }
   }},
 
-  // Phase 2: Rage – Temporal Devastation (CORRIGÉ)
-  'b2-2': { dur: 29.54, compose: async (oc, D) => {
-    const BEAT=60/130, BAR=BEAT*4, BARS=Math.floor(D/BAR);
-    m_drone(oc,41.2,0,D,0.55,{atk:0.08,rel:0.25,lp:230,harm:3});
-    // Bass agressive
-    const BR=[[0,0.14,82.41],[0.25,0.09,82.41],[0.5,0.13,98.0],[0.75,0.09,82.41],[1,0.14,73.42],[1.5,0.14,82.41],[1.75,0.09,92.5],[2,0.14,82.41],[2.25,0.09,98.0],[2.5,0.13,110.0],[2.75,0.09,98.0],[3,0.14,82.41],[3.25,0.09,73.42],[3.5,0.16,82.41],[3.75,0.11,61.74]];
-    for (let b=0;b<BARS;b++) {
-      const tBar=b*BAR;
-      for (const [bt,d,f] of BR) {
-        const t0=tBar+bt*BEAT;
-        if (t0+d < D) m_distOsc(oc,f,t0,d,0.38,200,{lp:360,type:'sawtooth'});
+  'b3-2': { dur: 14.0, compose: async (oc, D) => {
+    // Rage Zarveth — 120 BPM, éblouissant, prismatique
+    const BEAT = 60/120, BAR = BEAT*4, BARS = Math.floor(D/BAR);
+    m_drone(oc, 34.65, 0, D, 0.36, {atk:0.08, rel:0.19, lp:188, harm:3});
+    // Basse rapide C# mineur
+    const BRC = [[0,0.10,69.30],[0.25,0.06,69.30],[0.5,0.09,87.31],[0.75,0.06,69.30],[1,0.10,61.74],[1.5,0.10,69.30],[2,0.10,82.41],[2.5,0.08,98.0],[3,0.10,69.30],[3.5,0.08,51.91]];
+    for (let b = 0; b < BARS; b++) {
+      const tB = b*BAR;
+      for (const [bt, d, fr] of BRC) { const t0=tB+bt*BEAT; if (t0+d<D) m_distOsc(oc, fr, t0, d, 0.26, 128, {lp:290, type:'sawtooth'}); }
+    }
+    // Cordes hautes prismatiques
+    const SC = [[0,1108.73,0.15],[BEAT*0.5,987.77,0.11],[BEAT,1046.5,0.17],[BEAT*2,1108.73,0.13],[BEAT*2.5,1174.66,0.17],[BEAT*3,1108.73,0.24]];
+    for (let b = 0; b < BARS; b++) {
+      const tB = b*BAR;
+      for (const [bt, fr, d] of SC) {
+        const t0 = tB+bt; if (t0+d<D) m_strings(oc, fr, t0, d, 0.050, {atk:0.024, rel:0.048, lp:2650, pan:(b%2===0?-0.40:0.40), vRate:7, vDepth:2.9});
       }
     }
-    // Strings aigus
-    const SH=[[0,659.25,0.26],[BEAT*0.5,587.33,0.20],[BEAT,659.25,0.30],[BEAT*2,740.0,0.24],[BEAT*2.5,698.46,0.26],[BEAT*3,659.25,0.38],[BEAT*3.5,587.33,0.18]];
-    for (let b=0;b<BARS;b++) {
-      const tBar=b*BAR;
-      for (const [bt,f,d] of SH) {
-        const t0=tBar+bt*BEAT;
-        if (t0+d < D) m_strings(oc,f,t0,d,0.09,{atk:0.04,rel:0.08,lp:2400,pan:(b%2===0?-0.45:0.45),vRate:6,vDepth:4});
-      }
-    }
-    // Brass stabs
-    for (let b=0;b<BARS;b++) {
+    // Eclats cristallins
+    for (let b = 0; b < BARS; b++) {
       if (b%2===0) {
-        const t=b*BAR;
-        if (t+0.1 < D) m_distOsc(oc,164.81*4,t,0.09,0.18,95,{lp:2200,type:'square',atk:0.02,rel:0.04});
-        if (t+2*BEAT+0.09 < D) m_distOsc(oc,196.0*4,t+2*BEAT,0.08,0.15,95,{lp:2000,type:'square',atk:0.02,rel:0.04});
+        const t = b*BAR;
+        if (t+0.08<D) m_bell(oc, 1760.0, t, 0.076, 0.44, 0.48);
+        if (t+2*BEAT+0.07<D) m_bell(oc, 1396.91, t+2*BEAT, 0.063, 0.39, -0.48);
+      }
+      if (b%4===1 && b*BAR+BEAT<D) m_bell(oc, 2093.0, b*BAR+BEAT, 0.052, 0.31, 0);
+    }
+    // Taiko+snare martelés
+    for (let b = 0; b < BARS; b++) {
+      const t = b*BAR;
+      m_taiko(oc, t, 0.74, {p0:86, p1:25, dec:0.31, pan:-0.26});
+      m_taiko(oc, t+0.5*BEAT, 0.28, {p0:72, p1:29, dec:0.19, pan:0.40});
+      m_taiko(oc, t+BEAT, 0.44, {p0:90, p1:27, dec:0.25, pan:0.16});
+      m_taiko(oc, t+1.5*BEAT, 0.22, {p0:66, p1:23, dec:0.17, pan:-0.40});
+      m_taiko(oc, t+2*BEAT, 0.74, {p0:86, p1:25, dec:0.31, pan:0.26});
+      m_taiko(oc, t+3*BEAT, 0.44, {p0:80, p1:23, dec:0.25, pan:-0.16});
+      m_snare(oc, t+BEAT, 0.44, {bf:258, bd:0.07, nd:0.15, ng:0.72, pan:0});
+      m_snare(oc, t+3*BEAT, 0.48, {bf:266, bd:0.08, nd:0.16, ng:0.74, pan:0});
+      for (let h = 0; h < 8; h++) m_noise(oc, t+h*BEAT*0.5, 0.024, (h%2===0?0.088:0.042), {atk:0.002, ftype:'bandpass', freq:2700+h*230, Q:8, pan:(h%3===0?-0.40:0.32)});
+    }
+  }},
+
+  // ══════════════════════════════════════════════════════════════════════
+  // BOSS 4 — THYRAX SUPRÊME  ·  Sommet de la Sagesse  ·  E mineur épique
+  // Calibre : MAXIMUM — boss final, taiko massif, orchestre complet, rage totale
+  // ══════════════════════════════════════════════════════════════════════
+
+  'b4-0': { dur: 14.0, compose: async (oc, D) => {
+    // Silence du sommet — vent glacial + grondements draconiennes
+    m_wind(oc, 0, D, 0.080);
+    m_drone(oc, 41.2, 0, D, 0.38, {atk:3.0, rel:3.0, lp:125, harm:1});
+    m_drone(oc, 55.0, 1.5, D-1.5, 0.11, {atk:3.5, rel:2.5, lp:88, harm:0});
+    // Grondements de dragon (sub-bass boomers)
+    const gt = [1.5, 10.2, 18.0];
+    for (const tt of gt) {
+      if (tt < D-2) {
+        m_noise(oc, tt, 2.8, 0.20, {atk:0.014, ftype:'lowpass', freq:68, Q:0.6, pink:true});
+        m_noise(oc, tt+0.3, 3.5, 0.09, {atk:0.06, ftype:'bandpass', freq:170, Q:0.5});
       }
     }
-    // Taiko intense
-    for (let b=0;b<BARS;b++) {
-      const t=b*BAR;
-      m_taiko(oc,t,1.0,{p0:96,p1:30,dec:0.44,pan:-0.3});
-      m_taiko(oc,t+0.5*BEAT,0.36,{p0:80,p1:35,dec:0.28,pan:0.42});
-      m_taiko(oc,t+BEAT,0.50,{p0:100,p1:38,dec:0.36,pan:0.2});
-      m_taiko(oc,t+1.5*BEAT,0.30,{p0:75,p1:30,dec:0.26,pan:-0.42});
-      m_taiko(oc,t+2*BEAT,1.0,{p0:95,p1:30,dec:0.44,pan:0.3});
-      m_taiko(oc,t+2.5*BEAT,0.36,{p0:80,p1:35,dec:0.28,pan:-0.3});
-      m_taiko(oc,t+3*BEAT,0.55,{p0:90,p1:32,dec:0.36,pan:-0.2});
-      if (b%2===0) m_taiko(oc,t+3.5*BEAT,0.40,{p0:85,p1:30,dec:0.30,pan:0.4});
-      m_snare(oc,t+BEAT,0.60,{bf:300,bd:0.09,nd:0.18,ng:0.92,pan:0});
-      m_snare(oc,t+BEAT*3,0.65,{bf:310,bd:0.1,nd:0.20,ng:0.95,pan:0});
-      for (let h=0;h<16;h++) m_hihat(oc,t+h*BEAT*0.25,(h%4===0?0.18:h%2===0?0.09:0.055),false,(h%3===0?-0.42:0.32));
-      if (b%2===0) m_bell(oc,1046.5,t,0.12,0.55,0.62);
-      if (b%2===1) m_bell(oc,880,t+2*BEAT,0.10,0.48,-0.62);
+    // Cloches solennelles
+    if (D > 8) { m_bell(oc, 329.63, 6.5, 0.072, 4.2, 0); m_bell(oc, 246.94, 6.7, 0.045, 3.8, 0.28); }
+  }},
+
+  'b4-1': { dur: 16.0, compose: async (oc, D) => {
+    // Combat Thyrax — 100 BPM, taiko massif + flûte orientale + cordes épiques
+    const BEAT = 60/100, BAR = BEAT*4, BARS = Math.floor(D/BAR);
+    m_drone(oc, 41.2, 0, D, 0.34, {atk:0.15, rel:0.38, lp:182, harm:2});
+    m_drone(oc, 61.74, 0, D, 0.10, {atk:0.50, rel:0.38, lp:162, harm:0});
+    // Basse modale E phrygien
+    const BP3 = [[0,0.19,82.41],[1,0.19,82.41],[1.5,0.13,98.0],[2,0.21,73.42],[3,0.19,82.41],[3.5,0.11,87.31]];
+    for (let b = 0; b < BARS; b++) {
+      const tB = b*BAR;
+      for (const [bt, d, f] of BP3) { const t0=tB+bt*BEAT; if (t0+d<D) m_distOsc(oc, f, t0, d, 0.23, 94, {lp:262, type:'sine'}); }
+    }
+    // Flûte bambou — E mineur pentatonique (le joyau mélodique du jeu)
+    const FPH = [
+      [[0,164.81,0.60,0.115],[BEAT*1.5,196.0,0.44,0.100],[BEAT*3,220.0,1.10,0.108]],
+      [[0,246.94,0.54,0.105],[BEAT,220.0,0.72,0.092],[BEAT*2.5,196.0,1.38,0.100]],
+      [[0,164.81,0.38,0.088],[BEAT*2,185.0,0.78,0.098],[BEAT*3.5,164.81,0.45,0.080]],
+      [[0,220.0,0.42,0.105],[BEAT*1.5,246.94,0.35,0.088],[BEAT*2.5,220.0,0.52,0.080],[BEAT*3.5,196.0,1.65,0.098]]
+    ];
+    for (let r = 0; r < Math.floor(BARS/8); r++) {
+      for (let pi = 0; pi < FPH.length; pi++) {
+        const t0 = r*BAR*8+pi*BAR*2;
+        for (const [b, f, d, g] of FPH[pi]) { if (t0+b+d<D) m_flute(oc, f, t0+b, d, g, {vRate:4.5, vDepth:4, pan:(pi%2===0?-0.20:0.20)}); }
+      }
+    }
+    // Cordes épiques amples
+    const SE = [[0,164.81,BAR*2.4,0.080],[BAR*2,196.0,BAR*2.1,0.075],[BAR*4,220.0,BAR*2.4,0.080],[BAR*6,196.0,BAR*2.1,0.075]];
+    for (let r = 0; r < Math.floor(BARS/8); r++) {
+      for (const [b, f, d, g] of SE) {
+        const t0 = r*BAR*8+b; if (t0+d<D) m_strings(oc, f, t0, d, g, {atk:0.30, rel:0.68, lp:940, pan:-0.22, vRate:3.7, vDepth:2.7});
+      }
+    }
+    // TAIKO massif — le plus lourd du jeu
+    for (let b = 0; b < BARS; b++) {
+      const t = b*BAR;
+      m_taiko(oc, t, 0.80, {p0:90, p1:27, dec:0.56, pan:-0.24});
+      m_taiko(oc, t+2*BEAT, 0.68, {p0:84, p1:25, dec:0.50, pan:0.24});
+      m_taiko(oc, t+BEAT*0.75, 0.30, {p0:108, p1:48, dec:0.29, pan:0.46});
+      m_taiko(oc, t+BEAT*2.5, 0.27, {p0:102, p1:46, dec:0.25, pan:-0.46});
+      if (b%2===1) m_taiko(oc, t+BEAT*3.5, 0.36, {p0:92, p1:37, dec:0.31, pan:0});
+      // Snare léger (pour ne pas écraser la flûte)
+      m_snare(oc, t+BEAT, 0.16, {bf:400, bd:0.05, nd:0.08, ng:0.40, pan:-0.26});
+      m_snare(oc, t+BEAT*3, 0.18, {bf:386, bd:0.05, nd:0.08, ng:0.40, pan:0.26});
+      if (b%4===0) m_bell(oc, 784, t+BEAT, 0.068, 1.0, 0.36);
+      if (b%4===2) m_bell(oc, 659.25, t+BEAT*3, 0.056, 0.88, -0.36);
+    }
+  }},
+
+  'b4-2': { dur: 14.0, compose: async (oc, D) => {
+    // RAGE THYRAX — 130 BPM, apogée total — le plus intense de tout le jeu
+    const BEAT = 60/130, BAR = BEAT*4, BARS = Math.floor(D/BAR);
+    m_drone(oc, 41.2, 0, D, 0.38, {atk:0.08, rel:0.20, lp:205, harm:3});
+    // Basse ultra-agressive sawtooth
+    const BF = [[0,0.11,82.41],[0.25,0.06,82.41],[0.5,0.10,98.0],[0.75,0.06,82.41],[1,0.11,73.42],[1.5,0.11,82.41],[2,0.11,82.41],[2.5,0.10,110.0],[2.75,0.07,98.0],[3,0.11,82.41],[3.25,0.07,73.42],[3.5,0.12,82.41],[3.75,0.08,61.74]];
+    for (let b = 0; b < BARS; b++) {
+      const tB = b*BAR;
+      for (const [bt, d, f] of BF) { const t0=tB+bt*BEAT; if (t0+d<D) m_distOsc(oc, f, t0, d, 0.26, 138, {lp:318, type:'sawtooth'}); }
+    }
+    // Cordes de rage hautes — la mélodie de héros brisée
+    const SH = [[0,659.25,0.21],[BEAT*0.5,587.33,0.16],[BEAT,659.25,0.25],[BEAT*2,740.0,0.19],[BEAT*2.5,698.46,0.21],[BEAT*3,659.25,0.32],[BEAT*3.5,587.33,0.14]];
+    for (let b = 0; b < BARS; b++) {
+      const tB = b*BAR;
+      for (const [bt, f, d] of SH) {
+        const t0 = tB+bt*BEAT; if (t0+d<D) m_strings(oc, f, t0, d, 0.066, {atk:0.036, rel:0.072, lp:2080, pan:(b%2===0?-0.40:0.40), vRate:6, vDepth:3.1});
+      }
+    }
+    // Brass stabs de victoire/défaite (distorsion carrée)
+    for (let b = 0; b < BARS; b++) {
+      if (b%2===0) {
+        const t = b*BAR;
+        if (t+0.10<D) m_distOsc(oc, 164.81*4, t, 0.072, 0.12, 70, {lp:1850, type:'square'});
+        if (t+2*BEAT+0.08<D) m_distOsc(oc, 196.0*4, t+2*BEAT, 0.062, 0.10, 70, {lp:1650, type:'square'});
+      }
+    }
+    // TAIKO FINAL — densité maximale
+    for (let b = 0; b < BARS; b++) {
+      const t = b*BAR;
+      m_taiko(oc, t, 0.82, {p0:92, p1:27, dec:0.38, pan:-0.26});
+      m_taiko(oc, t+0.5*BEAT, 0.28, {p0:76, p1:32, dec:0.23, pan:0.38});
+      m_taiko(oc, t+BEAT, 0.40, {p0:96, p1:35, dec:0.31, pan:0.16});
+      m_taiko(oc, t+1.5*BEAT, 0.24, {p0:72, p1:27, dec:0.21, pan:-0.38});
+      m_taiko(oc, t+2*BEAT, 0.82, {p0:92, p1:27, dec:0.38, pan:0.26});
+      m_taiko(oc, t+2.5*BEAT, 0.28, {p0:76, p1:32, dec:0.23, pan:-0.26});
+      m_taiko(oc, t+3*BEAT, 0.44, {p0:86, p1:29, dec:0.31, pan:-0.16});
+      if (b%2===0) m_taiko(oc, t+3.5*BEAT, 0.33, {p0:82, p1:27, dec:0.25, pan:0.36});
+      m_snare(oc, t+BEAT, 0.46, {bf:282, bd:0.08, nd:0.16, ng:0.76, pan:0});
+      m_snare(oc, t+BEAT*3, 0.50, {bf:289, bd:0.08, nd:0.17, ng:0.78, pan:0});
+      for (let h = 0; h < 8; h++) m_hihat(oc, t+h*BEAT*0.5, (h%2===0?0.11:0.054), false, (h%3===0?-0.36:0.27));
+      if (b%2===0) m_bell(oc, 1046.5, t, 0.088, 0.46, 0.56);
+      if (b%2===1) m_bell(oc, 880, t+2*BEAT, 0.072, 0.42, -0.56);
     }
   }}
-};
+
+}; // fin MUSIC_TRACKS
 
 // ─────────────────────────────────────────────────────────────
-// MOTEUR DE LECTURE — BossMusic
+// MOTEUR DE LECTURE — BossMusic (rendu offline + cache)
 // ─────────────────────────────────────────────────────────────
 const BossMusic = (() => {
-  let actx = null, masterGain = null;
+  let actx = null, masterGain = null, limiter = null;
   let currentSrc = null;
   const bufCache = {};
-  const renderQueue = {};
-  let _engaged = false; // premier échange de coups détecté
+  let _engaged = false;
 
   function getCtx() {
     if (!actx) {
       actx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: MUSIC_SR });
-      masterGain = actx.createGain();
-      masterGain.gain.value = 0.72;
-      masterGain.connect(actx.destination);
+      masterGain = actx.createGain(); masterGain.gain.value = 0.58;
+      limiter = actx.createDynamicsCompressor();
+      limiter.threshold.value = -4; limiter.knee.value = 4;
+      limiter.ratio.value = 20; limiter.attack.value = 0.001; limiter.release.value = 0.08;
+      masterGain.connect(limiter); limiter.connect(actx.destination);
     }
     if (actx.state === 'suspended') actx.resume();
     return actx;
@@ -5540,122 +7356,79 @@ const BossMusic = (() => {
 
   async function renderTrack(key) {
     if (bufCache[key]) return bufCache[key];
-    if (renderQueue[key]) return renderQueue[key];
     const def = MUSIC_TRACKS[key];
     if (!def) throw new Error('Unknown track: ' + key);
     const D = def.dur;
-    // Ajouter 0.5s de marge pour éviter la troncature des notes en fin de buffer
-    const totalSamples = Math.ceil(MUSIC_SR * (D + 0.5));
-    const p = new Promise((res, rej) => {
-      try {
-        const oc = new OfflineAudioContext(2, totalSamples, MUSIC_SR);
-        def.compose(oc, D).then(() => {
-          return oc.startRendering();
-        }).then(buf => {
-          bufCache[key] = buf;
-          res(buf);
-        }).catch(err => {
-          console.error('Render error', key, err);
-          rej(err);
-        });
-      } catch(e) { rej(e); }
-    });
-    renderQueue[key] = p;
-    return p;
+    // Pas de silence final — on boucle exactement sur D secondes
+    const oc = new OfflineAudioContext(2, Math.ceil(MUSIC_SR * D), MUSIC_SR);
+    await def.compose(oc, D);
+    const buf = await oc.startRendering();
+    // Soft clip
+    for (let ch = 0; ch < buf.numberOfChannels; ch++) {
+      const d = buf.getChannelData(ch);
+      for (let i = 0; i < d.length; i++) {
+        if (Math.abs(d[i]) > 0.7) d[i] = d[i] > 0 ? 0.7 + 0.2*Math.tanh((d[i]-0.7)*3) : -(0.7+0.2*Math.tanh((-d[i]-0.7)*3));
+      }
+      // Fade out les 50 dernières ms pour éviter le clic au loop
+      const fadeLen = Math.min(Math.floor(MUSIC_SR * 0.05), d.length);
+      for (let i = 0; i < fadeLen; i++) d[d.length - fadeLen + i] *= (1 - i / fadeLen);
+    }
+    bufCache[key] = buf;
+    return buf;
   }
 
   function _playBuffer(buf, vol=0.75, fadein=0.8) {
     const c = getCtx();
-    if (currentSrc) {
-      try { currentSrc.stop(); } catch(e){}
-      currentSrc = null;
-    }
+    if (currentSrc) { try { currentSrc.stop(); } catch(e){} currentSrc = null; }
     const src = c.createBufferSource();
     src.buffer = buf;
     src.loop = true;
     src.loopStart = 0;
-    src.loopEnd = buf.duration;
+    src.loopEnd = buf.duration; // exactement D secondes, pas de silence
     const g = c.createGain();
     g.gain.setValueAtTime(0, c.currentTime);
     g.gain.linearRampToValueAtTime(vol, c.currentTime + fadein);
-    src.connect(g);
-    g.connect(masterGain);
-    src.start();
-    currentSrc = src;
-    currentSrc._gainNode = g;
+    src.connect(g); g.connect(masterGain); src.start();
+    currentSrc = src; currentSrc._gainNode = g;
   }
 
   async function _crossfade(key, vol=0.75) {
     const c = getCtx();
+    // Si le buffer n'est pas encore prêt, on joue quand même dès qu'il est là
+    // mais on garde la musique courante en attendant (pas de silence)
     const buf = await renderTrack(key);
-    // Fade out l'actuel
-    if (currentSrc && currentSrc._gainNode) {
-      const oldGain = currentSrc._gainNode;
-      oldGain.gain.setValueAtTime(oldGain.gain.value, c.currentTime);
-      oldGain.gain.linearRampToValueAtTime(0, c.currentTime + 0.5);
-      const oldSrc = currentSrc;
-      setTimeout(() => { try { oldSrc.stop(); } catch(e){} }, 600);
-      currentSrc = null;
+    if (currentSrc?._gainNode) {
+      const og = currentSrc._gainNode;
+      og.gain.setValueAtTime(og.gain.value, c.currentTime);
+      og.gain.linearRampToValueAtTime(0, c.currentTime + 0.4);
+      const old = currentSrc; currentSrc = null;
+      setTimeout(() => { try { old.stop(); } catch(e){} }, 500);
     }
-    await new Promise(r => setTimeout(r, 300));
-    _playBuffer(buf, vol, 0.5);
-  }
-
-  // Pré-render les 3 tracks d'un boss en arrière-plan
-  function preloadBoss(lvlIdx) {
-    for (let p=0; p<3; p++) {
-      const key = `b${lvlIdx}-${p}`;
-      renderTrack(key).catch(e => console.warn('Preload failed', key, e));
-    }
+    // Démarrer la nouvelle piste immédiatement après le fade (pas de silence)
+    setTimeout(() => _playBuffer(buf, vol, 0.4), 420);
   }
 
   return {
-    init() {
-      getCtx();
-      // Pré-charger le niveau 0 dès que possible
-      if (typeof requestIdleCallback !== 'undefined') {
-        requestIdleCallback(() => preloadBoss(0));
-      } else {
-        setTimeout(() => preloadBoss(0), 1000);
-      }
+    // Pré-rend toutes les tracks d'un niveau, retourne une Promise
+    async preloadLevel(idx) {
+      const keys = [`b${idx}-0`, `b${idx}-1`, `b${idx}-2`];
+      await Promise.all(keys.map(k => renderTrack(k).catch(e => console.warn('Preload failed', k, e))));
     },
-
-    // Appelé dans loadLevel(idx) — musique d'ambiance pré-boss
+    // Rend une seule track (pour le chargement initial avec progression)
+    async renderOne(key) {
+      return renderTrack(key);
+    },
+    init() { getCtx(); },
     onLoadLevel(idx) {
       _engaged = false;
-      const key = `b${idx}-0`;
-      renderTrack(key).then(buf => {
-        _playBuffer(buf, 0.55, 2.0);
-      }).catch(e => console.error('Music error', e));
-      // Pré-charger les 3 pistes en avance
-      preloadBoss(idx);
-      // Et pré-charger le niveau suivant si il existe
-      if (idx + 1 < 3) {
-        setTimeout(() => preloadBoss(idx + 1), 5000);
-      }
+      renderTrack(`b${idx}-0`).then(buf => _playBuffer(buf, 0.52, 2.0)).catch(console.error);
     },
-
-    // Appelé quand spawnBoss() — boss apparu, on reste sur l'ambient
-    onSpawnBoss(lvlIdx) {
-      // On continue la musique ambiante — pas de changement ici
-      // La transition vers le combat se fait au premier échange
-    },
-
-    // Appelé quand le premier échange de coups se produit (boss en combat)
+    onSpawnBoss() {},
     onCombatStart(lvlIdx) {
-      if (_engaged) return;
-      _engaged = true;
-      const key = `b${lvlIdx}-1`;
-      _crossfade(key, 0.78);
+      if (_engaged) return; _engaged = true;
+      _crossfade(`b${lvlIdx}-1`, 0.75);
     },
-
-    // Appelé quand rageMode = true (phase finale)
-    onRageMode(lvlIdx) {
-      const key = `b${lvlIdx}-2`;
-      _crossfade(key, 0.88);
-    },
-
-    // Fade out et stop
+    onRageMode(lvlIdx) { _crossfade(`b${lvlIdx}-2`, 0.84); },
     stop(fadeDur=1.5) {
       if (!actx || !currentSrc) return;
       if (currentSrc._gainNode) {
@@ -5663,11 +7436,9 @@ const BossMusic = (() => {
         g.gain.setValueAtTime(g.gain.value, actx.currentTime);
         g.gain.linearRampToValueAtTime(0, actx.currentTime + fadeDur);
       }
-      const s = currentSrc;
-      currentSrc = null;
-      setTimeout(() => { try { s.stop(); } catch(e){} }, fadeDur * 1000 + 200);
+      const s = currentSrc; currentSrc = null;
+      setTimeout(() => { try { s.stop(); } catch(e){} }, fadeDur*1000+200);
     },
-
     get engaged() { return _engaged; }
   };
 })();
