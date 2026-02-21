@@ -1042,7 +1042,9 @@
       <div class="hud-block" style="align-items:flex-end">
         <div class="hud-label" style="text-align:right">Quête</div>
         <div class="hud-quest-text" id="hud-quest">Explore...</div>
+
       </div>
+
     </div>
   </div>
 
@@ -1096,6 +1098,7 @@
             <div class="sk-ring" id="ring-charge"></div>
           </button>
         </div>
+
       </div>
     </div>
   </div>
@@ -1276,11 +1279,11 @@
       name: ["La Forêt des Souvenirs", "brrr...", "Un frisson vous traverse", "une présence sinistre du nord semble vous en vouloir..."], biome: "forest",
       quest: "Retrouve 3 Médaillons", questCount: 3, questType: "collect", questItem: "🥇",
       questMsgs: [
-        ["🥇", "MÉDAILLON", "Un médaillon en or... rappelant des moments passés à tes côtés.", "Ces moments du quotidien — les repas, les rires, les balades...", "Ce sont les trésors les plus précieux.", "Vous récupérez le médaillon"],
+        ["🥇", "MÉDAILLON", "Un médaillon en or... vous rappelant des moments passés à tes côtés.", "Ces moments du quotidien — les repas, les rires, les balades...", "Ce sont les trésors les plus précieux.", "Vous récupérez le médaillon"],
         ["🥇", "MÉDAILLON", "Un... médaillon ?", " Il semble représenter la patience.", "Elle est désormais votre, une patience à toutes épreuves", "Peut être au final, que vous l'avez toujours été", "Vous récupérez le médaillon de sagesse"],
-        ["🥇", "MÉDAILLON", "Un médaillon brille d'or pur.", "Une vision vous assaillit.","Une famille... aimante... est-ce la votre", "Médaillon de Famille récupéré !"]
+        ["🥇", "MÉDAILLON", "Un médaillon brille d'or pur.", "Une vision vous assaillit.", "Une famille... aimante... est-ce la votre", "Médaillon de Famille récupéré !"]
       ],
-      bossName: "Seigneur Oubli", bossIcon: "👹", bossHP: 40, bossPhases: 2,
+      bossName: "Vorgath le Brûlé", bossIcon: "👹", bossHP: 40, bossPhases: 2,
       bossPatterns: ['slash', 'poison_ring', 'enrage'],
       bossDialog: ["Je suis le Vorgath le Brûlé ! Dévoreur de souvenir !", "Je ne peux pas perdre la vie de cette façon !!!", "(Un cri strident retenti)", "BOSS VAINCU ! ⚔️ Épée de Vorgath débloquée !"],
       weapon: "⚔️ Épée de Vorgath le Brûlé", wPow: 3,
@@ -1293,7 +1296,7 @@
         ["💀", "GARDIEN VAINCU", "Deux de moins ! 📜 2/5", "Est-ce la preuve d'une force infini ?"],
         ["💀", "GARDIEN VAINCU", "La moitié du chemin. 📜 3/5", "ou peut-être une persévérance sans nom."],
         ["💀", "GARDIEN VAINCU", "Presque là ! 📜 4/5", "..."],
-        ["💀", "TOUS VAINCUS !", "Désormais votre force n'a plus de doute.","Un grincement se fait entendre... Vos sens sont en alerte", "Un nom apparait dans votre esprit", "Nytherion, le Revenant..."]
+        ["💀", "TOUS VAINCUS !", "Désormais votre force n'a plus de doute.", "Un grincement se fait entendre... Vos sens sont en alerte", "Un nom apparait dans votre esprit", "Nytherion, le Revenant..."]
       ],
       bossName: "Nytherion, le Revenant", bossIcon: "👑", bossHP: 60, bossPhases: 3,
       bossSpeed: 0.42, bossAggroR: 280, bossWarnR: 380,
@@ -1449,7 +1452,7 @@
       const d = [];
       const icons = {
         forest: ['🌲', '🌿', '🍄', '🌸', '🌺', '💎', '🪨', '🌳', '🦋', '🌾', '🍃'],
-        castle: ['🏰', '💎', '🪦', '🕸️', '🔦', '⚔️', '🛡️', '🧱', '🕯️'],
+        castle: ['💎', '🪦', '🕸️', '⚔️', '🛡️', '🧱'],
         mountain: ['🏔️', '❄️', '🦅', '🪨', '💎', '🌟', '⛰️', '🧊', '🌬️']
       };
       const arr = icons[biome] || icons.forest;
@@ -1603,6 +1606,8 @@
     }
     function hitMon(m, dmg, cls = 'normal') {
       if (m.state === 'dead' || m.state === 'dying') return;
+      // Premier coup sur le boss = début du combat
+      if (m.boss && typeof BossMusic !== 'undefined' && !BossMusic.engaged) BossMusic.onCombatStart(curLvl);
       m.hp -= dmg; m.hitFlash = 8; m.state = 'chase';
       GS.shake = cls === 'crit' ? 10 : cls === 'boss' ? 4 : 3; sHit(); dmgFx(m.x, m.y, dmg, cls);
       if (m.hp <= 0) killMon(m);
@@ -1614,6 +1619,7 @@
       updHUD();
       if (m.boss) {
         GS.bossDefeated = true;
+        if (typeof BossMusic !== 'undefined') BossMusic.stop(2.0);
         document.getElementById('boss-hud').style.display = 'none';
         setTimeout(() => openDlg(m.icon, m.name, LEVELS[curLvl].bossDialog, () => showLT()), 600);
       } else if (LEVELS[curLvl].questType === 'kill') {
@@ -1632,6 +1638,8 @@
       // Invincibilité totale pendant le dash — aucun dégât
       if (p.invincible) return;
       if (p.inv > 0) return;
+      // Premier dégât boss sur le joueur = début du combat
+      if (GS.boss && GS.boss.state !== 'dead' && typeof BossMusic !== 'undefined' && !BossMusic.engaged) BossMusic.onCombatStart(curLvl);
       p.hp -= dmg; p.inv = 60; GS.shake = 6; sDmg();
       dmgFx(p.x, p.y, -dmg, cls); updHUD();
       warnFlash();
@@ -1643,6 +1651,7 @@
     // ============================================================
     function playerDie() {
       if (isDead) return; isDead = true; gRun = false; sDeath(); GS.shake = 25;
+      if (typeof BossMusic !== 'undefined') BossMusic.stop(0.8);
       screenFlash(200, 0, 0, 0.5, 600);
       document.getElementById('boss-hud').style.display = 'none';
       setTimeout(() => document.getElementById('deathscreen').style.display = 'flex', 900);
@@ -1832,6 +1841,7 @@
       const phases = lv.bossPhases || 2;
       for (let i = 0; i < phases; i++) { const d = document.createElement('div'); d.className = 'boss-phase-pip' + (i === 0 ? ' active' : ''); d.id = `bpip${i}`; pip.appendChild(d); }
       sBossSpawn();
+      if (typeof BossMusic !== 'undefined') BossMusic.onSpawnBoss(curLvl);
       openDlg('⚠️', 'DANGER !', [`👹 ${lv.bossName} APPARAÎT !`, 'Attention ! Ce boss a des patterns dévastateurs !', 'Esquive et frappe au bon moment !'], null);
     }
     function updBossHPBar() {
@@ -1847,7 +1857,7 @@
         // Light up phase pip
         for (let i = 0; i < phases; i++) { const pip = document.getElementById(`bpip${i}`); if (pip) pip.classList.toggle('active', i <= currentPhase); }
         // Rage at last phase
-        if (currentPhase >= phases - 1) { b.rageMode = true; sBossRage(); screenFlash(255, 50, 0, 0.6, 500); GS.shake = 20; }
+        if (currentPhase >= phases - 1) { b.rageMode = true; sBossRage(); screenFlash(255, 50, 0, 0.6, 500); GS.shake = 20; if (typeof BossMusic !== 'undefined') BossMusic.onRageMode(curLvl); }
       }
     }
 
@@ -2099,7 +2109,7 @@
           for (let i = 0; i < 3; i++) setTimeout(() => { if (b.state === 'dead') return; GS.bossWarnings.push({ x: b.x, y: b.y, r: b.warnR * 0.6, life: 30, maxLife: 30, type: 'ring', color: '#ff6600' }); }, i * 350);
         }
       }
-      if (b.state === 'idle') { if (d < b.aggroR) { b.state = 'chase'; if (b.warnR) { screenFlash(255,50,0,0.5,400); GS.shake=12; } } }
+      if (b.state === 'idle') { if (d < b.aggroR) { b.state = 'chase'; if (b.warnR) { screenFlash(255, 50, 0, 0.5, 400); GS.shake = 12; } } }
       if (b.state === 'chase' || b.state === 'attack') {
         // Dash movement
         if (b.dashActive && b.dashTimer > 0) {
@@ -2122,7 +2132,7 @@
           b.x += b.vx || 0; b.y += b.vy || 0;
           // Wall phase visual effect: emit ghostly particles when inside a wall
           if (blk(b.x, b.y, map)) {
-            GS.atks.push({ worldX: b.x, worldY: b.y, icon: '👁️', sz: 28, life: 12, maxLife: 12, vx: (Math.random()-0.5)*1.5, vy: (Math.random()-0.5)*1.5 });
+            GS.atks.push({ worldX: b.x, worldY: b.y, icon: '👁️', sz: 28, life: 12, maxLife: 12, vx: (Math.random() - 0.5) * 1.5, vy: (Math.random() - 0.5) * 1.5 });
           }
         }
         b.x = Math.max(TSIZ, Math.min(WW - TSIZ, b.x)); b.y = Math.max(TSIZ, Math.min(WH - TSIZ, b.y));
@@ -2165,13 +2175,13 @@
             // 40 frames: dragon hovers above, shadow + warning circle grows below
             const progress = t / 40;
             if (t % 8 === 0) GS.bossWarnings.push({ x: b.aerialTargetX, y: b.aerialTargetY, r: 20 + progress * 80, life: 18, maxLife: 18, type: 'slam_zone', color: '#ff3300' });
-            if (t === 15) { screenFlash(255,50,0,0.3,200); GS.shake = 4; }
+            if (t === 15) { screenFlash(255, 50, 0, 0.3, 200); GS.shake = 4; }
             if (t >= 40) {
               b.aerialPhase = 'frozen'; // freeze moment before slam
               b.aerialTimer = 0;
               // Big final warning
               GS.bossWarnings.push({ x: b.aerialTargetX, y: b.aerialTargetY, r: 90, life: 20, maxLife: 20, type: 'slam_zone', color: '#ff0000' });
-              screenFlash(255,0,0,0.6,300); GS.shake = 10;
+              screenFlash(255, 0, 0, 0.6, 300); GS.shake = 10;
             }
           } else if (b.aerialPhase === 'frozen') {
             // Freeze in air for dramatic effect (20 frames)
@@ -2193,7 +2203,7 @@
               b.aerialPhase = 'impact';
               b.aerialTimer = 0;
               // IMPACT — massive damage, shockwave, screen shake
-              GS.shake = 30; screenFlash(255,100,0,0.9,400);
+              GS.shake = 30; screenFlash(255, 100, 0, 0.9, 400);
               const impDist = dst(b, p);
               if (impDist < 110) { damagePlayer(b.rageMode ? 7 : 5, 'fire'); }
               else if (impDist < 180) { damagePlayer(b.rageMode ? 4 : 2, 'fire'); }
@@ -2204,7 +2214,7 @@
               }
               // Big impact visuals
               for (let i = 0; i < 10; i++) {
-                GS.atks.push({ worldX: b.x + (Math.random()-0.5)*80, worldY: b.y + (Math.random()-0.5)*80, icon: '💥', sz: 34 + Math.random()*20, life: 22, maxLife: 22, vx: (Math.random()-0.5)*2, vy: (Math.random()-0.5)*2 });
+                GS.atks.push({ worldX: b.x + (Math.random() - 0.5) * 80, worldY: b.y + (Math.random() - 0.5) * 80, icon: '💥', sz: 34 + Math.random() * 20, life: 22, maxLife: 22, vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2 });
               }
               sBossBeam();
             }
@@ -2342,7 +2352,7 @@
         // Feuille qui tombe — losange vert pivotant
         const rot = f * 0.04;
         ctx.translate(sx, sy); ctx.rotate(rot);
-        ctx.fillStyle = `rgba(${60 + Math.floor(Math.random()*20)},160,60,0.8)`;
+        ctx.fillStyle = `rgba(${60 + Math.floor(Math.random() * 20)},160,60,0.8)`;
         ctx.fillRect(-sz * 0.4, -sz * 0.15, sz * 0.8, sz * 0.3);
         ctx.fillRect(-sz * 0.15, -sz * 0.4, sz * 0.3, sz * 0.8);
       } else if (type === 'spark') {
@@ -2591,37 +2601,37 @@
         const qi2 = lv.questItem;
         if (qi2 === '🥇') {
           // Médaillon doré
-          C.fillStyle = '#ffd700'; C.beginPath(); C.arc(sx, sy+bob, 10, 0, Math.PI*2); C.fill();
-          C.fillStyle = '#cc8800'; C.beginPath(); C.arc(sx, sy+bob, 10, 0, Math.PI*2); C.stroke();
+          C.fillStyle = '#ffd700'; C.beginPath(); C.arc(sx, sy + bob, 10, 0, Math.PI * 2); C.fill();
+          C.fillStyle = '#cc8800'; C.beginPath(); C.arc(sx, sy + bob, 10, 0, Math.PI * 2); C.stroke();
           C.strokeStyle = '#cc8800'; C.lineWidth = 2; C.stroke();
-          C.fillStyle = '#ffee88'; C.fillRect(sx-3, sy+bob-4, 6, 8);
-          C.fillStyle = '#cc8800'; C.fillRect(sx-1, sy+bob-6, 2, 3);
-          C.fillStyle = '#ffee88'; C.fillRect(sx-1, sy+bob-1, 2, 2);
+          C.fillStyle = '#ffee88'; C.fillRect(sx - 3, sy + bob - 4, 6, 8);
+          C.fillStyle = '#cc8800'; C.fillRect(sx - 1, sy + bob - 6, 2, 3);
+          C.fillStyle = '#ffee88'; C.fillRect(sx - 1, sy + bob - 1, 2, 2);
         } else if (qi2 === '💀') {
           // Crâne (pour les kills)
           C.fillStyle = '#e8e0c8';
-          C.fillRect(sx-7, sy+bob-8, 14, 12);
-          C.fillRect(sx-5, sy+bob-10, 10, 5);
-          C.fillStyle = '#000'; C.fillRect(sx-5, sy+bob-8, 4, 4); C.fillRect(sx+1, sy+bob-8, 4, 4);
-          C.fillStyle = '#e8e0c8'; C.fillRect(sx-4, sy+bob+3, 2, 3); C.fillRect(sx-1, sy+bob+3, 2, 3); C.fillRect(sx+2, sy+bob+3, 2, 3);
+          C.fillRect(sx - 7, sy + bob - 8, 14, 12);
+          C.fillRect(sx - 5, sy + bob - 10, 10, 5);
+          C.fillStyle = '#000'; C.fillRect(sx - 5, sy + bob - 8, 4, 4); C.fillRect(sx + 1, sy + bob - 8, 4, 4);
+          C.fillStyle = '#e8e0c8'; C.fillRect(sx - 4, sy + bob + 3, 2, 3); C.fillRect(sx - 1, sy + bob + 3, 2, 3); C.fillRect(sx + 2, sy + bob + 3, 2, 3);
         } else if (qi2 === '⭐') {
           // Étoile or 5 branches
           C.fillStyle = '#ffd700';
           const starR = 12, starr = 5;
           C.beginPath();
-          for(let i=0;i<10;i++){
-            const r2 = i%2===0?starR:starr;
-            const a = (i/10)*Math.PI*2 - Math.PI/2;
-            if(i===0) C.moveTo(sx+Math.cos(a)*r2, sy+bob+Math.sin(a)*r2);
-            else C.lineTo(sx+Math.cos(a)*r2, sy+bob+Math.sin(a)*r2);
+          for (let i = 0; i < 10; i++) {
+            const r2 = i % 2 === 0 ? starR : starr;
+            const a = (i / 10) * Math.PI * 2 - Math.PI / 2;
+            if (i === 0) C.moveTo(sx + Math.cos(a) * r2, sy + bob + Math.sin(a) * r2);
+            else C.lineTo(sx + Math.cos(a) * r2, sy + bob + Math.sin(a) * r2);
           }
           C.closePath(); C.fill();
-          C.fillStyle = '#ffe066'; C.fillRect(sx-2, sy+bob-4, 4, 4);
+          C.fillStyle = '#ffe066'; C.fillRect(sx - 2, sy + bob - 4, 4, 4);
         } else {
           // Fallback générique : diamant brillant
           C.fillStyle = '#aaddff';
-          C.beginPath(); C.moveTo(sx, sy+bob-10); C.lineTo(sx+8, sy+bob); C.lineTo(sx, sy+bob+10); C.lineTo(sx-8, sy+bob); C.closePath(); C.fill();
-          C.fillStyle = '#fff'; C.fillRect(sx-2, sy+bob-5, 3, 3);
+          C.beginPath(); C.moveTo(sx, sy + bob - 10); C.lineTo(sx + 8, sy + bob); C.lineTo(sx, sy + bob + 10); C.lineTo(sx - 8, sy + bob); C.closePath(); C.fill();
+          C.fillStyle = '#fff'; C.fillRect(sx - 2, sy + bob - 5, 3, 3);
         }
         C.restore();
       }
@@ -2788,7 +2798,7 @@
           else {
             // fallback absolu (ne devrait pas arriver)
             C.textAlign = 'center'; C.textBaseline = 'middle';
-            C.font = '20px serif'; C.fillStyle='#fff'; C.fillText('?', sx, sy + bob);
+            C.font = '20px serif'; C.fillStyle = '#fff'; C.fillText('?', sx, sy + bob);
           }
         }
 
@@ -2873,7 +2883,7 @@
       // Sprite sorcier pixel art
       const pdir = getPlayerDir(p);
       // scale up slightly if dying — non (no dying state for player), just draw
-      drawWizard(C, sx, sy + bob, pdir, p.atkAnim > 0 ? (Math.floor(GS.frame/4)%3) : (Math.floor(GS.frame/10)%3), 2.4);
+      drawWizard(C, sx, sy + bob, pdir, p.atkAnim > 0 ? (Math.floor(GS.frame / 4) % 3) : (Math.floor(GS.frame / 10) % 3), 2.4);
       C.restore();
     }
 
@@ -2896,57 +2906,57 @@
           // Éclat doré — croix de pixels + glow
           C.shadowColor = '#ffd700'; C.shadowBlur = 14 + prog * 10;
           C.fillStyle = '#ffd700';
-          C.fillRect(sx - sz*0.5, sy - 2, sz, 4);
-          C.fillRect(sx - 2, sy - sz*0.5, 4, sz);
+          C.fillRect(sx - sz * 0.5, sy - 2, sz, 4);
+          C.fillRect(sx - 2, sy - sz * 0.5, 4, sz);
           C.fillStyle = '#fff'; C.fillRect(sx - 2, sy - 2, 4, 4);
         } else if (a.icon === '💥') {
           // Explosion — cercles concentriques pixelisés
           C.shadowColor = '#ff6600'; C.shadowBlur = 10;
-          const rings = [['#ffcc00', sz*0.9], ['#ff6600', sz*0.65], ['#cc2200', sz*0.35]];
+          const rings = [['#ffcc00', sz * 0.9], ['#ff6600', sz * 0.65], ['#cc2200', sz * 0.35]];
           for (const [col, r] of rings) {
             C.strokeStyle = col; C.lineWidth = 3;
-            C.beginPath(); C.arc(sx, sy, r, 0, Math.PI*2); C.stroke();
+            C.beginPath(); C.arc(sx, sy, r, 0, Math.PI * 2); C.stroke();
           }
-          C.fillStyle = '#fff'; C.fillRect(sx-2, sy-2, 4, 4);
+          C.fillStyle = '#fff'; C.fillRect(sx - 2, sy - 2, 4, 4);
         } else if (a.icon === '💨') {
           // Traînée dash — petits rectangles bleus
           C.fillStyle = `rgba(0,220,180,${fa * 0.8})`;
-          C.fillRect(sx - sz*0.4, sy - 2, sz*0.8, 4);
-          C.fillRect(sx - 2, sy - sz*0.3, 4, sz*0.6);
+          C.fillRect(sx - sz * 0.4, sy - 2, sz * 0.8, 4);
+          C.fillRect(sx - 2, sy - sz * 0.3, 4, sz * 0.6);
         } else if (a.icon === '🌀') {
           // Téléport — spirale violette
           C.strokeStyle = '#cc44ff'; C.lineWidth = 2; C.shadowColor = '#cc44ff'; C.shadowBlur = 12;
           for (let t = 0; t < Math.PI * 4; t += 0.3) {
-            const r = (t / (Math.PI*4)) * sz * 0.6;
-            const px2 = sx + Math.cos(t + GS.frame*0.3) * r;
-            const py2 = sy + Math.sin(t + GS.frame*0.3) * r;
-            C.fillStyle = `rgba(200,80,255,${fa*(1-t/(Math.PI*4))})`;
+            const r = (t / (Math.PI * 4)) * sz * 0.6;
+            const px2 = sx + Math.cos(t + GS.frame * 0.3) * r;
+            const py2 = sy + Math.sin(t + GS.frame * 0.3) * r;
+            C.fillStyle = `rgba(200,80,255,${fa * (1 - t / (Math.PI * 4))})`;
             C.fillRect(px2, py2, 2, 2);
           }
         } else if (a.icon === '☄️') {
           // Météore — cercle rouge + traînée
           C.shadowColor = '#ff3300'; C.shadowBlur = 18;
           C.fillStyle = '#ff8800';
-          C.beginPath(); C.arc(sx, sy, sz*0.5, 0, Math.PI*2); C.fill();
+          C.beginPath(); C.arc(sx, sy, sz * 0.5, 0, Math.PI * 2); C.fill();
           C.fillStyle = '#ffdd00';
-          C.beginPath(); C.arc(sx, sy, sz*0.25, 0, Math.PI*2); C.fill();
+          C.beginPath(); C.arc(sx, sy, sz * 0.25, 0, Math.PI * 2); C.fill();
           // traînée
           C.fillStyle = 'rgba(255,100,0,0.4)';
           for (let t = 1; t <= 4; t++) {
-            C.beginPath(); C.arc(sx - t*sz*0.15, sy - t*sz*0.15, sz*0.4/t, 0, Math.PI*2); C.fill();
+            C.beginPath(); C.arc(sx - t * sz * 0.15, sy - t * sz * 0.15, sz * 0.4 / t, 0, Math.PI * 2); C.fill();
           }
         } else if (a.icon === '👁️') {
           // Wall phase eye — oeil flottant
-          C.fillStyle = `rgba(180,0,255,${fa*0.7})`;
-          C.beginPath(); C.ellipse(sx, sy, sz*0.6, sz*0.35, 0, 0, Math.PI*2); C.fill();
+          C.fillStyle = `rgba(180,0,255,${fa * 0.7})`;
+          C.beginPath(); C.ellipse(sx, sy, sz * 0.6, sz * 0.35, 0, 0, Math.PI * 2); C.fill();
           C.fillStyle = '#cc00ff';
-          C.beginPath(); C.arc(sx, sy, sz*0.2, 0, Math.PI*2); C.fill();
+          C.beginPath(); C.arc(sx, sy, sz * 0.2, 0, Math.PI * 2); C.fill();
           C.fillStyle = '#000';
-          C.beginPath(); C.arc(sx, sy, sz*0.1, 0, Math.PI*2); C.fill();
+          C.beginPath(); C.arc(sx, sy, sz * 0.1, 0, Math.PI * 2); C.fill();
         } else {
           // Fallback : carré coloré générique
           C.fillStyle = '#ffd700'; C.shadowColor = '#ffd700'; C.shadowBlur = 10;
-          C.fillRect(sx - sz*0.4, sy - sz*0.4, sz*0.8, sz*0.8);
+          C.fillRect(sx - sz * 0.4, sy - sz * 0.4, sz * 0.8, sz * 0.8);
         }
         C.restore();
       }
@@ -2973,19 +2983,19 @@
           // Orbe violet
           C.shadowColor = '#aa00ff';
           C.fillStyle = '#8800cc';
-          C.beginPath(); C.arc(0, 0, pr.sz*0.5, 0, Math.PI*2); C.fill();
+          C.beginPath(); C.arc(0, 0, pr.sz * 0.5, 0, Math.PI * 2); C.fill();
           C.fillStyle = '#cc44ff';
-          C.beginPath(); C.arc(-2, -2, pr.sz*0.2, 0, Math.PI*2); C.fill();
+          C.beginPath(); C.arc(-2, -2, pr.sz * 0.2, 0, Math.PI * 2); C.fill();
         } else if (pr.icon === '❄️') {
           // Flocon glace
           C.shadowColor = '#88ccff'; C.strokeStyle = '#aaddff'; C.lineWidth = 2;
-          for (let a = 0; a < Math.PI * 2; a += Math.PI/3) {
-            C.beginPath(); C.moveTo(0,0); C.lineTo(Math.cos(a)*10, Math.sin(a)*10); C.stroke();
+          for (let a = 0; a < Math.PI * 2; a += Math.PI / 3) {
+            C.beginPath(); C.moveTo(0, 0); C.lineTo(Math.cos(a) * 10, Math.sin(a) * 10); C.stroke();
           }
-          C.fillStyle = '#88ccff'; C.beginPath(); C.arc(0,0,3,0,Math.PI*2); C.fill();
+          C.fillStyle = '#88ccff'; C.beginPath(); C.arc(0, 0, 3, 0, Math.PI * 2); C.fill();
         } else {
           C.fillStyle = '#ffd700'; C.shadowColor = '#ffd700';
-          C.fillRect(-pr.sz*0.4, -pr.sz*0.4, pr.sz*0.8, pr.sz*0.8);
+          C.fillRect(-pr.sz * 0.4, -pr.sz * 0.4, pr.sz * 0.8, pr.sz * 0.8);
         }
         C.restore();
       }
@@ -2999,15 +3009,15 @@
           C.shadowColor = '#44ff44';
           C.fillStyle = '#228822';
           C.fillRect(-6, -6, 12, 10);
-          C.fillStyle = '#44ff44'; C.fillRect(-4,-8,4,3); C.fillRect(2,-8,4,3);
-          C.fillStyle = '#002200'; C.fillRect(-3,-4,3,3); C.fillRect(2,-4,3,3);
+          C.fillStyle = '#44ff44'; C.fillRect(-4, -8, 4, 3); C.fillRect(2, -8, 4, 3);
+          C.fillStyle = '#002200'; C.fillRect(-3, -4, 3, 3); C.fillRect(2, -4, 3, 3);
           C.fillRect(-2, 0, 2, 3); C.fillRect(0, 0, 2, 3); C.fillRect(2, 0, 2, 3);
         } else if (pr.icon === '💜') {
           // Ombre violette
           C.shadowColor = '#8800ff';
           C.fillStyle = '#6600cc';
-          C.beginPath(); C.arc(0,0,pr.sz*0.5,0,Math.PI*2); C.fill();
-          C.fillStyle = '#aa44ff'; C.beginPath(); C.arc(-2,-2,pr.sz*0.2,0,Math.PI*2); C.fill();
+          C.beginPath(); C.arc(0, 0, pr.sz * 0.5, 0, Math.PI * 2); C.fill();
+          C.fillStyle = '#aa44ff'; C.beginPath(); C.arc(-2, -2, pr.sz * 0.2, 0, Math.PI * 2); C.fill();
         } else if (pr.icon === '🔥') {
           // Flamme
           C.shadowColor = '#ff4400';
@@ -3019,14 +3029,14 @@
           // Onde choc
           C.shadowColor = '#4488ff';
           C.strokeStyle = '#4488ff'; C.lineWidth = 2;
-          C.beginPath(); C.arc(0, 0, pr.sz*0.6, 0, Math.PI*2); C.stroke();
+          C.beginPath(); C.arc(0, 0, pr.sz * 0.6, 0, Math.PI * 2); C.stroke();
           C.strokeStyle = '#88ccff'; C.lineWidth = 1;
-          C.beginPath(); C.arc(0, 0, pr.sz*0.35, 0, Math.PI*2); C.stroke();
+          C.beginPath(); C.arc(0, 0, pr.sz * 0.35, 0, Math.PI * 2); C.stroke();
         } else if (pr.icon === '💢') {
           // Enrage — losange rouge
           C.shadowColor = '#ff0000';
           C.fillStyle = '#cc0000';
-          C.save(); C.rotate(Math.PI/4 + GS.frame*0.05);
+          C.save(); C.rotate(Math.PI / 4 + GS.frame * 0.05);
           C.fillRect(-5, -5, 10, 10);
           C.restore();
           C.fillStyle = '#ff4444'; C.fillRect(-2, -2, 4, 4);
@@ -3034,11 +3044,11 @@
           // Arrêt du temps — horloge
           C.shadowColor = '#8888ff';
           C.strokeStyle = '#8888ff'; C.lineWidth = 2;
-          C.beginPath(); C.arc(0,0,pr.sz*0.5,0,Math.PI*2); C.stroke();
-          C.fillStyle = '#8888ff'; C.fillRect(-1,-7,2,7); C.fillRect(0,-2,5,2);
+          C.beginPath(); C.arc(0, 0, pr.sz * 0.5, 0, Math.PI * 2); C.stroke();
+          C.fillStyle = '#8888ff'; C.fillRect(-1, -7, 2, 7); C.fillRect(0, -2, 5, 2);
         } else {
           C.fillStyle = '#ff4400'; C.shadowColor = '#ff4400';
-          C.fillRect(-pr.sz*0.4, -pr.sz*0.4, pr.sz*0.8, pr.sz*0.8);
+          C.fillRect(-pr.sz * 0.4, -pr.sz * 0.4, pr.sz * 0.8, pr.sz * 0.8);
         }
         C.restore();
       }
@@ -3194,6 +3204,7 @@
     // LOAD LEVEL
     // ============================================================
     function loadLevel(idx) {
+      if (typeof BossMusic !== 'undefined') BossMusic.onLoadLevel(idx);
       const lv = LEVELS[idx];
       const mapData = genMap(lv.biome);
       GS.map = mapData; GS.decos = genDecos(mapData, lv.biome); GS.ambient = genAmbient(lv.biome);
@@ -3273,7 +3284,7 @@
       if (flip) { ctx.scale(-1, 1); }
 
       // Palette: 1=robe foncée 2=robe claire 3=peau 4=barbe 5=chapeau 6=bâton 7=orbe 8=yeux 9=accent doré
-      const P = ['#2a1c6e','#4a3ea8','#f2c07a','#e8e8e8','#1a1240','#7a4a1a','#00d4ff','#220022','#ffd700'];
+      const P = ['#2a1c6e', '#4a3ea8', '#f2c07a', '#e8e8e8', '#1a1240', '#7a4a1a', '#00d4ff', '#220022', '#ffd700'];
 
       const W = 12, H = 16;
       const ox = -Math.floor(W * s / 2), oy = -Math.floor(H * s / 2);
@@ -3367,49 +3378,49 @@
 
       // Corps
       ctx.fillStyle = '#5a4030';
-      ctx.fillRect(ox + 3*s, oy + 5*s + runBob, 12*s, 7*s);
+      ctx.fillRect(ox + 3 * s, oy + 5 * s + runBob, 12 * s, 7 * s);
       // Ventre plus clair
       ctx.fillStyle = '#7a6050';
-      ctx.fillRect(ox + 5*s, oy + 8*s + runBob, 7*s, 3*s);
+      ctx.fillRect(ox + 5 * s, oy + 8 * s + runBob, 7 * s, 3 * s);
       // Queue
       ctx.fillStyle = '#4a3020';
-      ctx.fillRect(ox + 15*s, oy + 3*s + runBob, 3*s, 5*s);
-      ctx.fillRect(ox + 16*s, oy + 2*s + runBob, 2*s, 3*s);
+      ctx.fillRect(ox + 15 * s, oy + 3 * s + runBob, 3 * s, 5 * s);
+      ctx.fillRect(ox + 16 * s, oy + 2 * s + runBob, 2 * s, 3 * s);
 
       // Tête
       ctx.fillStyle = '#4a3020';
-      ctx.fillRect(ox + 0*s, oy + 2*s + runBob, 8*s, 7*s);
+      ctx.fillRect(ox + 0 * s, oy + 2 * s + runBob, 8 * s, 7 * s);
       // Museau
       ctx.fillStyle = '#6a5040';
-      ctx.fillRect(ox + 0*s, oy + 6*s + runBob, 5*s, 3*s);
+      ctx.fillRect(ox + 0 * s, oy + 6 * s + runBob, 5 * s, 3 * s);
       // Truffe
       ctx.fillStyle = '#1a0808';
-      ctx.fillRect(ox + 0*s, oy + 6*s + runBob, 2*s, 2*s);
+      ctx.fillRect(ox + 0 * s, oy + 6 * s + runBob, 2 * s, 2 * s);
       // Oreilles
       ctx.fillStyle = '#3a2010';
-      ctx.fillRect(ox + 3*s, oy + 0*s + runBob, 3*s, 3*s);
-      ctx.fillRect(ox + 6*s, oy + 0*s + runBob, 3*s, 3*s);
+      ctx.fillRect(ox + 3 * s, oy + 0 * s + runBob, 3 * s, 3 * s);
+      ctx.fillRect(ox + 6 * s, oy + 0 * s + runBob, 3 * s, 3 * s);
       // Yeux
       ctx.fillStyle = '#ffdd00';
-      ctx.fillRect(ox + 2*s, oy + 3*s + runBob, 2*s, 2*s);
-      ctx.fillRect(ox + 5*s, oy + 3*s + runBob, 2*s, 2*s);
+      ctx.fillRect(ox + 2 * s, oy + 3 * s + runBob, 2 * s, 2 * s);
+      ctx.fillRect(ox + 5 * s, oy + 3 * s + runBob, 2 * s, 2 * s);
       ctx.fillStyle = '#000';
-      ctx.fillRect(ox + 3*s, oy + 3*s + runBob, s, s);
-      ctx.fillRect(ox + 6*s, oy + 3*s + runBob, s, s);
+      ctx.fillRect(ox + 3 * s, oy + 3 * s + runBob, s, s);
+      ctx.fillRect(ox + 6 * s, oy + 3 * s + runBob, s, s);
 
       // Pattes avant
       ctx.fillStyle = '#4a3020';
-      ctx.fillRect(ox + 3*s, oy + 11*s + legOff, 3*s, 3*s);
-      ctx.fillRect(ox + 8*s, oy + 11*s - legOff, 3*s, 3*s);
+      ctx.fillRect(ox + 3 * s, oy + 11 * s + legOff, 3 * s, 3 * s);
+      ctx.fillRect(ox + 8 * s, oy + 11 * s - legOff, 3 * s, 3 * s);
       // Pattes arrière
-      ctx.fillRect(ox + 11*s, oy + 11*s + legOff, 3*s, 3*s);
-      ctx.fillRect(ox + 14*s, oy + 11*s - legOff, 3*s, 3*s);
+      ctx.fillRect(ox + 11 * s, oy + 11 * s + legOff, 3 * s, 3 * s);
+      ctx.fillRect(ox + 14 * s, oy + 11 * s - legOff, 3 * s, 3 * s);
       // Griffes
       ctx.fillStyle = '#aaa';
-      ctx.fillRect(ox + 3*s, oy + 13*s + legOff, s, s);
-      ctx.fillRect(ox + 5*s, oy + 13*s + legOff, s, s);
-      ctx.fillRect(ox + 8*s, oy + 13*s - legOff, s, s);
-      ctx.fillRect(ox + 10*s, oy + 13*s - legOff, s, s);
+      ctx.fillRect(ox + 3 * s, oy + 13 * s + legOff, s, s);
+      ctx.fillRect(ox + 5 * s, oy + 13 * s + legOff, s, s);
+      ctx.fillRect(ox + 8 * s, oy + 13 * s - legOff, s, s);
+      ctx.fillRect(ox + 10 * s, oy + 13 * s - legOff, s, s);
 
       ctx.restore();
     }
@@ -3426,7 +3437,7 @@
 
       // Ombre portée
       ctx.fillStyle = 'rgba(0,0,0,0.18)';
-      ctx.beginPath(); ctx.ellipse(cx - cx + 0, oy + 18*s - cy + cy, 8*s, 2*s, 0, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(cx - cx + 0, oy + 18 * s - cy + cy, 8 * s, 2 * s, 0, 0, Math.PI * 2); ctx.fill();
       ctx.translate(-cx + cx, -cy + cy);
 
       // Ailes
@@ -3434,52 +3445,52 @@
       if (wingUp) {
         // Ailes levées
         ctx.beginPath();
-        ctx.moveTo(ox + 6*s, oy + 6*s); ctx.lineTo(ox - 2*s, oy + 0*s);
-        ctx.lineTo(ox + 0*s, oy + 2*s); ctx.lineTo(ox + 2*s, oy + 0*s);
-        ctx.lineTo(ox + 4*s, oy + 3*s); ctx.closePath(); ctx.fill();
+        ctx.moveTo(ox + 6 * s, oy + 6 * s); ctx.lineTo(ox - 2 * s, oy + 0 * s);
+        ctx.lineTo(ox + 0 * s, oy + 2 * s); ctx.lineTo(ox + 2 * s, oy + 0 * s);
+        ctx.lineTo(ox + 4 * s, oy + 3 * s); ctx.closePath(); ctx.fill();
         ctx.beginPath();
-        ctx.moveTo(ox + 14*s, oy + 6*s); ctx.lineTo(ox + 22*s, oy + 0*s);
-        ctx.lineTo(ox + 20*s, oy + 2*s); ctx.lineTo(ox + 18*s, oy + 0*s);
-        ctx.lineTo(ox + 16*s, oy + 3*s); ctx.closePath(); ctx.fill();
+        ctx.moveTo(ox + 14 * s, oy + 6 * s); ctx.lineTo(ox + 22 * s, oy + 0 * s);
+        ctx.lineTo(ox + 20 * s, oy + 2 * s); ctx.lineTo(ox + 18 * s, oy + 0 * s);
+        ctx.lineTo(ox + 16 * s, oy + 3 * s); ctx.closePath(); ctx.fill();
       } else {
         // Ailes baissées
         ctx.beginPath();
-        ctx.moveTo(ox + 6*s, oy + 6*s); ctx.lineTo(ox - 2*s, oy + 10*s);
-        ctx.lineTo(ox + 0*s, oy + 9*s); ctx.lineTo(ox + 2*s, oy + 10*s);
-        ctx.lineTo(ox + 4*s, oy + 8*s); ctx.closePath(); ctx.fill();
+        ctx.moveTo(ox + 6 * s, oy + 6 * s); ctx.lineTo(ox - 2 * s, oy + 10 * s);
+        ctx.lineTo(ox + 0 * s, oy + 9 * s); ctx.lineTo(ox + 2 * s, oy + 10 * s);
+        ctx.lineTo(ox + 4 * s, oy + 8 * s); ctx.closePath(); ctx.fill();
         ctx.beginPath();
-        ctx.moveTo(ox + 14*s, oy + 6*s); ctx.lineTo(ox + 22*s, oy + 10*s);
-        ctx.lineTo(ox + 20*s, oy + 9*s); ctx.lineTo(ox + 18*s, oy + 10*s);
-        ctx.lineTo(ox + 16*s, oy + 8*s); ctx.closePath(); ctx.fill();
+        ctx.moveTo(ox + 14 * s, oy + 6 * s); ctx.lineTo(ox + 22 * s, oy + 10 * s);
+        ctx.lineTo(ox + 20 * s, oy + 9 * s); ctx.lineTo(ox + 18 * s, oy + 10 * s);
+        ctx.lineTo(ox + 16 * s, oy + 8 * s); ctx.closePath(); ctx.fill();
       }
       // Membrane aile (détail)
       ctx.fillStyle = '#3a2860';
       if (wingUp) {
-        ctx.fillRect(ox + 1*s, oy + 1*s, 4*s, s); ctx.fillRect(ox + 15*s, oy + 1*s, 4*s, s);
+        ctx.fillRect(ox + 1 * s, oy + 1 * s, 4 * s, s); ctx.fillRect(ox + 15 * s, oy + 1 * s, 4 * s, s);
       }
       // Corps
       ctx.fillStyle = '#2a1848';
-      ctx.beginPath(); ctx.arc(ox + 10*s, oy + 7*s, 5*s, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(ox + 10 * s, oy + 7 * s, 5 * s, 0, Math.PI * 2); ctx.fill();
       // Fourrure ventre
       ctx.fillStyle = '#3a2868';
-      ctx.fillRect(ox + 7*s, oy + 6*s, 6*s, 3*s);
+      ctx.fillRect(ox + 7 * s, oy + 6 * s, 6 * s, 3 * s);
       // Oreilles pointues
       ctx.fillStyle = '#1a0c30';
       ctx.beginPath();
-      ctx.moveTo(ox + 7*s, oy + 3*s); ctx.lineTo(ox + 6*s, oy - 1*s); ctx.lineTo(ox + 9*s, oy + 3*s); ctx.closePath(); ctx.fill();
+      ctx.moveTo(ox + 7 * s, oy + 3 * s); ctx.lineTo(ox + 6 * s, oy - 1 * s); ctx.lineTo(ox + 9 * s, oy + 3 * s); ctx.closePath(); ctx.fill();
       ctx.beginPath();
-      ctx.moveTo(ox + 11*s, oy + 3*s); ctx.lineTo(ox + 14*s, oy - 1*s); ctx.lineTo(ox + 13*s, oy + 3*s); ctx.closePath(); ctx.fill();
+      ctx.moveTo(ox + 11 * s, oy + 3 * s); ctx.lineTo(ox + 14 * s, oy - 1 * s); ctx.lineTo(ox + 13 * s, oy + 3 * s); ctx.closePath(); ctx.fill();
       // Yeux rouges brillants
       ctx.fillStyle = '#ff2200';
-      ctx.fillRect(ox + 8*s, oy + 5*s, 2*s, 2*s);
-      ctx.fillRect(ox + 11*s, oy + 5*s, 2*s, 2*s);
+      ctx.fillRect(ox + 8 * s, oy + 5 * s, 2 * s, 2 * s);
+      ctx.fillRect(ox + 11 * s, oy + 5 * s, 2 * s, 2 * s);
       ctx.fillStyle = '#ff8866';
-      ctx.fillRect(ox + 8*s, oy + 5*s, s, s);
-      ctx.fillRect(ox + 11*s, oy + 5*s, s, s);
+      ctx.fillRect(ox + 8 * s, oy + 5 * s, s, s);
+      ctx.fillRect(ox + 11 * s, oy + 5 * s, s, s);
       // Crocs
       ctx.fillStyle = '#eee';
-      ctx.fillRect(ox + 9*s, oy + 9*s, s, 2*s);
-      ctx.fillRect(ox + 11*s, oy + 9*s, s, 2*s);
+      ctx.fillRect(ox + 9 * s, oy + 9 * s, s, 2 * s);
+      ctx.fillRect(ox + 11 * s, oy + 9 * s, s, 2 * s);
 
       ctx.restore();
     }
@@ -3498,12 +3509,12 @@
       ctx.strokeStyle = 'rgba(200,200,200,0.3)';
       ctx.lineWidth = 0.5;
       for (let i = 0; i < 3; i++) {
-        ctx.beginPath(); ctx.arc(0, oy + 2*s, (4 + i*3)*s, 0, Math.PI*2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(0, oy + 2 * s, (4 + i * 3) * s, 0, Math.PI * 2); ctx.stroke();
       }
 
       // Pattes (8 pattes)
       ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = s;
-      const legAngles = [-0.7, -0.4, -0.15, 0.15, 0.4, 0.7, 1.0, 1.3].map((a, i) => i < 4 ? -Math.PI/2 - a*0.8 : Math.PI/2 + (a-0.7)*0.8);
+      const legAngles = [-0.7, -0.4, -0.15, 0.15, 0.4, 0.7, 1.0, 1.3].map((a, i) => i < 4 ? -Math.PI / 2 - a * 0.8 : Math.PI / 2 + (a - 0.7) * 0.8);
       for (let i = 0; i < 8; i++) {
         const side = i < 4 ? -1 : 1;
         const li = i % 4;
@@ -3514,35 +3525,35 @@
         ctx.beginPath();
         ctx.moveTo(baseX, 0);
         const midX = baseX + side * lLen * 0.5;
-        const midY = -4*s + ang * 3*s + bendY;
+        const midY = -4 * s + ang * 3 * s + bendY;
         const endX = baseX + side * lLen;
-        const endY = 3*s + ang * 2*s - bendY;
+        const endY = 3 * s + ang * 2 * s - bendY;
         ctx.quadraticCurveTo(midX, midY, endX, endY);
         ctx.stroke();
       }
 
       // Corps (abdomen)
       ctx.fillStyle = '#181818';
-      ctx.beginPath(); ctx.ellipse(0, 3*s, 6*s, 5*s, 0, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(0, 3 * s, 6 * s, 5 * s, 0, 0, Math.PI * 2); ctx.fill();
       // Motif abdomen
       ctx.fillStyle = '#cc2200';
-      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-2*s, 5*s); ctx.lineTo(0, 7*s); ctx.lineTo(2*s, 5*s); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-2 * s, 5 * s); ctx.lineTo(0, 7 * s); ctx.lineTo(2 * s, 5 * s); ctx.closePath(); ctx.fill();
       ctx.fillStyle = '#ff4400';
-      ctx.fillRect(-s, 3*s, 2*s, 2*s);
+      ctx.fillRect(-s, 3 * s, 2 * s, 2 * s);
 
       // Céphalothorax
       ctx.fillStyle = '#222';
-      ctx.beginPath(); ctx.ellipse(0, -3*s, 4*s, 4*s, 0, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(0, -3 * s, 4 * s, 4 * s, 0, 0, Math.PI * 2); ctx.fill();
       // 8 yeux
       ctx.fillStyle = '#44ffaa';
-      const eyePos = [[-2,-5],[0,-5],[2,-5],[-3,-3],[3,-3],[-1,-2],[1,-2],[0,-4]];
+      const eyePos = [[-2, -5], [0, -5], [2, -5], [-3, -3], [3, -3], [-1, -2], [1, -2], [0, -4]];
       for (const [ex, ey] of eyePos) {
-        ctx.fillRect(ex*s, ey*s, s, s);
+        ctx.fillRect(ex * s, ey * s, s, s);
       }
       // Crochets
       ctx.fillStyle = '#ff2200';
-      ctx.fillRect(-2*s, -8*s, s, 3*s);
-      ctx.fillRect(s, -8*s, s, 3*s);
+      ctx.fillRect(-2 * s, -8 * s, s, 3 * s);
+      ctx.fillRect(s, -8 * s, s, 3 * s);
 
       ctx.restore();
     }
@@ -3563,7 +3574,7 @@
         ctx.save();
         ctx.rotate((i - 1) * 0.3 + sway * 0.05);
         ctx.beginPath();
-        ctx.ellipse((-2 + i * 2) * s, -10*s, 4*s, 7*s, (i-1)*0.4, 0, Math.PI*2);
+        ctx.ellipse((-2 + i * 2) * s, -10 * s, 4 * s, 7 * s, (i - 1) * 0.4, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
       }
@@ -3571,811 +3582,1253 @@
       // Corps principal (feuille géante)
       ctx.fillStyle = '#2a8040';
       ctx.beginPath();
-      ctx.moveTo(0, oy + 0*s);
-      ctx.bezierCurveTo(-8*s + sway, oy + 6*s, -6*s - sway, oy + 16*s, 0, oy + 22*s);
-      ctx.bezierCurveTo(6*s + sway, oy + 16*s, 8*s - sway, oy + 6*s, 0, oy + 0*s);
+      ctx.moveTo(0, oy + 0 * s);
+      ctx.bezierCurveTo(-8 * s + sway, oy + 6 * s, -6 * s - sway, oy + 16 * s, 0, oy + 22 * s);
+      ctx.bezierCurveTo(6 * s + sway, oy + 16 * s, 8 * s - sway, oy + 6 * s, 0, oy + 0 * s);
       ctx.fill();
       // Nervure centrale
       ctx.strokeStyle = '#1a6030'; ctx.lineWidth = s;
       ctx.beginPath();
-      ctx.moveTo(0, oy); ctx.lineTo(0, oy + 22*s); ctx.stroke();
+      ctx.moveTo(0, oy); ctx.lineTo(0, oy + 22 * s); ctx.stroke();
       // Nervures latérales
       ctx.lineWidth = 0.5;
       for (let i = 1; i < 5; i++) {
         ctx.beginPath();
-        ctx.moveTo(0, oy + i*4*s);
-        ctx.lineTo(-4*s, oy + i*4*s + 2*s);
+        ctx.moveTo(0, oy + i * 4 * s);
+        ctx.lineTo(-4 * s, oy + i * 4 * s + 2 * s);
         ctx.stroke();
         ctx.beginPath();
-        ctx.moveTo(0, oy + i*4*s);
-        ctx.lineTo(4*s, oy + i*4*s + 2*s);
+        ctx.moveTo(0, oy + i * 4 * s);
+        ctx.lineTo(4 * s, oy + i * 4 * s + 2 * s);
         ctx.stroke();
       }
       // Reflets
       ctx.fillStyle = '#4ab060';
       ctx.beginPath();
-      ctx.ellipse(-2*s, oy + 8*s, 2*s, 5*s, -0.2, 0, Math.PI*2);
+      ctx.ellipse(-2 * s, oy + 8 * s, 2 * s, 5 * s, -0.2, 0, Math.PI * 2);
       ctx.fill();
 
       // Yeux rouges brillants
       ctx.fillStyle = '#cc0000';
-      ctx.beginPath(); ctx.arc(-3*s, oy + 9*s, 2*s, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(3*s, oy + 9*s, 2*s, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(-3 * s, oy + 9 * s, 2 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(3 * s, oy + 9 * s, 2 * s, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#ff4444';
-      ctx.fillRect(-4*s, oy + 8*s, 2*s, 2*s);
-      ctx.fillRect(2*s, oy + 8*s, 2*s, 2*s);
+      ctx.fillRect(-4 * s, oy + 8 * s, 2 * s, 2 * s);
+      ctx.fillRect(2 * s, oy + 8 * s, 2 * s, 2 * s);
       // Pupilles
       ctx.fillStyle = '#000';
-      ctx.fillRect(-3*s, oy + 9*s, s, s);
-      ctx.fillRect(3*s, oy + 9*s, s, s);
+      ctx.fillRect(-3 * s, oy + 9 * s, s, s);
+      ctx.fillRect(3 * s, oy + 9 * s, s, s);
 
       // Bouche dentelée
       ctx.fillStyle = '#0a3010';
-      ctx.fillRect(-3*s, oy + 13*s, 6*s, 2*s);
+      ctx.fillRect(-3 * s, oy + 13 * s, 6 * s, 2 * s);
       ctx.fillStyle = '#eee';
       for (let i = 0; i < 3; i++) {
-        ctx.fillRect((-2 + i*2)*s, oy + 13*s, s, 2*s);
+        ctx.fillRect((-2 + i * 2) * s, oy + 13 * s, s, 2 * s);
       }
 
       // Petites griffes
       ctx.fillStyle = '#1a4020';
-      ctx.fillRect(-4*s, oy + 20*s - sway, 2*s, 3*s);
-      ctx.fillRect(2*s, oy + 20*s + sway, 2*s, 3*s);
+      ctx.fillRect(-4 * s, oy + 20 * s - sway, 2 * s, 3 * s);
+      ctx.fillRect(2 * s, oy + 20 * s + sway, 2 * s, 3 * s);
       ctx.fillStyle = '#aad060';
-      ctx.fillRect(-5*s, oy + 22*s - sway, s, 2*s);
-      ctx.fillRect(-3*s, oy + 22*s - sway, s, 2*s);
-      ctx.fillRect(2*s, oy + 22*s + sway, s, 2*s);
-      ctx.fillRect(4*s, oy + 22*s + sway, s, 2*s);
+      ctx.fillRect(-5 * s, oy + 22 * s - sway, s, 2 * s);
+      ctx.fillRect(-3 * s, oy + 22 * s - sway, s, 2 * s);
+      ctx.fillRect(2 * s, oy + 22 * s + sway, s, 2 * s);
+      ctx.fillRect(4 * s, oy + 22 * s + sway, s, 2 * s);
 
       ctx.restore();
     }
 
     // ─── DÉMON RAGE (boss 1) ──────────────────────────────────────
+    // ═══════════════════════════════════════════════════════════════
+    // ─── VORGATH LE BRÛLÉ — Démon des Flammes ──────────────────────
+    // ═══════════════════════════════════════════════════════════════
     function drawDemon(ctx, cx, cy, dir, frame, scale = 2.2, alpha = 1, rageMode = false) {
       const s = scale;
+      const f = GS.frame;
       ctx.save();
       ctx.translate(cx, cy);
       ctx.globalAlpha *= alpha;
-      const flip = dir === 1;
-      if (flip) ctx.scale(-1, 1);
-
-      const ox = -12 * s, oy = -14 * s;
-      const legOff = frame === 0 ? 0 : frame === 1 ? -s : s;
-      const pulse = (Math.sin(GS.frame * 0.15) + 1) / 2;
-
-      // Aura de rage
-      if (rageMode) {
-        const grad = ctx.createRadialGradient(0, 0, 2, 0, 0, 20*s);
-        grad.addColorStop(0, `rgba(255,50,0,${0.3 + 0.2*pulse})`);
-        grad.addColorStop(1, 'rgba(255,0,0,0)');
-        ctx.fillStyle = grad;
-        ctx.beginPath(); ctx.arc(0, 0, 20*s, 0, Math.PI*2); ctx.fill();
-      }
-
-      // Ombres/contours
-      ctx.fillStyle = '#2a0000';
-      ctx.fillRect(ox + 3*s, oy + 2*s, 18*s, 4*s); // ombre cornes
-      ctx.fillRect(ox + 2*s, oy + 6*s, 20*s, 20*s); // ombre corps
-
-      // Cornes
-      ctx.fillStyle = '#1a0000';
-      ctx.beginPath();
-      ctx.moveTo(ox + 5*s, oy + 6*s); ctx.lineTo(ox + 3*s, oy + 0*s); ctx.lineTo(ox + 9*s, oy + 6*s);
-      ctx.closePath(); ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(ox + 15*s, oy + 6*s); ctx.lineTo(ox + 21*s, oy + 0*s); ctx.lineTo(ox + 19*s, oy + 6*s);
-      ctx.closePath(); ctx.fill();
-      // Pointes cornes
-      ctx.fillStyle = rageMode ? '#ff4400' : '#3a0000';
-      ctx.fillRect(ox + 3*s, oy + 0*s, 2*s, 2*s);
-      ctx.fillRect(ox + 21*s, oy + 0*s, 2*s, 2*s);
-
-      // Tête
-      ctx.fillStyle = '#8b0000';
-      ctx.fillRect(ox + 5*s, oy + 6*s, 14*s, 10*s);
-      // Joues
-      ctx.fillStyle = '#6a0000';
-      ctx.fillRect(ox + 4*s, oy + 10*s, 3*s, 4*s);
-      ctx.fillRect(ox + 17*s, oy + 10*s, 3*s, 4*s);
-
-      // Yeux — brillants selon rage
-      const eyeCol = rageMode ? '#ff8800' : '#ff2200';
-      ctx.fillStyle = eyeCol;
-      ctx.fillRect(ox + 7*s, oy + 9*s, 4*s, 3*s);
-      ctx.fillRect(ox + 13*s, oy + 9*s, 4*s, 3*s);
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(ox + 7*s, oy + 9*s, 2*s, s);
-      ctx.fillRect(ox + 13*s, oy + 9*s, 2*s, s);
-      // Glow yeux
-      if (rageMode || pulse > 0.6) {
-        ctx.fillStyle = `rgba(255,100,0,${0.4 * pulse})`;
-        ctx.fillRect(ox + 6*s, oy + 8*s, 6*s, 5*s);
-        ctx.fillRect(ox + 12*s, oy + 8*s, 6*s, 5*s);
-      }
-
-      // Bouche avec crocs
-      ctx.fillStyle = '#3a0000';
-      ctx.fillRect(ox + 7*s, oy + 13*s, 10*s, 3*s);
-      ctx.fillStyle = '#cc2200';
-      ctx.fillRect(ox + 8*s, oy + 13*s, 2*s, s); // langue
-      ctx.fillRect(ox + 12*s, oy + 13*s, 2*s, s);
-      ctx.fillStyle = '#eeeeee';
-      ctx.fillRect(ox + 7*s, oy + 13*s, 2*s, 2*s); // crocs
-      ctx.fillRect(ox + 10*s, oy + 13*s, 2*s, 2*s);
-      ctx.fillRect(ox + 14*s, oy + 13*s, 2*s, 2*s);
-
-      // Corps massif
-      ctx.fillStyle = '#6a0000';
-      ctx.fillRect(ox + 3*s, oy + 16*s, 18*s, 10*s);
-      // Abdomen
-      ctx.fillStyle = '#8b1a00';
-      ctx.fillRect(ox + 5*s, oy + 18*s, 14*s, 6*s);
-      // Détails corps (segments)
-      ctx.fillStyle = '#4a0000';
-      for (let i = 0; i < 3; i++) {
-        ctx.fillRect(ox + 5*s, oy + (18 + i*2)*s, 14*s, s);
-      }
-
-      // Épaules / aura instable
-      ctx.fillStyle = rageMode ? `rgba(255,80,0,${0.5 + 0.3*pulse})` : `rgba(200,0,0,${0.2 + 0.15*pulse})`;
-      ctx.fillRect(ox + 1*s, oy + 14*s, 4*s, 4*s);
-      ctx.fillRect(ox + 19*s, oy + 14*s, 4*s, 4*s);
-
-      // Bras
-      ctx.fillStyle = '#7a0000';
-      ctx.fillRect(ox + 0*s, oy + 16*s, 4*s, 8*s);
-      ctx.fillRect(ox + 20*s, oy + 16*s, 4*s, 8*s);
-      // Griffes
-      ctx.fillStyle = '#1a0000';
-      ctx.fillRect(ox + 0*s, oy + 23*s, 2*s, 3*s);
-      ctx.fillRect(ox + 2*s, oy + 24*s, 2*s, 2*s);
-      ctx.fillRect(ox + 20*s, oy + 23*s, 2*s, 3*s);
-      ctx.fillRect(ox + 22*s, oy + 24*s, 2*s, 2*s);
-
-      // Jambes
-      ctx.fillStyle = '#6a0000';
-      ctx.fillRect(ox + 5*s, oy + 26*s + legOff, 5*s, 5*s);
-      ctx.fillRect(ox + 14*s, oy + 26*s - legOff, 5*s, 5*s);
-      // Sabots
-      ctx.fillStyle = '#1a0000';
-      ctx.fillRect(ox + 4*s, oy + 30*s + legOff, 6*s, 2*s);
-      ctx.fillRect(ox + 13*s, oy + 30*s - legOff, 6*s, 2*s);
-
-      ctx.restore();
-    }
-
-    // ─── ROI DOUTE (boss 2) ───────────────────────────────────────
-    function drawKingDoubt(ctx, cx, cy, dir, frame, scale = 2.2, alpha = 1, rageMode = false) {
-      const s = scale;
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.globalAlpha *= alpha;
-      const flip = dir === 1;
-      if (flip) ctx.scale(-1, 1);
+      if (dir === 1) ctx.scale(-1, 1);
 
       const ox = -12 * s, oy = -16 * s;
-      const legOff = frame === 0 ? 0 : frame === 1 ? -s : s;
-      const pulse = (Math.sin(GS.frame * 0.1) + 1) / 2;
 
-      // Aura violet/noir
-      const auraCol = rageMode ? `rgba(180,0,255,${0.35+0.2*pulse})` : `rgba(80,0,150,${0.2+0.1*pulse})`;
-      ctx.fillStyle = auraCol;
-      ctx.beginPath(); ctx.ellipse(0, 4*s, 18*s, 10*s, 0, 0, Math.PI*2); ctx.fill();
+      // Timings animés indépendants
+      const breathe   = Math.sin(f * 0.06);
+      const pulse     = (Math.sin(f * 0.18) + 1) / 2;
+      const fireFlick = (Math.sin(f * 0.38) + Math.sin(f * 0.71)) * 0.5;
+      const legPhase  = (f % 32) / 32;
+      const legL      = Math.sin(legPhase * Math.PI * 2) * 4 * s;
+      const legR      = -legL;
+      const armL      = Math.sin(f * 0.09) * 5 * s;
+      const armR      = -armL;
+      const bodyBob   = breathe * 1.2 * s;
+      const hornPulse = rageMode ? 0.6 + 0.4 * pulse : 0.2 + 0.15 * pulse;
 
-      // Cape flottante
-      ctx.fillStyle = rageMode ? '#4a0080' : '#1a0040';
-      ctx.beginPath();
-      ctx.moveTo(ox + 2*s, oy + 14*s);
-      ctx.lineTo(ox - 3*s, oy + 32*s + legOff*0.5);
-      ctx.lineTo(ox + 12*s, oy + 34*s);
-      ctx.lineTo(ox + 26*s, oy + 32*s - legOff*0.5);
-      ctx.lineTo(ox + 22*s, oy + 14*s);
-      ctx.closePath(); ctx.fill();
-      // Liseré cape
-      ctx.strokeStyle = rageMode ? '#cc00ff' : '#6600aa';
-      ctx.lineWidth = s; ctx.stroke();
-
-      // Couronne
-      ctx.fillStyle = '#ffd700';
-      ctx.fillRect(ox + 5*s, oy + 2*s, 14*s, 4*s);
-      // Pointes couronne
-      for (let i = 0; i < 5; i++) {
-        const h = [3,5,6,5,3][i];
-        ctx.fillRect(ox + (5 + i*3)*s, oy + (2-h)*s, 2*s, h*s);
+      // ── Flammes au sol (en dessous de tout) ──
+      const flameCount = rageMode ? 8 : 5;
+      for (let i = 0; i < flameCount; i++) {
+        const fx2 = ox + (4 + i * 4) * s;
+        const fh = (6 + Math.sin(f * 0.3 + i * 1.3) * 3 + fireFlick * 2) * s;
+        const falpha = 0.35 + 0.25 * Math.sin(f * 0.25 + i * 0.8);
+        ctx.fillStyle = `rgba(255,${60 + i * 15},0,${falpha})`;
+        ctx.beginPath();
+        ctx.moveTo(fx2, oy + 33 * s + bodyBob);
+        ctx.lineTo(fx2 + 2 * s, oy + 33 * s - fh + bodyBob);
+        ctx.lineTo(fx2 + 4 * s, oy + 33 * s + bodyBob);
+        ctx.closePath(); ctx.fill();
       }
-      // Gemmes couronne
-      ctx.fillStyle = rageMode ? '#ff00ff' : '#aa00ff';
-      ctx.fillRect(ox + 11*s, oy - 2*s, 2*s, 2*s);
-      ctx.fillStyle = '#ff4444';
-      ctx.fillRect(ox + 8*s, oy + 0*s, 2*s, 2*s);
-      ctx.fillRect(ox + 14*s, oy + 0*s, 2*s, 2*s);
 
-      // Tête
-      ctx.fillStyle = '#2a0a2a';
-      ctx.fillRect(ox + 5*s, oy + 6*s, 14*s, 10*s);
-      // Masque
-      ctx.fillStyle = '#1a0028';
-      ctx.fillRect(ox + 7*s, oy + 8*s, 10*s, 5*s);
-      // Yeux
-      const eyeCol2 = rageMode ? '#ff00ff' : '#aa00ff';
-      ctx.fillStyle = eyeCol2;
-      ctx.fillRect(ox + 8*s, oy + 9*s, 3*s, 3*s);
-      ctx.fillRect(ox + 13*s, oy + 9*s, 3*s, 3*s);
+      // ── Aura rage / braise ──
+      if (rageMode) {
+        const gr = ctx.createRadialGradient(0, bodyBob, 3 * s, 0, bodyBob, 28 * s);
+        gr.addColorStop(0, `rgba(255,80,0,${0.35 + 0.2 * pulse})`);
+        gr.addColorStop(0.6, `rgba(200,20,0,${0.12 + 0.08 * pulse})`);
+        gr.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = gr;
+        ctx.beginPath(); ctx.ellipse(0, bodyBob, 28 * s, 22 * s, 0, 0, Math.PI * 2); ctx.fill();
+        // Particules de braise
+        for (let i = 0; i < 6; i++) {
+          const angle = (f * 0.04 + i * 1.047) % (Math.PI * 2);
+          const r2 = (18 + Math.sin(f * 0.1 + i) * 4) * s;
+          const px2 = Math.cos(angle) * r2, py2 = Math.sin(angle) * r2 * 0.6 + bodyBob;
+          ctx.fillStyle = `rgba(255,${100 + i * 25},0,${0.5 + 0.3 * Math.sin(f * 0.2 + i)})`;
+          ctx.fillRect(px2 - s, py2 - s, 2 * s, 2 * s);
+        }
+      } else {
+        // braise passive
+        const gr2 = ctx.createRadialGradient(0, bodyBob, 2 * s, 0, bodyBob, 20 * s);
+        gr2.addColorStop(0, `rgba(200,40,0,${0.15 + 0.08 * pulse})`);
+        gr2.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = gr2; ctx.beginPath(); ctx.ellipse(0, bodyBob, 22 * s, 16 * s, 0, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // ── Corps (centré sur bodyBob) ──
+      ctx.save(); ctx.translate(0, bodyBob);
+
+      // Ombre corps
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
+      ctx.fillRect(ox + 2 * s, oy + 7 * s, 20 * s, 21 * s);
+
+      // JAMBES (animées indépendamment)
+      // Jambe gauche
+      ctx.fillStyle = '#6a0000';
+      ctx.fillRect(ox + 4 * s, oy + 26 * s + legL, 6 * s, 6 * s);
+      ctx.fillStyle = '#4a0000';
+      ctx.fillRect(ox + 3 * s, oy + 31 * s + legL, 7 * s, 3 * s);
+      // Sabot gauche avec petites flammes
+      ctx.fillStyle = rageMode ? '#ff2200' : '#1a0000';
+      ctx.fillRect(ox + 2 * s, oy + 33 * s + legL, 8 * s, 2 * s);
+      if (rageMode) {
+        ctx.fillStyle = `rgba(255,120,0,${0.6 + 0.3 * pulse})`;
+        ctx.fillRect(ox + 3 * s, oy + 32 * s + legL, 2 * s, 2 * s);
+        ctx.fillRect(ox + 7 * s, oy + 32 * s + legL, 2 * s, 2 * s);
+      }
+      // Jambe droite
+      ctx.fillStyle = '#6a0000';
+      ctx.fillRect(ox + 14 * s, oy + 26 * s + legR, 6 * s, 6 * s);
+      ctx.fillStyle = '#4a0000';
+      ctx.fillRect(ox + 13 * s, oy + 31 * s + legR, 7 * s, 3 * s);
+      ctx.fillStyle = rageMode ? '#ff2200' : '#1a0000';
+      ctx.fillRect(ox + 12 * s, oy + 33 * s + legR, 8 * s, 2 * s);
+      if (rageMode) {
+        ctx.fillStyle = `rgba(255,120,0,${0.6 + 0.3 * pulse})`;
+        ctx.fillRect(ox + 13 * s, oy + 32 * s + legR, 2 * s, 2 * s);
+        ctx.fillRect(ox + 17 * s, oy + 32 * s + legR, 2 * s, 2 * s);
+      }
+
+      // CORPS principal
+      ctx.fillStyle = '#6a0000';
+      ctx.fillRect(ox + 2 * s, oy + 16 * s, 20 * s, 11 * s);
+      // Abdomen segmenté
+      ctx.fillStyle = '#8b1a00';
+      ctx.fillRect(ox + 4 * s, oy + 18 * s, 16 * s, 7 * s);
+      // Segments abdomen animés
+      for (let i = 0; i < 3; i++) {
+        const segAlpha = 0.4 + 0.2 * Math.sin(f * 0.12 + i * 1.2);
+        ctx.fillStyle = `rgba(40,0,0,${segAlpha})`;
+        ctx.fillRect(ox + 4 * s, oy + (19 + i * 2) * s, 16 * s, s);
+      }
+      // Lueur abdomen (lave interne)
+      ctx.fillStyle = `rgba(255,${60 + 40 * pulse},0,${0.18 + 0.12 * pulse})`;
+      ctx.fillRect(ox + 5 * s, oy + 19 * s, 14 * s, 5 * s);
+
+      // ÉPAULES avec lave
+      const shoulderGlow = rageMode ? `rgba(255,80,0,${0.5 + 0.3 * pulse})` : `rgba(200,30,0,${0.25 + 0.15 * pulse})`;
+      ctx.fillStyle = shoulderGlow;
+      ctx.fillRect(ox + 0 * s, oy + 14 * s, 5 * s, 5 * s);
+      ctx.fillRect(ox + 19 * s, oy + 14 * s, 5 * s, 5 * s);
+      ctx.fillStyle = '#8b0000';
+      ctx.fillRect(ox + 1 * s, oy + 15 * s, 3 * s, 3 * s);
+      ctx.fillRect(ox + 20 * s, oy + 15 * s, 3 * s, 3 * s);
+
+      // BRAS gauche (animé)
+      ctx.save(); ctx.translate(ox + 2 * s, oy + 16 * s);
+      ctx.rotate(armL * 0.025);
+      ctx.fillStyle = '#7a0000';
+      ctx.fillRect(-2 * s, 0, 4 * s, 9 * s);
+      // Avant-bras
+      ctx.fillStyle = '#6a0000';
+      ctx.fillRect(-2 * s, 7 * s, 4 * s, 5 * s);
+      // Griffes
+      ctx.fillStyle = '#1a0000';
+      ctx.fillRect(-2 * s, 11 * s, 2 * s, 3 * s);
+      ctx.fillRect(0, 12 * s, 2 * s, 2 * s);
+      ctx.fillRect(1 * s, 11 * s, 2 * s, 3 * s);
+      if (rageMode) {
+        ctx.fillStyle = `rgba(255,100,0,${0.5 + 0.3 * pulse})`;
+        ctx.fillRect(-3 * s, 10 * s, 6 * s, 4 * s);
+      }
+      ctx.restore();
+
+      // BRAS droit (animé miroir)
+      ctx.save(); ctx.translate(ox + 22 * s, oy + 16 * s);
+      ctx.rotate(armR * 0.025);
+      ctx.fillStyle = '#7a0000';
+      ctx.fillRect(-2 * s, 0, 4 * s, 9 * s);
+      ctx.fillStyle = '#6a0000';
+      ctx.fillRect(-2 * s, 7 * s, 4 * s, 5 * s);
+      ctx.fillStyle = '#1a0000';
+      ctx.fillRect(-2 * s, 11 * s, 2 * s, 3 * s);
+      ctx.fillRect(0, 12 * s, 2 * s, 2 * s);
+      ctx.fillRect(1 * s, 11 * s, 2 * s, 3 * s);
+      if (rageMode) {
+        ctx.fillStyle = `rgba(255,100,0,${0.5 + 0.3 * pulse})`;
+        ctx.fillRect(-3 * s, 10 * s, 6 * s, 4 * s);
+      }
+      ctx.restore();
+
+      // TÊTE
+      // Ombre tête
+      ctx.fillStyle = '#2a0000';
+      ctx.fillRect(ox + 3 * s, oy + 3 * s, 18 * s, 4 * s);
+      ctx.fillRect(ox + 2 * s, oy + 7 * s, 20 * s, 11 * s);
+
+      // Cornes (animées légèrement)
+      const hornBend = Math.sin(f * 0.05) * s * 0.5;
+      // Corne gauche
+      ctx.fillStyle = '#1a0000';
+      ctx.beginPath();
+      ctx.moveTo(ox + 5 * s, oy + 7 * s);
+      ctx.lineTo(ox + 2 * s + hornBend, oy + 0);
+      ctx.lineTo(ox + 9 * s, oy + 7 * s);
+      ctx.closePath(); ctx.fill();
+      // Corne droite
+      ctx.beginPath();
+      ctx.moveTo(ox + 15 * s, oy + 7 * s);
+      ctx.lineTo(ox + 22 * s - hornBend, oy + 0);
+      ctx.lineTo(ox + 19 * s, oy + 7 * s);
+      ctx.closePath(); ctx.fill();
+      // Pointes cornes avec glow
+      ctx.fillStyle = rageMode ? '#ff6600' : '#8b1a00';
+      ctx.fillRect(ox + 2 * s, oy - s, 2 * s, 2 * s);
+      ctx.fillRect(ox + 21 * s, oy - s, 2 * s, 2 * s);
+      if (hornPulse > 0.25) {
+        ctx.fillStyle = `rgba(255,${rageMode ? 80 : 30},0,${hornPulse})`;
+        ctx.fillRect(ox + 1 * s, oy - 2 * s, 4 * s, 3 * s);
+        ctx.fillRect(ox + 19 * s, oy - 2 * s, 4 * s, 3 * s);
+      }
+
+      // Tête principale
+      ctx.fillStyle = '#8b0000';
+      ctx.fillRect(ox + 4 * s, oy + 7 * s, 16 * s, 10 * s);
+      // Joues osseuses
+      ctx.fillStyle = '#6a0000';
+      ctx.fillRect(ox + 3 * s, oy + 10 * s, 3 * s, 5 * s);
+      ctx.fillRect(ox + 18 * s, oy + 10 * s, 3 * s, 5 * s);
+      // Détail front
+      ctx.fillStyle = '#7a0000';
+      ctx.fillRect(ox + 5 * s, oy + 7 * s, 14 * s, 3 * s);
+
+      // YEUX (animés — clignement + glow pulsé)
+      const blinkOpen = (f % 120) > 4; // cligne rapidement toutes les 2s
+      const eyeH = blinkOpen ? 3 * s : s;
+      const eyeY = blinkOpen ? oy + 9 * s : oy + 10 * s;
+      // Fond yeux sombres
+      ctx.fillStyle = '#1a0000';
+      ctx.fillRect(ox + 6 * s, oy + 9 * s, 5 * s, 4 * s);
+      ctx.fillRect(ox + 13 * s, oy + 9 * s, 5 * s, 4 * s);
+      // Iris
+      const eyeColor = rageMode ? `rgb(255,${60 + Math.floor(80 * pulse)},0)` : `rgb(220,${30 + Math.floor(40 * pulse)},0)`;
+      ctx.fillStyle = eyeColor;
+      ctx.fillRect(ox + 7 * s, eyeY, 4 * s, eyeH);
+      ctx.fillRect(ox + 14 * s, eyeY, 4 * s, eyeH);
+      // Pupilles
+      if (blinkOpen) {
+        ctx.fillStyle = '#000';
+        ctx.fillRect(ox + 8 * s, eyeY + s, 2 * s, s);
+        ctx.fillRect(ox + 15 * s, eyeY + s, 2 * s, s);
+      }
+      // Brillance
       ctx.fillStyle = '#fff';
-      ctx.fillRect(ox + 8*s, oy + 9*s, s, s);
-      ctx.fillRect(ox + 13*s, oy + 9*s, s, s);
-      // Ombre yeux glow
-      ctx.fillStyle = `rgba(180,0,255,${0.4*pulse})`;
-      ctx.fillRect(ox + 6*s, oy + 8*s, 6*s, 5*s);
-      ctx.fillRect(ox + 12*s, oy + 8*s, 6*s, 5*s);
-      // Bouche
-      ctx.fillStyle = '#000';
-      ctx.fillRect(ox + 8*s, oy + 14*s, 8*s, 2*s);
-      ctx.fillStyle = '#cc00cc';
-      ctx.fillRect(ox + 9*s, oy + 14*s, 2*s, s);
-      ctx.fillRect(ox + 13*s, oy + 14*s, 2*s, s);
+      ctx.fillRect(ox + 7 * s, eyeY, s, s);
+      ctx.fillRect(ox + 14 * s, eyeY, s, s);
+      // Glow yeux
+      const glowA = blinkOpen ? 0.35 + 0.25 * pulse : 0.1;
+      ctx.fillStyle = `rgba(255,${rageMode ? 60 : 30},0,${glowA})`;
+      ctx.fillRect(ox + 5 * s, oy + 8 * s, 7 * s, 6 * s);
+      ctx.fillRect(ox + 12 * s, oy + 8 * s, 7 * s, 6 * s);
 
-      // Corps avec armure
-      ctx.fillStyle = '#1a0a30';
-      ctx.fillRect(ox + 4*s, oy + 16*s, 16*s, 10*s);
-      // Plaques armure
-      ctx.fillStyle = '#3a1a60';
-      ctx.fillRect(ox + 5*s, oy + 17*s, 14*s, 4*s);
-      ctx.fillRect(ox + 5*s, oy + 22*s, 14*s, 3*s);
-      // Brillance armure
-      ctx.fillStyle = rageMode ? '#cc00ff' : '#6600aa';
-      ctx.fillRect(ox + 6*s, oy + 17*s, s, 3*s);
-      ctx.fillRect(ox + 17*s, oy + 17*s, s, 3*s);
-      // Orbe central
-      ctx.fillStyle = rageMode ? '#ff00ff' : '#8800cc';
-      ctx.beginPath(); ctx.arc(ox + 12*s, oy + 21*s, 3*s, 0, Math.PI*2); ctx.fill();
-      ctx.fillStyle = `rgba(255,100,255,${0.6*pulse})`;
-      ctx.beginPath(); ctx.arc(ox + 12*s, oy + 21*s, 2*s, 0, Math.PI*2); ctx.fill();
+      // BOUCHE avec crocs
+      ctx.fillStyle = '#2a0000';
+      ctx.fillRect(ox + 7 * s, oy + 14 * s, 10 * s, 3 * s);
+      // Lueur bouche (intérieur ardent)
+      ctx.fillStyle = `rgba(255,${80 + 40 * pulse},0,${0.5 + 0.3 * pulse})`;
+      ctx.fillRect(ox + 8 * s, oy + 15 * s, 8 * s, s);
+      // Crocs
+      ctx.fillStyle = '#e0d8cc';
+      ctx.fillRect(ox + 7 * s, oy + 14 * s, 2 * s, 3 * s);
+      ctx.fillRect(ox + 10 * s, oy + 14 * s, 2 * s, 2 * s);
+      ctx.fillRect(ox + 14 * s, oy + 14 * s, 2 * s, 3 * s);
+      ctx.fillRect(ox + 12 * s, oy + 14 * s, 2 * s, 2 * s);
 
-      // Bras avec épaulières
-      ctx.fillStyle = '#2a0a40';
-      ctx.fillRect(ox + 0*s, oy + 16*s, 5*s, 10*s);
-      ctx.fillRect(ox + 19*s, oy + 16*s, 5*s, 10*s);
-      ctx.fillStyle = '#4a2080';
-      ctx.fillRect(ox + 0*s, oy + 16*s, 5*s, 3*s); // épaulière
-      ctx.fillRect(ox + 19*s, oy + 16*s, 5*s, 3*s);
-      // Mains/magie
-      ctx.fillStyle = rageMode ? '#ff00ff' : '#8800cc';
-      ctx.fillRect(ox + 0*s, oy + 25*s, 4*s, 3*s);
-      ctx.fillRect(ox + 20*s, oy + 25*s, 4*s, 3*s);
+      // Flammes bouche (rage)
+      if (rageMode) {
+        for (let i = 0; i < 4; i++) {
+          const fh2 = (4 + Math.sin(f * 0.3 + i * 0.9) * 2 + fireFlick) * s;
+          ctx.fillStyle = `rgba(255,${80 + i * 30},0,${0.7 + 0.2 * Math.sin(f * 0.4 + i)})`;
+          ctx.beginPath();
+          ctx.moveTo(ox + (8 + i * 2) * s, oy + 17 * s);
+          ctx.lineTo(ox + (9 + i * 2) * s, oy + 17 * s - fh2);
+          ctx.lineTo(ox + (10 + i * 2) * s, oy + 17 * s);
+          ctx.closePath(); ctx.fill();
+        }
+      }
 
-      // Jambes
-      ctx.fillStyle = '#1a0a30';
-      ctx.fillRect(ox + 5*s, oy + 26*s + legOff, 5*s, 6*s);
-      ctx.fillRect(ox + 14*s, oy + 26*s - legOff, 5*s, 6*s);
+      ctx.restore(); // fin bodyBob
+      ctx.restore(); // fin global
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // ─── NYTHERION LE REVENANT — Roi Fantôme ───────────────────────
+    // ═══════════════════════════════════════════════════════════════
+    function drawKingDoubt(ctx, cx, cy, dir, frame, scale = 2.2, alpha = 1, rageMode = false) {
+      const s = scale;
+      const f = GS.frame;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.globalAlpha *= alpha;
+      if (dir === 1) ctx.scale(-1, 1);
+
+      const ox = -12 * s, oy = -18 * s;
+
+      // Timings
+      const breathe   = Math.sin(f * 0.05);
+      const pulse     = (Math.sin(f * 0.14) + 1) / 2;
+      const fastPulse = (Math.sin(f * 0.28) + 1) / 2;
+      const capeWave  = Math.sin(f * 0.08);
+      const legPhase  = (f % 36) / 36;
+      const legL      = Math.sin(legPhase * Math.PI * 2) * 3 * s;
+      const legR      = -legL;
+      const armWave   = Math.sin(f * 0.07) * 6 * s;
+      const float     = Math.sin(f * 0.055) * 1.5 * s;
+      const orbSpin   = f * 0.04;
+
+      // ── Orbes orbitaux (avant tout) ──
+      const orbCount = rageMode ? 5 : 3;
+      for (let i = 0; i < orbCount; i++) {
+        const angle = orbSpin + i * (Math.PI * 2 / orbCount);
+        const orR = (22 + Math.sin(f * 0.06 + i) * 3) * s;
+        const orX = Math.cos(angle) * orR;
+        const orY = Math.sin(angle) * orR * 0.5 + float;
+        const orA = 0.5 + 0.4 * Math.sin(f * 0.15 + i);
+        ctx.fillStyle = rageMode ? `rgba(255,0,255,${orA})` : `rgba(160,0,255,${orA})`;
+        ctx.beginPath(); ctx.arc(orX, orY, 3 * s, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = `rgba(255,255,255,${orA * 0.6})`;
+        ctx.beginPath(); ctx.arc(orX - s, orY - s, s, 0, Math.PI * 2); ctx.fill();
+        // Traîne de l'orbe
+        for (let t = 1; t <= 3; t++) {
+          const ta = angle - t * 0.15;
+          const tX = Math.cos(ta) * orR;
+          const tY = Math.sin(ta) * orR * 0.5 + float;
+          ctx.fillStyle = rageMode ? `rgba(200,0,255,${orA * 0.3 / t})` : `rgba(120,0,220,${orA * 0.25 / t})`;
+          ctx.beginPath(); ctx.arc(tX, tY, (2 - t * 0.4) * s, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+
+      // ── Aura fantôme ──
+      const auraGr = ctx.createRadialGradient(0, float, 4 * s, 0, float, 30 * s);
+      if (rageMode) {
+        auraGr.addColorStop(0, `rgba(200,0,255,${0.3 + 0.2 * pulse})`);
+        auraGr.addColorStop(0.5, `rgba(100,0,180,${0.12 + 0.08 * pulse})`);
+      } else {
+        auraGr.addColorStop(0, `rgba(80,0,160,${0.2 + 0.12 * pulse})`);
+        auraGr.addColorStop(0.5, `rgba(40,0,80,${0.08 + 0.05 * pulse})`);
+      }
+      auraGr.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = auraGr;
+      ctx.beginPath(); ctx.ellipse(0, float, 30 * s, 22 * s, 0, 0, Math.PI * 2); ctx.fill();
+
+      ctx.save(); ctx.translate(0, float);
+
+      // ── CAPE (derrière corps) — ondulante ──
+      const capeL = capeWave * 3 * s;
+      const capeR = -capeL;
+      ctx.fillStyle = rageMode ? '#5a0090' : '#1e004e';
+      ctx.beginPath();
+      ctx.moveTo(ox + 1 * s, oy + 16 * s);
+      ctx.bezierCurveTo(
+        ox - 5 * s, oy + 24 * s + capeL,
+        ox - 3 * s + capeL, oy + 34 * s,
+        ox + 12 * s, oy + 36 * s + capeWave * s
+      );
+      ctx.bezierCurveTo(
+        ox + 27 * s + capeR, oy + 34 * s,
+        ox + 29 * s, oy + 24 * s + capeR,
+        ox + 23 * s, oy + 16 * s
+      );
+      ctx.closePath(); ctx.fill();
+      // Bord de cape lumineux
+      ctx.strokeStyle = rageMode ? '#cc00ff' : '#7700bb';
+      ctx.lineWidth = s * 1.2;
+      ctx.stroke();
+      // Reflets cape
+      ctx.fillStyle = `rgba(${rageMode ? '200,0,255' : '100,0,200'},${0.12 + 0.08 * pulse})`;
+      ctx.beginPath();
+      ctx.moveTo(ox + 3 * s, oy + 18 * s);
+      ctx.bezierCurveTo(ox + 0, oy + 26 * s, ox + 2 * s, oy + 32 * s, ox + 7 * s, oy + 35 * s);
+      ctx.bezierCurveTo(ox + 5 * s, oy + 30 * s, ox + 4 * s, oy + 24 * s, ox + 5 * s, oy + 18 * s);
+      ctx.closePath(); ctx.fill();
+
+      // JAMBES
+      ctx.fillStyle = '#1a0038';
+      ctx.fillRect(ox + 5 * s, oy + 28 * s + legL, 5 * s, 7 * s);
+      ctx.fillRect(ox + 14 * s, oy + 28 * s + legR, 5 * s, 7 * s);
       // Bottes
-      ctx.fillStyle = '#0a0018';
-      ctx.fillRect(ox + 4*s, oy + 31*s + legOff, 6*s, 2*s);
-      ctx.fillRect(ox + 13*s, oy + 31*s - legOff, 6*s, 2*s);
+      ctx.fillStyle = '#0a0020';
+      ctx.fillRect(ox + 4 * s, oy + 34 * s + legL, 7 * s, 2 * s);
+      ctx.fillRect(ox + 13 * s, oy + 34 * s + legR, 7 * s, 2 * s);
+      // Lueur bottes
+      if (rageMode) {
+        ctx.fillStyle = `rgba(180,0,255,${0.4 + 0.3 * pulse})`;
+        ctx.fillRect(ox + 4 * s, oy + 35 * s + legL, 7 * s, s);
+        ctx.fillRect(ox + 13 * s, oy + 35 * s + legR, 7 * s, s);
+      }
 
+      // CORPS armure
+      ctx.fillStyle = '#1a0a30';
+      ctx.fillRect(ox + 3 * s, oy + 18 * s, 18 * s, 11 * s);
+      // Plaque centrale
+      ctx.fillStyle = '#2e1450';
+      ctx.fillRect(ox + 5 * s, oy + 19 * s, 14 * s, 5 * s);
+      ctx.fillRect(ox + 5 * s, oy + 24 * s, 14 * s, 4 * s);
+      // Nervures armure animées
+      for (let i = 0; i < 3; i++) {
+        const gv = 0.15 + 0.12 * Math.sin(f * 0.1 + i * 1.4);
+        ctx.fillStyle = rageMode ? `rgba(220,0,255,${gv})` : `rgba(140,0,220,${gv})`;
+        ctx.fillRect(ox + 6 * s, oy + (19 + i * 2) * s, 12 * s, s);
+      }
+      // Orbe pectoral central
+      const orbR = (3 + Math.sin(f * 0.15) * 0.8) * s;
+      const orbGr = ctx.createRadialGradient(ox + 12 * s, oy + 22 * s, 0, ox + 12 * s, oy + 22 * s, orbR);
+      if (rageMode) {
+        orbGr.addColorStop(0, `rgba(255,200,255,${0.9 + 0.1 * fastPulse})`);
+        orbGr.addColorStop(0.4, `rgba(255,0,255,0.85)`);
+        orbGr.addColorStop(1, 'rgba(100,0,180,0.4)');
+      } else {
+        orbGr.addColorStop(0, `rgba(200,150,255,${0.85 + 0.15 * pulse})`);
+        orbGr.addColorStop(0.4, `rgba(140,0,220,0.8)`);
+        orbGr.addColorStop(1, 'rgba(60,0,120,0.3)');
+      }
+      ctx.fillStyle = orbGr;
+      ctx.beginPath(); ctx.arc(ox + 12 * s, oy + 22 * s, orbR, 0, Math.PI * 2); ctx.fill();
+
+      // BRAS gauche (flotte et se lève en combat)
+      ctx.save(); ctx.translate(ox + 3 * s, oy + 18 * s);
+      ctx.rotate(-0.15 + armWave * 0.012);
+      ctx.fillStyle = '#2a0a40';
+      ctx.fillRect(-2 * s, 0, 5 * s, 9 * s);
+      // Épaulière
+      ctx.fillStyle = '#4a2080';
+      ctx.fillRect(-3 * s, -s, 7 * s, 4 * s);
+      ctx.fillStyle = rageMode ? '#cc00ff' : '#6600aa';
+      ctx.fillRect(-2 * s, -s, 5 * s, 2 * s);
+      // Main magique
+      ctx.fillStyle = rageMode ? '#ff00ff' : '#9900cc';
+      ctx.fillRect(-2 * s, 9 * s, 5 * s, 4 * s);
+      // Particules mains
+      if (rageMode || pulse > 0.5) {
+        for (let i = 0; i < 3; i++) {
+          ctx.fillStyle = `rgba(${rageMode ? '255,0,255' : '180,0,255'},${(0.4 + 0.4 * Math.sin(f * 0.2 + i)) * (rageMode ? 1 : 0.5)})`;
+          const mx = (Math.sin(f * 0.15 + i * 2.1)) * 3 * s;
+          const my = (Math.cos(f * 0.12 + i * 1.5)) * 2 * s;
+          ctx.fillRect(mx - s, 12 * s + my, 2 * s, 2 * s);
+        }
+      }
+      ctx.restore();
+
+      // BRAS droit
+      ctx.save(); ctx.translate(ox + 21 * s, oy + 18 * s);
+      ctx.rotate(0.15 - armWave * 0.012);
+      ctx.fillStyle = '#2a0a40';
+      ctx.fillRect(-3 * s, 0, 5 * s, 9 * s);
+      ctx.fillStyle = '#4a2080';
+      ctx.fillRect(-4 * s, -s, 7 * s, 4 * s);
+      ctx.fillStyle = rageMode ? '#cc00ff' : '#6600aa';
+      ctx.fillRect(-3 * s, -s, 5 * s, 2 * s);
+      ctx.fillStyle = rageMode ? '#ff00ff' : '#9900cc';
+      ctx.fillRect(-3 * s, 9 * s, 5 * s, 4 * s);
+      if (rageMode || pulse > 0.5) {
+        for (let i = 0; i < 3; i++) {
+          ctx.fillStyle = `rgba(${rageMode ? '255,0,255' : '180,0,255'},${(0.4 + 0.4 * Math.sin(f * 0.2 + i + 1)) * (rageMode ? 1 : 0.5)})`;
+          const mx = (Math.sin(f * 0.15 + i * 2.1 + 1)) * 3 * s;
+          const my = (Math.cos(f * 0.12 + i * 1.5 + 1)) * 2 * s;
+          ctx.fillRect(mx - s, 12 * s + my, 2 * s, 2 * s);
+        }
+      }
+      ctx.restore();
+
+      // TÊTE
+      // Ombre tête
+      ctx.fillStyle = '#1a0030';
+      ctx.fillRect(ox + 3 * s, oy + 4 * s, 18 * s, 16 * s);
+
+      // COURONNE (animée — gemmes pulsantes)
+      ctx.fillStyle = '#d4a800';
+      ctx.fillRect(ox + 4 * s, oy + 4 * s, 16 * s, 5 * s);
+      // Pointes couronne
+      const crownHeights = [3, 5, 7, 5, 3];
+      for (let i = 0; i < 5; i++) {
+        const h = crownHeights[i] * s;
+        const cx2 = ox + (4 + i * 3.2) * s;
+        ctx.fillStyle = '#ffd700';
+        ctx.fillRect(cx2, oy + 4 * s - h, 2.5 * s, h);
+        ctx.fillStyle = '#c8a000';
+        ctx.fillRect(cx2, oy + 4 * s - h, s, h * 0.6);
+      }
+      // Gemme centrale couronne (pulsante)
+      const gemR = (2 + Math.sin(f * 0.2) * 0.5) * s;
+      ctx.fillStyle = rageMode ? `rgba(255,0,255,${0.8 + 0.2 * fastPulse})` : `rgba(180,0,255,${0.75 + 0.25 * pulse})`;
+      ctx.beginPath(); ctx.arc(ox + 12 * s, oy + s, gemR, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = `rgba(255,255,255,${0.6 + 0.4 * fastPulse})`;
+      ctx.beginPath(); ctx.arc(ox + 11 * s, oy + 0.5 * s, gemR * 0.4, 0, Math.PI * 2); ctx.fill();
+      // Gemmes latérales
+      ctx.fillStyle = `rgba(255,60,60,${0.7 + 0.3 * pulse})`;
+      ctx.fillRect(ox + 7 * s, oy + 2 * s, 2 * s, 2 * s);
+      ctx.fillRect(ox + 15 * s, oy + 2 * s, 2 * s, 2 * s);
+
+      // Tête principale
+      ctx.fillStyle = '#280a35';
+      ctx.fillRect(ox + 4 * s, oy + 9 * s, 16 * s, 10 * s);
+      // Masque fantôme
+      ctx.fillStyle = '#1c0028';
+      ctx.fillRect(ox + 6 * s, oy + 10 * s, 12 * s, 6 * s);
+
+      // YEUX (portail spectral, animés)
+      const blinkKing = (f % 150) > 5;
+      const eyeGlowR = rageMode ? `rgba(255,0,255,${0.5 + 0.4 * pulse})` : `rgba(160,0,255,${0.4 + 0.3 * pulse})`;
+      // Halo yeux
+      ctx.fillStyle = eyeGlowR;
+      ctx.fillRect(ox + 6 * s, oy + 10 * s, 5 * s, 5 * s);
+      ctx.fillRect(ox + 13 * s, oy + 10 * s, 5 * s, 5 * s);
+      // Yeux
+      const eyeKingH = blinkKing ? 3 * s : s * 0.8;
+      const eyeKingColor = rageMode
+        ? `rgb(255,${60 + Math.floor(100 * fastPulse)},255)`
+        : `rgb(${160 + Math.floor(60 * pulse)},0,${200 + Math.floor(55 * pulse)})`;
+      ctx.fillStyle = eyeKingColor;
+      ctx.fillRect(ox + 7 * s, oy + 11 * s, 4 * s, eyeKingH);
+      ctx.fillRect(ox + 14 * s, oy + 11 * s, 4 * s, eyeKingH);
+      // Pupilles portail
+      if (blinkKing) {
+        ctx.fillStyle = '#000';
+        ctx.fillRect(ox + 8 * s, oy + 12 * s, 2 * s, s);
+        ctx.fillRect(ox + 15 * s, oy + 12 * s, 2 * s, s);
+        // Étoile dans l'œil
+        ctx.fillStyle = `rgba(255,255,255,${0.8 + 0.2 * fastPulse})`;
+        ctx.fillRect(ox + 7 * s, oy + 11 * s, s, s);
+        ctx.fillRect(ox + 14 * s, oy + 11 * s, s, s);
+      }
+
+      // Bouche royale
+      ctx.fillStyle = '#0a0018';
+      ctx.fillRect(ox + 7 * s, oy + 16 * s, 10 * s, 2 * s);
+      // Lueur bouche magie
+      ctx.fillStyle = `rgba(${rageMode ? '255,0,255' : '120,0,200'},${0.4 + 0.3 * pulse})`;
+      ctx.fillRect(ox + 8 * s, oy + 16 * s, 8 * s, s);
+      // Dents spectrales
+      ctx.fillStyle = `rgba(200,150,255,${0.5 + 0.3 * pulse})`;
+      ctx.fillRect(ox + 7 * s, oy + 15 * s, 2 * s, 2 * s);
+      ctx.fillRect(ox + 10 * s, oy + 15 * s, 2 * s, 2 * s);
+      ctx.fillRect(ox + 14 * s, oy + 15 * s, 2 * s, 2 * s);
+
+      // Brume fantôme autour de la tête
+      for (let i = 0; i < 4; i++) {
+        const angle2 = f * 0.03 + i * 1.57;
+        const bx = Math.cos(angle2) * (14 + i * 2) * s + ox + 12 * s;
+        const by = Math.sin(angle2) * 6 * s + oy + 12 * s;
+        ctx.fillStyle = `rgba(${rageMode ? '200,0,255' : '80,0,160'},${0.08 + 0.06 * Math.sin(f * 0.1 + i)})`;
+        ctx.beginPath(); ctx.arc(bx, by, (3 + i) * s, 0, Math.PI * 2); ctx.fill();
+      }
+
+      ctx.restore(); // float
       ctx.restore();
     }
 
-    // ─── DRAGON DU TEMPS (boss 3) ─────────────────────────────────
+    // ═══════════════════════════════════════════════════════════════
+    // ─── THYRAX LE SOUFFLE NOIR — Dragon du Temps ──────────────────
+    // ═══════════════════════════════════════════════════════════════
     function drawDragon(ctx, cx, cy, dir, frame, scale = 2.5, alpha = 1, rageMode = false, aerialYOff = 0) {
       const s = scale;
+      const f = GS.frame;
       ctx.save();
       ctx.translate(cx, cy + (aerialYOff || 0));
       ctx.globalAlpha *= alpha;
-      const flip = dir === 1;
-      if (flip) ctx.scale(-1, 1);
+      if (dir === 1) ctx.scale(-1, 1);
 
-      const ox = -16 * s, oy = -16 * s;
-      const legOff = frame === 0 ? 0 : frame === 1 ? -s*1.5 : s*1.5;
-      const pulse = (Math.sin(GS.frame * 0.12) + 1) / 2;
-      const wingFlap = frame === 0 ? 0 : frame === 1 ? -4*s : 2*s;
+      const ox = -18 * s, oy = -18 * s;
 
-      // Aura temporelle
-      ctx.fillStyle = rageMode
-        ? `rgba(255,100,0,${0.25+0.15*pulse})`
-        : `rgba(80,180,255,${0.15+0.1*pulse})`;
-      ctx.beginPath(); ctx.ellipse(0, 4*s, 26*s, 14*s, 0, 0, Math.PI*2); ctx.fill();
+      // Timings
+      const breathe    = Math.sin(f * 0.055);
+      const pulse      = (Math.sin(f * 0.13) + 1) / 2;
+      const fastPulse  = (Math.sin(f * 0.24) + 1) / 2;
+      const legPhase   = (f % 28) / 28;
+      const legL       = Math.sin(legPhase * Math.PI * 2) * 5 * s;
+      const legR       = -legL;
+      const bodyBreath = breathe * 1.5 * s;
+      const tailWave   = Math.sin(f * 0.07);
+      const tailWave2  = Math.sin(f * 0.07 + 0.8);
 
-      // Ailes (derrière)
-      ctx.fillStyle = rageMode ? '#8b2200' : '#1a3060';
-      // Aile gauche
-      ctx.beginPath();
-      ctx.moveTo(ox + 12*s, oy + 12*s);
-      ctx.lineTo(ox - 6*s, oy + 8*s + wingFlap);
-      ctx.lineTo(ox + 0*s, oy + 4*s + wingFlap);
-      ctx.lineTo(ox + 4*s, oy + 0*s + wingFlap*0.5);
-      ctx.lineTo(ox + 8*s, oy + 8*s + wingFlap*0.3);
-      ctx.lineTo(ox + 12*s, oy + 10*s);
-      ctx.closePath(); ctx.fill();
-      // Membrane aile g
-      ctx.fillStyle = rageMode ? 'rgba(180,50,0,0.5)' : 'rgba(40,80,140,0.5)';
-      ctx.beginPath();
-      ctx.moveTo(ox + 10*s, oy + 12*s);
-      ctx.lineTo(ox - 4*s, oy + 9*s + wingFlap);
-      ctx.lineTo(ox + 2*s, oy + 5*s + wingFlap);
-      ctx.lineTo(ox + 8*s, oy + 9*s + wingFlap*0.3);
-      ctx.closePath(); ctx.fill();
-      // Aile droite
-      ctx.fillStyle = rageMode ? '#8b2200' : '#1a3060';
-      ctx.beginPath();
-      ctx.moveTo(ox + 20*s, oy + 12*s);
-      ctx.lineTo(ox + 38*s, oy + 8*s + wingFlap);
-      ctx.lineTo(ox + 32*s, oy + 4*s + wingFlap);
-      ctx.lineTo(ox + 28*s, oy + 0*s + wingFlap*0.5);
-      ctx.lineTo(ox + 24*s, oy + 8*s + wingFlap*0.3);
-      ctx.lineTo(ox + 20*s, oy + 10*s);
-      ctx.closePath(); ctx.fill();
-      ctx.fillStyle = rageMode ? 'rgba(180,50,0,0.5)' : 'rgba(40,80,140,0.5)';
-      ctx.beginPath();
-      ctx.moveTo(ox + 22*s, oy + 12*s);
-      ctx.lineTo(ox + 36*s, oy + 9*s + wingFlap);
-      ctx.lineTo(ox + 30*s, oy + 5*s + wingFlap);
-      ctx.lineTo(ox + 24*s, oy + 9*s + wingFlap*0.3);
-      ctx.closePath(); ctx.fill();
+      // ── Aile : battement ──
+      const wFlap = (aerialYOff < -20)
+        ? Math.sin(f * 0.35) * 12 * s           // vol rapide
+        : Math.sin(f * 0.1) * 5 * s;            // aile lente au sol
 
-      // Queue
-      ctx.fillStyle = rageMode ? '#6a1800' : '#102040';
-      ctx.beginPath();
-      ctx.moveTo(ox + 22*s, oy + 24*s);
-      ctx.lineTo(ox + 30*s, oy + 28*s + legOff*0.3);
-      ctx.lineTo(ox + 34*s, oy + 24*s);
-      ctx.lineTo(ox + 36*s, oy + 20*s);
-      ctx.lineTo(ox + 32*s, oy + 22*s);
-      ctx.lineTo(ox + 28*s, oy + 26*s + legOff*0.3);
-      ctx.lineTo(ox + 24*s, oy + 22*s);
-      ctx.closePath(); ctx.fill();
-      // pointe queue
-      ctx.fillStyle = rageMode ? '#ff4400' : '#3060a0';
-      ctx.beginPath();
-      ctx.moveTo(ox + 34*s, oy + 24*s);
-      ctx.lineTo(ox + 38*s, oy + 18*s);
-      ctx.lineTo(ox + 36*s, oy + 24*s);
-      ctx.closePath(); ctx.fill();
-
-      // Corps principal
-      ctx.fillStyle = rageMode ? '#6a0000' : '#0d2040';
-      ctx.fillRect(ox + 8*s, oy + 12*s, 16*s, 14*s);
-      // Écailles dos
-      ctx.fillStyle = rageMode ? '#8b1000' : '#1a3a60';
-      ctx.fillRect(ox + 9*s, oy + 12*s, 14*s, 4*s);
-      // Ventre
-      ctx.fillStyle = rageMode ? '#cc3300' : '#1a4a80';
-      ctx.fillRect(ox + 10*s, oy + 18*s, 12*s, 6*s);
-      // Écailles ventre
-      ctx.fillStyle = rageMode ? '#aa2200' : '#0d3060';
-      for (let i = 0; i < 3; i++) {
-        ctx.fillRect(ox + (10+i*4)*s, oy + 19*s, 3*s, s);
-        ctx.fillRect(ox + (10+i*4)*s, oy + 22*s, 3*s, s);
-      }
-      // Crête dos
-      ctx.fillStyle = rageMode ? '#ff4400' : '#2080ff';
-      for (let i = 0; i < 4; i++) {
-        ctx.beginPath();
-        ctx.moveTo(ox + (10+i*3)*s, oy + 12*s);
-        ctx.lineTo(ox + (11+i*3)*s, oy + (8 - i%2*2)*s);
-        ctx.lineTo(ox + (12+i*3)*s, oy + 12*s);
-        ctx.closePath(); ctx.fill();
+      // ── Particules temporelles (autour du dragon) ──
+      const partCount = rageMode ? 10 : 6;
+      for (let i = 0; i < partCount; i++) {
+        const angle = f * 0.035 + i * (Math.PI * 2 / partCount);
+        const r2 = (26 + Math.sin(f * 0.07 + i) * 6) * s;
+        const px2 = Math.cos(angle) * r2;
+        const py2 = Math.sin(angle) * r2 * 0.45 + bodyBreath;
+        const pA = 0.4 + 0.35 * Math.sin(f * 0.12 + i * 1.3);
+        ctx.fillStyle = rageMode
+          ? `rgba(255,${80 + i * 15},0,${pA})`
+          : `rgba(${20 + i * 20},${160 + i * 8},255,${pA})`;
+        ctx.beginPath(); ctx.arc(px2, py2, (2 + Math.sin(f * 0.1 + i) * 0.8) * s, 0, Math.PI * 2); ctx.fill();
+        // Traîne particule
+        const ta = angle - 0.2;
+        ctx.fillStyle = rageMode ? `rgba(220,60,0,${pA * 0.4})` : `rgba(0,100,255,${pA * 0.35})`;
+        ctx.beginPath(); ctx.arc(Math.cos(ta) * r2, Math.sin(ta) * r2 * 0.45 + bodyBreath, s, 0, Math.PI * 2); ctx.fill();
       }
 
-      // Cou et tête
-      ctx.fillStyle = rageMode ? '#7a0000' : '#0f2a50';
-      ctx.fillRect(ox + 4*s, oy + 8*s, 10*s, 8*s);
-
-      // Tête
-      ctx.fillStyle = rageMode ? '#9b0000' : '#152840';
-      ctx.fillRect(ox + 0*s, oy + 4*s, 14*s, 10*s);
-      // Mâchoire
-      ctx.fillStyle = rageMode ? '#7a0000' : '#0d2030';
-      ctx.fillRect(ox + 0*s, oy + 11*s, 12*s, 5*s);
-      // Crocs
-      ctx.fillStyle = '#eeeeee';
-      for (let i = 0; i < 4; i++) {
-        ctx.fillRect(ox + (1+i*3)*s, oy + 14*s, 2*s, 3*s);
-      }
-      // Yeux
-      ctx.fillStyle = rageMode ? '#ffaa00' : '#00ccff';
-      ctx.fillRect(ox + 3*s, oy + 6*s, 4*s, 3*s);
-      ctx.fillRect(ox + 9*s, oy + 6*s, 3*s, 3*s);
-      ctx.fillStyle = '#000';
-      ctx.fillRect(ox + 4*s, oy + 6*s, 2*s, 3*s);
-      ctx.fillRect(ox + 10*s, oy + 6*s, 2*s, 2*s);
-      // Glow yeux
-      ctx.fillStyle = rageMode ? `rgba(255,150,0,${0.5*pulse})` : `rgba(0,200,255,${0.4*pulse})`;
-      ctx.fillRect(ox + 2*s, oy + 5*s, 6*s, 5*s);
-      ctx.fillRect(ox + 8*s, oy + 5*s, 5*s, 5*s);
-      // Narines
-      ctx.fillStyle = rageMode ? '#ff4400' : '#002a50';
-      ctx.fillRect(ox + 1*s, oy + 10*s, 2*s, 2*s);
-      ctx.fillRect(ox + 4*s, oy + 10*s, 2*s, 2*s);
-      // Flamme (rage)
+      // ── Aura temporelle ──
+      const auraGr = ctx.createRadialGradient(0, bodyBreath, 5 * s, 0, bodyBreath, 38 * s);
       if (rageMode) {
-        ctx.fillStyle = `rgba(255,${100+Math.floor(100*pulse)},0,0.8)`;
-        ctx.beginPath();
-        ctx.moveTo(ox + 0*s, oy + 11*s);
-        ctx.lineTo(ox - 6*s, oy + 7*s + pulse*3*s);
-        ctx.lineTo(ox - 2*s, oy + 9*s);
-        ctx.lineTo(ox - 8*s, oy + 4*s + pulse*4*s);
-        ctx.lineTo(ox + 0*s, oy + 8*s);
-        ctx.closePath(); ctx.fill();
+        auraGr.addColorStop(0, `rgba(255,100,0,${0.28 + 0.18 * pulse})`);
+        auraGr.addColorStop(0.5, `rgba(200,40,0,${0.1 + 0.07 * pulse})`);
+      } else {
+        auraGr.addColorStop(0, `rgba(60,160,255,${0.18 + 0.12 * pulse})`);
+        auraGr.addColorStop(0.5, `rgba(20,80,200,${0.07 + 0.05 * pulse})`);
+      }
+      auraGr.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = auraGr;
+      ctx.beginPath(); ctx.ellipse(0, bodyBreath, 38 * s, 24 * s, 0, 0, Math.PI * 2); ctx.fill();
+
+      ctx.save(); ctx.translate(0, bodyBreath);
+
+      // ── QUEUE (ondulante) ──
+      const qCol = rageMode ? '#7a1800' : '#102848';
+      ctx.fillStyle = qCol;
+      ctx.beginPath();
+      ctx.moveTo(ox + 24 * s, oy + 24 * s);
+      ctx.bezierCurveTo(
+        ox + 32 * s, oy + 28 * s + tailWave * 4 * s,
+        ox + 38 * s, oy + 22 * s + tailWave2 * 4 * s,
+        ox + 42 * s, oy + 16 * s + tailWave * 6 * s
+      );
+      ctx.bezierCurveTo(
+        ox + 40 * s, oy + 16 * s + tailWave * 6 * s,
+        ox + 36 * s, oy + 22 * s + tailWave2 * 3 * s,
+        ox + 30 * s, oy + 26 * s + tailWave * 3 * s
+      );
+      ctx.closePath(); ctx.fill();
+      // Pointe queue
+      ctx.fillStyle = rageMode ? '#ff4400' : '#4090d0';
+      ctx.beginPath();
+      ctx.moveTo(ox + 42 * s, oy + 16 * s + tailWave * 6 * s);
+      ctx.lineTo(ox + 46 * s, oy + 10 * s + tailWave * 8 * s);
+      ctx.lineTo(ox + 43 * s, oy + 16 * s + tailWave * 6 * s);
+      ctx.closePath(); ctx.fill();
+      // Segments queue
+      for (let i = 0; i < 4; i++) {
+        const t2 = i / 4;
+        const qx = ox + (24 + i * 4.5) * s;
+        const qy = oy + (25 + i * 0.5) * s + tailWave * i * 1.5 * s;
+        ctx.fillStyle = rageMode ? `rgba(160,30,0,0.6)` : `rgba(30,80,160,0.5)`;
+        ctx.fillRect(qx, qy, 3 * s, 2 * s);
       }
 
-      // Pattes avant
-      ctx.fillStyle = rageMode ? '#6a0000' : '#0d2040';
-      ctx.fillRect(ox + 8*s, oy + 22*s + legOff, 5*s, 6*s);
-      ctx.fillRect(ox + 16*s, oy + 22*s - legOff, 5*s, 6*s);
-      // Griffes
-      ctx.fillStyle = '#888';
+      // ── AILES (derrière le corps) ──
+      const wingMainCol = rageMode ? '#8b2000' : '#1a3870';
+      const wingMemCol  = rageMode ? 'rgba(180,50,0,0.55)' : 'rgba(40,90,160,0.55)';
+
+      // Aile gauche
+      ctx.fillStyle = wingMainCol;
+      ctx.beginPath();
+      ctx.moveTo(ox + 14 * s, oy + 14 * s);
+      ctx.lineTo(ox - 8 * s, oy + 8 * s + wFlap);
+      ctx.lineTo(ox - 2 * s, oy + 2 * s + wFlap * 1.2);
+      ctx.lineTo(ox + 2 * s, oy - 4 * s + wFlap * 0.6);
+      ctx.lineTo(ox + 6 * s, oy + 6 * s + wFlap * 0.4);
+      ctx.lineTo(ox + 10 * s, oy + 8 * s + wFlap * 0.2);
+      ctx.lineTo(ox + 14 * s, oy + 12 * s);
+      ctx.closePath(); ctx.fill();
+      // Nervures aile gauche
+      ctx.strokeStyle = rageMode ? 'rgba(255,80,0,0.5)' : 'rgba(80,140,255,0.45)';
+      ctx.lineWidth = s * 0.9;
       for (let i = 0; i < 3; i++) {
-        ctx.fillRect(ox + (8+i)*s, oy + 27*s + legOff, s, 3*s);
-        ctx.fillRect(ox + (16+i)*s, oy + 27*s - legOff, s, 3*s);
+        const nx = ox + (14 - i * 4) * s;
+        const ny = oy + (14 - i * 2) * s;
+        const ex = ox + (-6 + i * 3) * s;
+        const ey = oy + (9 + wFlap * (1 - i * 0.3));
+        ctx.beginPath(); ctx.moveTo(nx, ny); ctx.lineTo(ex, ey); ctx.stroke();
+      }
+      // Membrane aile gauche
+      ctx.fillStyle = wingMemCol;
+      ctx.beginPath();
+      ctx.moveTo(ox + 12 * s, oy + 13 * s);
+      ctx.lineTo(ox - 6 * s, oy + 9 * s + wFlap);
+      ctx.lineTo(ox + 0, oy + 4 * s + wFlap * 1.1);
+      ctx.lineTo(ox + 8 * s, oy + 9 * s + wFlap * 0.3);
+      ctx.closePath(); ctx.fill();
+
+      // Aile droite
+      ctx.fillStyle = wingMainCol;
+      ctx.beginPath();
+      ctx.moveTo(ox + 22 * s, oy + 14 * s);
+      ctx.lineTo(ox + 44 * s, oy + 8 * s + wFlap);
+      ctx.lineTo(ox + 38 * s, oy + 2 * s + wFlap * 1.2);
+      ctx.lineTo(ox + 34 * s, oy - 4 * s + wFlap * 0.6);
+      ctx.lineTo(ox + 30 * s, oy + 6 * s + wFlap * 0.4);
+      ctx.lineTo(ox + 26 * s, oy + 8 * s + wFlap * 0.2);
+      ctx.lineTo(ox + 22 * s, oy + 12 * s);
+      ctx.closePath(); ctx.fill();
+      // Nervures aile droite
+      for (let i = 0; i < 3; i++) {
+        const nx = ox + (22 + i * 4) * s;
+        const ny = oy + (14 - i * 2) * s;
+        const ex = ox + (42 - i * 3) * s;
+        const ey = oy + (9 + wFlap * (1 - i * 0.3));
+        ctx.beginPath(); ctx.moveTo(nx, ny); ctx.lineTo(ex, ey); ctx.stroke();
+      }
+      ctx.fillStyle = wingMemCol;
+      ctx.beginPath();
+      ctx.moveTo(ox + 24 * s, oy + 13 * s);
+      ctx.lineTo(ox + 42 * s, oy + 9 * s + wFlap);
+      ctx.lineTo(ox + 36 * s, oy + 4 * s + wFlap * 1.1);
+      ctx.lineTo(ox + 28 * s, oy + 9 * s + wFlap * 0.3);
+      ctx.closePath(); ctx.fill();
+
+      // ── CORPS principal ──
+      ctx.fillStyle = rageMode ? '#6a0000' : '#0d2848';
+      ctx.fillRect(ox + 8 * s, oy + 12 * s, 20 * s, 16 * s);
+      // Dos / écailles
+      ctx.fillStyle = rageMode ? '#8b1000' : '#1a4070';
+      ctx.fillRect(ox + 9 * s, oy + 12 * s, 18 * s, 5 * s);
+      // Ventre
+      ctx.fillStyle = rageMode ? '#cc3300' : '#1a5090';
+      ctx.fillRect(ox + 10 * s, oy + 19 * s, 16 * s, 7 * s);
+      // Plaques ventre animées
+      for (let i = 0; i < 4; i++) {
+        const gv = 0.3 + 0.2 * Math.sin(f * 0.1 + i * 1.1);
+        ctx.fillStyle = rageMode ? `rgba(40,0,0,${gv})` : `rgba(0,30,60,${gv})`;
+        ctx.fillRect(ox + (10 + i * 4) * s, oy + 20 * s, 3 * s, 5 * s);
+      }
+      // Crête dorsale (épines animées)
+      const creteCol = rageMode ? '#ff4400' : '#40a0ff';
+      for (let i = 0; i < 5; i++) {
+        const h = (4 + Math.sin(f * 0.08 + i * 0.8) * 1.5) * s;
+        const bx2 = ox + (10 + i * 3.5) * s;
+        ctx.fillStyle = creteCol;
+        ctx.beginPath();
+        ctx.moveTo(bx2, oy + 12 * s);
+        ctx.lineTo(bx2 + 1.5 * s, oy + 12 * s - h);
+        ctx.lineTo(bx2 + 3 * s, oy + 12 * s);
+        ctx.closePath(); ctx.fill();
+        ctx.fillStyle = `rgba(255,255,255,${0.3 + 0.2 * Math.sin(f * 0.12 + i)})`;
+        ctx.fillRect(bx2 + 0.5 * s, oy + 12 * s - h, s, h * 0.4);
       }
 
+      // PATTES avant
+      ctx.fillStyle = rageMode ? '#6a0000' : '#0d2848';
+      ctx.fillRect(ox + 8 * s, oy + 24 * s + legL, 6 * s, 8 * s);
+      ctx.fillRect(ox + 18 * s, oy + 24 * s + legR, 6 * s, 8 * s);
+      // Griffes
+      const clawCol = rageMode ? '#cc3300' : '#4080c0';
+      for (let i = 0; i < 3; i++) {
+        ctx.fillStyle = '#aaa';
+        ctx.fillRect(ox + (8 + i * 2) * s, oy + 31 * s + legL, 2 * s, 4 * s);
+        ctx.fillRect(ox + (18 + i * 2) * s, oy + 31 * s + legR, 2 * s, 4 * s);
+        // Base griffes colorée
+        ctx.fillStyle = clawCol;
+        ctx.fillRect(ox + (8 + i * 2) * s, oy + 31 * s + legL, 2 * s, s);
+        ctx.fillRect(ox + (18 + i * 2) * s, oy + 31 * s + legR, 2 * s, s);
+      }
+
+      // ── COU ──
+      ctx.fillStyle = rageMode ? '#7a0000' : '#0f2a50';
+      ctx.fillRect(ox + 4 * s, oy + 8 * s, 12 * s, 8 * s);
+      // Écailles cou
+      ctx.fillStyle = rageMode ? '#9b1000' : '#1a3a60';
+      for (let i = 0; i < 3; i++) {
+        ctx.fillRect(ox + (4 + i * 3.5) * s, oy + 8 * s, 3 * s, 3 * s);
+      }
+
+      // ── TÊTE ──
+      ctx.fillStyle = rageMode ? '#9b0000' : '#152840';
+      ctx.fillRect(ox - 2 * s, oy + 2 * s, 18 * s, 12 * s);
+      // Crâne
+      ctx.fillStyle = rageMode ? '#7a0000' : '#0d2030';
+      ctx.fillRect(ox - 2 * s, oy + 2 * s, 18 * s, 6 * s);
+
+      // CORNES de tête (animées)
+      const hornAng = Math.sin(f * 0.04) * 0.06;
+      ctx.save(); ctx.translate(ox + 0, oy + 2 * s);
+      ctx.rotate(-hornAng);
+      ctx.fillStyle = rageMode ? '#cc3300' : '#2060a0';
+      ctx.beginPath();
+      ctx.moveTo(0, 0); ctx.lineTo(-3 * s, -10 * s); ctx.lineTo(3 * s, 0);
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle = rageMode ? '#ff6600' : '#60b0ff';
+      ctx.fillRect(-s, -10 * s, 2 * s, 2 * s);
+      ctx.restore();
+      ctx.save(); ctx.translate(ox + 14 * s, oy + 2 * s);
+      ctx.rotate(hornAng);
+      ctx.fillStyle = rageMode ? '#cc3300' : '#2060a0';
+      ctx.beginPath();
+      ctx.moveTo(0, 0); ctx.lineTo(3 * s, -10 * s); ctx.lineTo(-3 * s, 0);
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle = rageMode ? '#ff6600' : '#60b0ff';
+      ctx.fillRect(-s, -10 * s, 2 * s, 2 * s);
+      ctx.restore();
+
+      // YEUX dragon (fendus, pulsants)
+      const blinkDragon = (f % 110) > 4;
+      // Halo
+      ctx.fillStyle = rageMode ? `rgba(255,120,0,${0.5 + 0.4 * pulse})` : `rgba(0,180,255,${0.45 + 0.35 * pulse})`;
+      ctx.fillRect(ox + 0, oy + 4 * s, 6 * s, 5 * s);
+      ctx.fillRect(ox + 8 * s, oy + 4 * s, 6 * s, 5 * s);
+      // Iris
+      const dragonEyeH = blinkDragon ? 4 * s : s;
+      ctx.fillStyle = rageMode ? `rgb(255,${80 + Math.floor(80 * fastPulse)},0)` : `rgb(0,${180 + Math.floor(75 * pulse)},255)`;
+      ctx.fillRect(ox + s, oy + 5 * s, 4 * s, dragonEyeH);
+      ctx.fillRect(ox + 9 * s, oy + 5 * s, 4 * s, dragonEyeH);
+      // Pupille verticale
+      if (blinkDragon) {
+        ctx.fillStyle = '#000';
+        ctx.fillRect(ox + 2 * s, oy + 5 * s, 2 * s, 4 * s);
+        ctx.fillRect(ox + 10 * s, oy + 5 * s, 2 * s, 4 * s);
+        // Reflet
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.fillRect(ox + s, oy + 5 * s, s, s);
+        ctx.fillRect(ox + 9 * s, oy + 5 * s, s, s);
+      }
+
+      // GUEULE (mâchoire animée légèrement)
+      const mawOpen = rageMode ? 2 + Math.sin(f * 0.15) * 1.5 : 1;
+      ctx.fillStyle = rageMode ? '#7a0000' : '#0d2030';
+      ctx.fillRect(ox - 2 * s, oy + (11 + mawOpen) * s, 14 * s, 4 * s);
+      // Lueur gueule
+      ctx.fillStyle = rageMode
+        ? `rgba(255,${80 + 60 * pulse},0,${0.6 + 0.3 * pulse})`
+        : `rgba(0,150,255,${0.35 + 0.2 * pulse})`;
+      ctx.fillRect(ox - s, oy + (12 + mawOpen) * s, 12 * s, 2 * s);
+      // Crocs
+      ctx.fillStyle = '#e8e4d8';
+      for (let i = 0; i < 5; i++) {
+        ctx.fillRect(ox + (i * 2.5 - 1) * s, oy + (11 + mawOpen) * s, 2 * s, 3 * s);
+      }
+
+      // Flamme / souffle (rage)
+      if (rageMode) {
+        for (let i = 0; i < 6; i++) {
+          const fh3 = (5 + Math.sin(f * 0.35 + i * 0.9) * 3) * s;
+          const fw3 = (3 + Math.sin(f * 0.2 + i * 1.1)) * s;
+          const fx3 = ox + (i * 2.2 - 2) * s;
+          ctx.fillStyle = `rgba(255,${50 + i * 30},0,${0.7 + 0.2 * Math.sin(f * 0.4 + i)})`;
+          ctx.beginPath();
+          ctx.moveTo(fx3, oy + (12 + mawOpen) * s);
+          ctx.lineTo(fx3 + fw3 * 0.5, oy + (12 + mawOpen) * s - fh3);
+          ctx.lineTo(fx3 + fw3, oy + (12 + mawOpen) * s);
+          ctx.closePath(); ctx.fill();
+        }
+      }
+
+      // Narines
+      ctx.fillStyle = rageMode ? '#ff3300' : '#003060';
+      ctx.fillRect(ox + s, oy + 9 * s, 2 * s, 2 * s);
+      ctx.fillRect(ox + 5 * s, oy + 9 * s, 2 * s, 2 * s);
+
+      ctx.restore(); // bodyBreath
       ctx.restore();
     }
 
     // ─── SQUELETTE ────────────────────────────────────────────────
     function drawSkeleton(ctx, cx, cy, dir, frame, scale = 1.8, alpha = 1) {
       const s = scale; ctx.save(); ctx.translate(cx, cy); ctx.globalAlpha *= alpha;
-      if (dir < 0) { ctx.scale(-1,1); }
-      const ox = -7*s, oy = -12*s;
-      const legOff = frame===0?0:frame===1?-s:s;
+      if (dir < 0) { ctx.scale(-1, 1); }
+      const ox = -7 * s, oy = -12 * s;
+      const legOff = frame === 0 ? 0 : frame === 1 ? -s : s;
       // Os crâne
       ctx.fillStyle = '#e8e0c8';
-      ctx.fillRect(ox+2*s, oy+0*s, 10*s, 8*s);
-      ctx.fillRect(ox+1*s, oy+2*s, 12*s, 6*s);
+      ctx.fillRect(ox + 2 * s, oy + 0 * s, 10 * s, 8 * s);
+      ctx.fillRect(ox + 1 * s, oy + 2 * s, 12 * s, 6 * s);
       // Yeux noirs
       ctx.fillStyle = '#000';
-      ctx.fillRect(ox+3*s, oy+2*s, 3*s, 3*s);
-      ctx.fillRect(ox+8*s, oy+2*s, 3*s, 3*s);
+      ctx.fillRect(ox + 3 * s, oy + 2 * s, 3 * s, 3 * s);
+      ctx.fillRect(ox + 8 * s, oy + 2 * s, 3 * s, 3 * s);
       // Nez
-      ctx.fillRect(ox+6*s, oy+5*s, 2*s, s);
+      ctx.fillRect(ox + 6 * s, oy + 5 * s, 2 * s, s);
       // Dents
       ctx.fillStyle = '#e8e0c8';
-      ctx.fillRect(ox+3*s, oy+7*s, 8*s, 2*s);
+      ctx.fillRect(ox + 3 * s, oy + 7 * s, 8 * s, 2 * s);
       ctx.fillStyle = '#222';
-      for(let i=0;i<3;i++) ctx.fillRect(ox+(4+i*2)*s, oy+7*s, s, 2*s);
+      for (let i = 0; i < 3; i++) ctx.fillRect(ox + (4 + i * 2) * s, oy + 7 * s, s, 2 * s);
       // Colonne
       ctx.fillStyle = '#d4ccb0';
-      for(let i=0;i<3;i++) ctx.fillRect(ox+6*s, oy+(9+i*2)*s, 2*s, s);
+      for (let i = 0; i < 3; i++) ctx.fillRect(ox + 6 * s, oy + (9 + i * 2) * s, 2 * s, s);
       // Côtes
-      ctx.strokeStyle = '#d4ccb0'; ctx.lineWidth = s*0.7;
-      for(let i=0;i<2;i++){
-        ctx.beginPath(); ctx.moveTo(ox+6*s,oy+(10+i*2)*s); ctx.lineTo(ox+2*s,oy+(11+i*2)*s); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(ox+8*s,oy+(10+i*2)*s); ctx.lineTo(ox+12*s,oy+(11+i*2)*s); ctx.stroke();
+      ctx.strokeStyle = '#d4ccb0'; ctx.lineWidth = s * 0.7;
+      for (let i = 0; i < 2; i++) {
+        ctx.beginPath(); ctx.moveTo(ox + 6 * s, oy + (10 + i * 2) * s); ctx.lineTo(ox + 2 * s, oy + (11 + i * 2) * s); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(ox + 8 * s, oy + (10 + i * 2) * s); ctx.lineTo(ox + 12 * s, oy + (11 + i * 2) * s); ctx.stroke();
       }
       // Bras
       ctx.fillStyle = '#d4ccb0';
-      ctx.fillRect(ox+0*s, oy+9*s, 2*s, 6*s);
-      ctx.fillRect(ox+12*s, oy+9*s, 2*s, 6*s);
+      ctx.fillRect(ox + 0 * s, oy + 9 * s, 2 * s, 6 * s);
+      ctx.fillRect(ox + 12 * s, oy + 9 * s, 2 * s, 6 * s);
       // Mains
-      ctx.fillRect(ox-s, oy+14*s, 3*s, 2*s);
-      ctx.fillRect(ox+12*s, oy+14*s, 3*s, 2*s);
+      ctx.fillRect(ox - s, oy + 14 * s, 3 * s, 2 * s);
+      ctx.fillRect(ox + 12 * s, oy + 14 * s, 3 * s, 2 * s);
       // Jambes
-      ctx.fillRect(ox+3*s, oy+17*s+legOff, 2*s, 5*s);
-      ctx.fillRect(ox+9*s, oy+17*s-legOff, 2*s, 5*s);
+      ctx.fillRect(ox + 3 * s, oy + 17 * s + legOff, 2 * s, 5 * s);
+      ctx.fillRect(ox + 9 * s, oy + 17 * s - legOff, 2 * s, 5 * s);
       // Pieds
-      ctx.fillRect(ox+2*s, oy+21*s+legOff, 4*s, s);
-      ctx.fillRect(ox+8*s, oy+21*s-legOff, 4*s, s);
+      ctx.fillRect(ox + 2 * s, oy + 21 * s + legOff, 4 * s, s);
+      ctx.fillRect(ox + 8 * s, oy + 21 * s - legOff, 4 * s, s);
       ctx.restore();
     }
 
     // ─── ZOMBIE ───────────────────────────────────────────────────
     function drawZombie(ctx, cx, cy, dir, frame, scale = 1.8, alpha = 1) {
       const s = scale; ctx.save(); ctx.translate(cx, cy); ctx.globalAlpha *= alpha;
-      if (dir < 0) { ctx.scale(-1,1); }
-      const ox = -8*s, oy = -13*s;
-      const legOff = frame===1?-s:frame===2?s:0;
+      if (dir < 0) { ctx.scale(-1, 1); }
+      const ox = -8 * s, oy = -13 * s;
+      const legOff = frame === 1 ? -s : frame === 2 ? s : 0;
       // Corps
       ctx.fillStyle = '#3a6a2a';
-      ctx.fillRect(ox+2*s, oy+9*s, 12*s, 10*s);
+      ctx.fillRect(ox + 2 * s, oy + 9 * s, 12 * s, 10 * s);
       // Déchirures
       ctx.fillStyle = '#2a5020';
-      ctx.fillRect(ox+4*s, oy+10*s, 2*s, 5*s);
-      ctx.fillRect(ox+10*s, oy+12*s, 2*s, 4*s);
+      ctx.fillRect(ox + 4 * s, oy + 10 * s, 2 * s, 5 * s);
+      ctx.fillRect(ox + 10 * s, oy + 12 * s, 2 * s, 4 * s);
       // Tête
       ctx.fillStyle = '#4a7a38';
-      ctx.fillRect(ox+3*s, oy+1*s, 10*s, 9*s);
+      ctx.fillRect(ox + 3 * s, oy + 1 * s, 10 * s, 9 * s);
       // Plaie
       ctx.fillStyle = '#8b0000';
-      ctx.fillRect(ox+5*s, oy+4*s, 6*s, 2*s);
+      ctx.fillRect(ox + 5 * s, oy + 4 * s, 6 * s, 2 * s);
       // Yeux jaunes
       ctx.fillStyle = '#aaff00';
-      ctx.fillRect(ox+4*s, oy+2*s, 3*s, 3*s);
-      ctx.fillRect(ox+9*s, oy+2*s, 3*s, 3*s);
+      ctx.fillRect(ox + 4 * s, oy + 2 * s, 3 * s, 3 * s);
+      ctx.fillRect(ox + 9 * s, oy + 2 * s, 3 * s, 3 * s);
       ctx.fillStyle = '#000';
-      ctx.fillRect(ox+5*s, oy+3*s, s, s);
-      ctx.fillRect(ox+10*s, oy+3*s, s, s);
+      ctx.fillRect(ox + 5 * s, oy + 3 * s, s, s);
+      ctx.fillRect(ox + 10 * s, oy + 3 * s, s, s);
       // Bouche
       ctx.fillStyle = '#1a0000';
-      ctx.fillRect(ox+4*s, oy+7*s, 8*s, 2*s);
-      ctx.fillStyle = '#cc2200'; ctx.fillRect(ox+6*s, oy+7*s, 4*s, s);
+      ctx.fillRect(ox + 4 * s, oy + 7 * s, 8 * s, 2 * s);
+      ctx.fillStyle = '#cc2200'; ctx.fillRect(ox + 6 * s, oy + 7 * s, 4 * s, s);
       // Bras tendus (zombie!)
       ctx.fillStyle = '#3a6a2a';
-      ctx.fillRect(ox-2*s, oy+9*s, 4*s, 3*s); // bras gauche tendu
-      ctx.fillRect(ox+14*s, oy+8*s, 4*s, 3*s);// bras droit tendu
-      ctx.fillRect(ox-4*s, oy+10*s, 3*s, s);   // main g
-      ctx.fillRect(ox+16*s, oy+9*s, 3*s, s);   // main d
+      ctx.fillRect(ox - 2 * s, oy + 9 * s, 4 * s, 3 * s); // bras gauche tendu
+      ctx.fillRect(ox + 14 * s, oy + 8 * s, 4 * s, 3 * s);// bras droit tendu
+      ctx.fillRect(ox - 4 * s, oy + 10 * s, 3 * s, s);   // main g
+      ctx.fillRect(ox + 16 * s, oy + 9 * s, 3 * s, s);   // main d
       // Jambes lentes
       ctx.fillStyle = '#2a5020';
-      ctx.fillRect(ox+3*s, oy+19*s+legOff, 4*s, 4*s);
-      ctx.fillRect(ox+9*s, oy+19*s-legOff, 4*s, 4*s);
+      ctx.fillRect(ox + 3 * s, oy + 19 * s + legOff, 4 * s, 4 * s);
+      ctx.fillRect(ox + 9 * s, oy + 19 * s - legOff, 4 * s, 4 * s);
       ctx.fillStyle = '#1a3010';
-      ctx.fillRect(ox+2*s, oy+22*s+legOff, 5*s, 2*s);
-      ctx.fillRect(ox+8*s, oy+22*s-legOff, 5*s, 2*s);
+      ctx.fillRect(ox + 2 * s, oy + 22 * s + legOff, 5 * s, 2 * s);
+      ctx.fillRect(ox + 8 * s, oy + 22 * s - legOff, 5 * s, 2 * s);
       ctx.restore();
     }
 
     // ─── FANTÔME ──────────────────────────────────────────────────
     function drawGhost(ctx, cx, cy, frame, scale = 1.7, alpha = 1) {
       const s = scale; ctx.save(); ctx.translate(cx, cy); ctx.globalAlpha *= alpha;
-      const ox = -7*s, oy = -11*s;
+      const ox = -7 * s, oy = -11 * s;
       const float = Math.sin(GS.frame * 0.08) * 3;
-      const pulse = (Math.sin(GS.frame*0.12)+1)/2;
+      const pulse = (Math.sin(GS.frame * 0.12) + 1) / 2;
       // Corps translucide
-      ctx.fillStyle = `rgba(180,200,255,${0.65+0.15*pulse})`;
+      ctx.fillStyle = `rgba(180,200,255,${0.65 + 0.15 * pulse})`;
       ctx.beginPath();
-      ctx.arc(ox+7*s, oy+6*s+float, 7*s, Math.PI, 0);
-      ctx.lineTo(ox+14*s, oy+14*s+float);
+      ctx.arc(ox + 7 * s, oy + 6 * s + float, 7 * s, Math.PI, 0);
+      ctx.lineTo(ox + 14 * s, oy + 14 * s + float);
       // bord ondulé bas
-      for(let i=0;i<3;i++){
-        ctx.lineTo(ox+(12-i*4)*s, oy+(12+i%2*3)*s+float);
+      for (let i = 0; i < 3; i++) {
+        ctx.lineTo(ox + (12 - i * 4) * s, oy + (12 + i % 2 * 3) * s + float);
       }
-      ctx.lineTo(ox+0*s, oy+14*s+float);
+      ctx.lineTo(ox + 0 * s, oy + 14 * s + float);
       ctx.closePath(); ctx.fill();
       // Yeux
       ctx.fillStyle = `rgba(40,0,120,${0.9})`;
-      ctx.fillRect(ox+3*s, oy+4*s+float, 3*s, 4*s);
-      ctx.fillRect(ox+8*s, oy+4*s+float, 3*s, 4*s);
+      ctx.fillRect(ox + 3 * s, oy + 4 * s + float, 3 * s, 4 * s);
+      ctx.fillRect(ox + 8 * s, oy + 4 * s + float, 3 * s, 4 * s);
       // reflet yeux
       ctx.fillStyle = `rgba(150,150,255,0.8)`;
-      ctx.fillRect(ox+3*s, oy+4*s+float, s, s);
-      ctx.fillRect(ox+8*s, oy+4*s+float, s, s);
+      ctx.fillRect(ox + 3 * s, oy + 4 * s + float, s, s);
+      ctx.fillRect(ox + 8 * s, oy + 4 * s + float, s, s);
       // Bouche
       ctx.fillStyle = `rgba(40,0,120,0.7)`;
-      ctx.fillRect(ox+4*s, oy+9*s+float, 6*s, 2*s);
+      ctx.fillRect(ox + 4 * s, oy + 9 * s + float, 6 * s, 2 * s);
       // traîné fantôme
-      ctx.fillStyle = `rgba(180,200,255,${0.12*pulse})`;
-      ctx.fillRect(ox+2*s, oy+14*s+float, 10*s, 4*s);
+      ctx.fillStyle = `rgba(180,200,255,${0.12 * pulse})`;
+      ctx.fillRect(ox + 2 * s, oy + 14 * s + float, 10 * s, 4 * s);
       ctx.restore();
     }
 
     // ─── CHEVALIER ────────────────────────────────────────────────
     function drawKnight(ctx, cx, cy, dir, frame, scale = 1.8, alpha = 1) {
       const s = scale; ctx.save(); ctx.translate(cx, cy); ctx.globalAlpha *= alpha;
-      if (dir < 0) ctx.scale(-1,1);
-      const ox = -8*s, oy = -14*s;
-      const legOff = frame===1?-s:frame===2?s:0;
+      if (dir < 0) ctx.scale(-1, 1);
+      const ox = -8 * s, oy = -14 * s;
+      const legOff = frame === 1 ? -s : frame === 2 ? s : 0;
       // Bouclier
       ctx.fillStyle = '#c8a020';
-      ctx.fillRect(ox-2*s, oy+9*s, 5*s, 8*s);
-      ctx.fillStyle = '#8b5e00'; ctx.fillRect(ox-s, oy+10*s, 3*s, 6*s);
-      ctx.fillStyle = '#ffd700'; ctx.fillRect(ox, oy+12*s, s, 2*s);
+      ctx.fillRect(ox - 2 * s, oy + 9 * s, 5 * s, 8 * s);
+      ctx.fillStyle = '#8b5e00'; ctx.fillRect(ox - s, oy + 10 * s, 3 * s, 6 * s);
+      ctx.fillStyle = '#ffd700'; ctx.fillRect(ox, oy + 12 * s, s, 2 * s);
       // Corps armure
       ctx.fillStyle = '#888888';
-      ctx.fillRect(ox+3*s, oy+8*s, 12*s, 12*s);
-      ctx.fillStyle = '#aaaaaa'; ctx.fillRect(ox+4*s, oy+9*s, 10*s, 5*s);
+      ctx.fillRect(ox + 3 * s, oy + 8 * s, 12 * s, 12 * s);
+      ctx.fillStyle = '#aaaaaa'; ctx.fillRect(ox + 4 * s, oy + 9 * s, 10 * s, 5 * s);
       // Détails armure
-      ctx.fillStyle = '#666'; ctx.fillRect(ox+4*s, oy+13*s, 10*s, s);
-      ctx.fillStyle = '#c8a020'; ctx.fillRect(ox+8*s, oy+10*s, 2*s, 3*s);
+      ctx.fillStyle = '#666'; ctx.fillRect(ox + 4 * s, oy + 13 * s, 10 * s, s);
+      ctx.fillStyle = '#c8a020'; ctx.fillRect(ox + 8 * s, oy + 10 * s, 2 * s, 3 * s);
       // Casque
       ctx.fillStyle = '#777';
-      ctx.fillRect(ox+3*s, oy+1*s, 12*s, 8*s);
-      ctx.fillStyle = '#999'; ctx.fillRect(ox+4*s, oy+2*s, 10*s, 4*s);
+      ctx.fillRect(ox + 3 * s, oy + 1 * s, 12 * s, 8 * s);
+      ctx.fillStyle = '#999'; ctx.fillRect(ox + 4 * s, oy + 2 * s, 10 * s, 4 * s);
       // Visière
-      ctx.fillStyle = '#333'; ctx.fillRect(ox+5*s, oy+5*s, 8*s, 3*s);
+      ctx.fillStyle = '#333'; ctx.fillRect(ox + 5 * s, oy + 5 * s, 8 * s, 3 * s);
       // Yeux (fente)
       ctx.fillStyle = '#ff6600';
-      ctx.fillRect(ox+5*s, oy+5*s, 3*s, s);
-      ctx.fillRect(ox+10*s, oy+5*s, 3*s, s);
+      ctx.fillRect(ox + 5 * s, oy + 5 * s, 3 * s, s);
+      ctx.fillRect(ox + 10 * s, oy + 5 * s, 3 * s, s);
       // Plumet
       ctx.fillStyle = '#cc0000';
-      ctx.fillRect(ox+7*s, oy-2*s, 4*s, 4*s);
-      ctx.fillRect(ox+8*s, oy-4*s, 2*s, 3*s);
+      ctx.fillRect(ox + 7 * s, oy - 2 * s, 4 * s, 4 * s);
+      ctx.fillRect(ox + 8 * s, oy - 4 * s, 2 * s, 3 * s);
       // Bras + épée
       ctx.fillStyle = '#777';
-      ctx.fillRect(ox+15*s, oy+8*s, 3*s, 6*s);
+      ctx.fillRect(ox + 15 * s, oy + 8 * s, 3 * s, 6 * s);
       // Épée
-      ctx.fillStyle = '#ccc'; ctx.fillRect(ox+17*s, oy+2*s, 2*s, 10*s);
-      ctx.fillStyle = '#c8a020'; ctx.fillRect(ox+15*s, oy+8*s, 6*s, 2*s);
-      ctx.fillStyle = '#888'; ctx.fillRect(ox+17*s, oy+11*s, 2*s, s);
+      ctx.fillStyle = '#ccc'; ctx.fillRect(ox + 17 * s, oy + 2 * s, 2 * s, 10 * s);
+      ctx.fillStyle = '#c8a020'; ctx.fillRect(ox + 15 * s, oy + 8 * s, 6 * s, 2 * s);
+      ctx.fillStyle = '#888'; ctx.fillRect(ox + 17 * s, oy + 11 * s, 2 * s, s);
       // Jambes
       ctx.fillStyle = '#666';
-      ctx.fillRect(ox+4*s, oy+20*s+legOff, 4*s, 5*s);
-      ctx.fillRect(ox+10*s, oy+20*s-legOff, 4*s, 5*s);
+      ctx.fillRect(ox + 4 * s, oy + 20 * s + legOff, 4 * s, 5 * s);
+      ctx.fillRect(ox + 10 * s, oy + 20 * s - legOff, 4 * s, 5 * s);
       ctx.fillStyle = '#444';
-      ctx.fillRect(ox+3*s, oy+24*s+legOff, 5*s, 2*s);
-      ctx.fillRect(ox+9*s, oy+24*s-legOff, 5*s, 2*s);
+      ctx.fillRect(ox + 3 * s, oy + 24 * s + legOff, 5 * s, 2 * s);
+      ctx.fillRect(ox + 9 * s, oy + 24 * s - legOff, 5 * s, 2 * s);
       ctx.restore();
     }
 
     // ─── GÉANT DE GLACE ───────────────────────────────────────────
     function drawIceGiant(ctx, cx, cy, dir, frame, scale = 2.0, alpha = 1) {
       const s = scale; ctx.save(); ctx.translate(cx, cy); ctx.globalAlpha *= alpha;
-      if (dir < 0) ctx.scale(-1,1);
-      const ox = -11*s, oy = -16*s;
-      const legOff = frame===1?-s*1.5:frame===2?s*1.5:0;
-      const pulse = (Math.sin(GS.frame*0.08)+1)/2;
+      if (dir < 0) ctx.scale(-1, 1);
+      const ox = -11 * s, oy = -16 * s;
+      const legOff = frame === 1 ? -s * 1.5 : frame === 2 ? s * 1.5 : 0;
+      const pulse = (Math.sin(GS.frame * 0.08) + 1) / 2;
       // Aura glace
-      ctx.fillStyle = `rgba(100,200,255,${0.1+0.08*pulse})`;
-      ctx.beginPath(); ctx.ellipse(0, 4*s, 18*s, 10*s, 0, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = `rgba(100,200,255,${0.1 + 0.08 * pulse})`;
+      ctx.beginPath(); ctx.ellipse(0, 4 * s, 18 * s, 10 * s, 0, 0, Math.PI * 2); ctx.fill();
       // Corps massif glace
       ctx.fillStyle = '#4488cc';
-      ctx.fillRect(ox+3*s, oy+10*s, 16*s, 16*s);
+      ctx.fillRect(ox + 3 * s, oy + 10 * s, 16 * s, 16 * s);
       // Cristaux dos
       ctx.fillStyle = '#88ccff';
-      ctx.fillRect(ox+5*s, oy+10*s, 12*s, 3*s);
+      ctx.fillRect(ox + 5 * s, oy + 10 * s, 12 * s, 3 * s);
       // Ventre
       ctx.fillStyle = '#66aaee';
-      ctx.fillRect(ox+5*s, oy+16*s, 12*s, 7*s);
+      ctx.fillRect(ox + 5 * s, oy + 16 * s, 12 * s, 7 * s);
       // Craquelures glace
-      ctx.strokeStyle = '#aaddff'; ctx.lineWidth = s*0.5;
-      ctx.beginPath(); ctx.moveTo(ox+6*s, oy+14*s); ctx.lineTo(ox+10*s, oy+20*s); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(ox+14*s, oy+13*s); ctx.lineTo(ox+11*s, oy+19*s); ctx.stroke();
+      ctx.strokeStyle = '#aaddff'; ctx.lineWidth = s * 0.5;
+      ctx.beginPath(); ctx.moveTo(ox + 6 * s, oy + 14 * s); ctx.lineTo(ox + 10 * s, oy + 20 * s); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(ox + 14 * s, oy + 13 * s); ctx.lineTo(ox + 11 * s, oy + 19 * s); ctx.stroke();
       // Cristaux épaules
       ctx.fillStyle = '#aaddff';
-      ctx.beginPath(); ctx.moveTo(ox+2*s, oy+10*s); ctx.lineTo(ox, oy+6*s); ctx.lineTo(ox+4*s, oy+10*s); ctx.closePath(); ctx.fill();
-      ctx.beginPath(); ctx.moveTo(ox+18*s, oy+10*s); ctx.lineTo(ox+22*s, oy+6*s); ctx.lineTo(ox+20*s, oy+10*s); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(ox + 2 * s, oy + 10 * s); ctx.lineTo(ox, oy + 6 * s); ctx.lineTo(ox + 4 * s, oy + 10 * s); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(ox + 18 * s, oy + 10 * s); ctx.lineTo(ox + 22 * s, oy + 6 * s); ctx.lineTo(ox + 20 * s, oy + 10 * s); ctx.closePath(); ctx.fill();
       // Bras
       ctx.fillStyle = '#3377bb';
-      ctx.fillRect(ox+0*s, oy+10*s, 4*s, 10*s);
-      ctx.fillRect(ox+18*s, oy+10*s, 4*s, 10*s);
+      ctx.fillRect(ox + 0 * s, oy + 10 * s, 4 * s, 10 * s);
+      ctx.fillRect(ox + 18 * s, oy + 10 * s, 4 * s, 10 * s);
       // Poings
-      ctx.fillStyle = '#4488cc'; ctx.fillRect(ox-s, oy+19*s, 5*s, 4*s);
-      ctx.fillStyle = '#4488cc'; ctx.fillRect(ox+18*s, oy+19*s, 5*s, 4*s);
+      ctx.fillStyle = '#4488cc'; ctx.fillRect(ox - s, oy + 19 * s, 5 * s, 4 * s);
+      ctx.fillStyle = '#4488cc'; ctx.fillRect(ox + 18 * s, oy + 19 * s, 5 * s, 4 * s);
       // Cristaux poings
-      ctx.fillStyle = '#88ddff'; ctx.fillRect(ox-2*s, oy+18*s, 2*s, 3*s); ctx.fillRect(ox+22*s, oy+18*s, 2*s, 3*s);
+      ctx.fillStyle = '#88ddff'; ctx.fillRect(ox - 2 * s, oy + 18 * s, 2 * s, 3 * s); ctx.fillRect(ox + 22 * s, oy + 18 * s, 2 * s, 3 * s);
       // Tête
       ctx.fillStyle = '#3377bb';
-      ctx.fillRect(ox+4*s, oy+3*s, 14*s, 8*s);
+      ctx.fillRect(ox + 4 * s, oy + 3 * s, 14 * s, 8 * s);
       // Crête cristaux
       ctx.fillStyle = '#aaddff';
-      for(let i=0;i<3;i++) { ctx.beginPath(); ctx.moveTo(ox+(5+i*4)*s, oy+3*s); ctx.lineTo(ox+(6+i*4)*s, oy, oy+0*s); ctx.lineTo(ox+(7+i*4)*s, oy+3*s); ctx.closePath(); ctx.fill(); }
+      for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.moveTo(ox + (5 + i * 4) * s, oy + 3 * s); ctx.lineTo(ox + (6 + i * 4) * s, oy, oy + 0 * s); ctx.lineTo(ox + (7 + i * 4) * s, oy + 3 * s); ctx.closePath(); ctx.fill(); }
       // Yeux
       ctx.fillStyle = '#00ccff';
-      ctx.fillRect(ox+5*s, oy+5*s, 4*s, 3*s);
-      ctx.fillRect(ox+13*s, oy+5*s, 4*s, 3*s);
-      ctx.fillStyle = `rgba(0,200,255,${0.5*pulse})`;
-      ctx.fillRect(ox+4*s, oy+4*s, 6*s, 5*s); ctx.fillRect(ox+12*s, oy+4*s, 6*s, 5*s);
+      ctx.fillRect(ox + 5 * s, oy + 5 * s, 4 * s, 3 * s);
+      ctx.fillRect(ox + 13 * s, oy + 5 * s, 4 * s, 3 * s);
+      ctx.fillStyle = `rgba(0,200,255,${0.5 * pulse})`;
+      ctx.fillRect(ox + 4 * s, oy + 4 * s, 6 * s, 5 * s); ctx.fillRect(ox + 12 * s, oy + 4 * s, 6 * s, 5 * s);
       // Bouche
       ctx.fillStyle = '#002244';
-      ctx.fillRect(ox+6*s, oy+9*s, 10*s, 2*s);
-      ctx.fillStyle = '#aaddff'; for(let i=0;i<3;i++) ctx.fillRect(ox+(7+i*3)*s, oy+9*s, 2*s, 2*s);
+      ctx.fillRect(ox + 6 * s, oy + 9 * s, 10 * s, 2 * s);
+      ctx.fillStyle = '#aaddff'; for (let i = 0; i < 3; i++) ctx.fillRect(ox + (7 + i * 3) * s, oy + 9 * s, 2 * s, 2 * s);
       // Jambes
       ctx.fillStyle = '#3377bb';
-      ctx.fillRect(ox+4*s, oy+26*s+legOff, 5*s, 6*s);
-      ctx.fillRect(ox+13*s, oy+26*s-legOff, 5*s, 6*s);
+      ctx.fillRect(ox + 4 * s, oy + 26 * s + legOff, 5 * s, 6 * s);
+      ctx.fillRect(ox + 13 * s, oy + 26 * s - legOff, 5 * s, 6 * s);
       ctx.fillStyle = '#2266aa';
-      ctx.fillRect(ox+3*s, oy+31*s+legOff, 6*s, 2*s); ctx.fillRect(ox+12*s, oy+31*s-legOff, 6*s, 2*s);
+      ctx.fillRect(ox + 3 * s, oy + 31 * s + legOff, 6 * s, 2 * s); ctx.fillRect(ox + 12 * s, oy + 31 * s - legOff, 6 * s, 2 * s);
       ctx.restore();
     }
 
     // ─── GRIFFON (montagne) ───────────────────────────────────────
     function drawGriffon(ctx, cx, cy, dir, frame, scale = 1.7, alpha = 1) {
       const s = scale; ctx.save(); ctx.translate(cx, cy); ctx.globalAlpha *= alpha;
-      if (dir < 0) ctx.scale(-1,1);
-      const ox = -10*s, oy = -10*s;
-      const wingOff = frame===1?-2*s:frame===2?2*s:0;
-      const legOff = frame===1?-s:frame===2?s:0;
+      if (dir < 0) ctx.scale(-1, 1);
+      const ox = -10 * s, oy = -10 * s;
+      const wingOff = frame === 1 ? -2 * s : frame === 2 ? 2 * s : 0;
+      const legOff = frame === 1 ? -s : frame === 2 ? s : 0;
       // Ailes
       ctx.fillStyle = '#8b6a10';
-      ctx.beginPath(); ctx.moveTo(ox+10*s,oy+5*s); ctx.lineTo(ox-4*s,oy+0*s+wingOff); ctx.lineTo(ox+0*s,oy+5*s+wingOff); ctx.lineTo(ox+6*s,oy+8*s); ctx.closePath(); ctx.fill();
-      ctx.beginPath(); ctx.moveTo(ox+12*s,oy+5*s); ctx.lineTo(ox+24*s,oy+0*s+wingOff); ctx.lineTo(ox+20*s,oy+5*s+wingOff); ctx.lineTo(ox+16*s,oy+8*s); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(ox + 10 * s, oy + 5 * s); ctx.lineTo(ox - 4 * s, oy + 0 * s + wingOff); ctx.lineTo(ox + 0 * s, oy + 5 * s + wingOff); ctx.lineTo(ox + 6 * s, oy + 8 * s); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(ox + 12 * s, oy + 5 * s); ctx.lineTo(ox + 24 * s, oy + 0 * s + wingOff); ctx.lineTo(ox + 20 * s, oy + 5 * s + wingOff); ctx.lineTo(ox + 16 * s, oy + 8 * s); ctx.closePath(); ctx.fill();
       ctx.fillStyle = '#c8a020';
-      ctx.fillRect(ox-3*s, oy+s+wingOff, 4*s, s); ctx.fillRect(ox+21*s, oy+s+wingOff, 4*s, s);
+      ctx.fillRect(ox - 3 * s, oy + s + wingOff, 4 * s, s); ctx.fillRect(ox + 21 * s, oy + s + wingOff, 4 * s, s);
       // Corps
       ctx.fillStyle = '#c8a020';
-      ctx.fillRect(ox+4*s, oy+5*s, 14*s, 9*s);
+      ctx.fillRect(ox + 4 * s, oy + 5 * s, 14 * s, 9 * s);
       ctx.fillStyle = '#eecc44';
-      ctx.fillRect(ox+6*s, oy+6*s, 10*s, 4*s);
+      ctx.fillRect(ox + 6 * s, oy + 6 * s, 10 * s, 4 * s);
       // Tête d'aigle
       ctx.fillStyle = '#ffffff';
-      ctx.fillRect(ox+1*s, oy+1*s, 10*s, 8*s);
-      ctx.fillStyle = '#dddddd'; ctx.fillRect(ox+2*s, oy+2*s, 7*s, 5*s);
+      ctx.fillRect(ox + 1 * s, oy + 1 * s, 10 * s, 8 * s);
+      ctx.fillStyle = '#dddddd'; ctx.fillRect(ox + 2 * s, oy + 2 * s, 7 * s, 5 * s);
       // Bec
-      ctx.fillStyle = '#cc8800'; ctx.fillRect(ox, oy+5*s, 3*s, 3*s); ctx.fillRect(ox-s, oy+7*s, 3*s, s);
+      ctx.fillStyle = '#cc8800'; ctx.fillRect(ox, oy + 5 * s, 3 * s, 3 * s); ctx.fillRect(ox - s, oy + 7 * s, 3 * s, s);
       // Oeil
-      ctx.fillStyle = '#ffcc00'; ctx.fillRect(ox+5*s, oy+3*s, 3*s, 3*s);
-      ctx.fillStyle = '#000'; ctx.fillRect(ox+6*s, oy+3*s, 2*s, 2*s);
+      ctx.fillStyle = '#ffcc00'; ctx.fillRect(ox + 5 * s, oy + 3 * s, 3 * s, 3 * s);
+      ctx.fillStyle = '#000'; ctx.fillRect(ox + 6 * s, oy + 3 * s, 2 * s, 2 * s);
       // Oreilles/huppe
-      ctx.fillStyle = '#c8a020'; ctx.fillRect(ox+7*s, oy, 3*s, 2*s); ctx.fillRect(ox+6*s, oy-2*s, s, 3*s); ctx.fillRect(ox+10*s, oy-2*s, s, 3*s);
+      ctx.fillStyle = '#c8a020'; ctx.fillRect(ox + 7 * s, oy, 3 * s, 2 * s); ctx.fillRect(ox + 6 * s, oy - 2 * s, s, 3 * s); ctx.fillRect(ox + 10 * s, oy - 2 * s, s, 3 * s);
       // Queue
       ctx.fillStyle = '#c8a020';
-      ctx.fillRect(ox+18*s, oy+5*s, 4*s, 4*s);
-      ctx.fillRect(ox+20*s, oy+3*s+legOff, 2*s, 4*s);
-      ctx.fillRect(ox+21*s, oy+1*s+legOff, s, 3*s);
+      ctx.fillRect(ox + 18 * s, oy + 5 * s, 4 * s, 4 * s);
+      ctx.fillRect(ox + 20 * s, oy + 3 * s + legOff, 2 * s, 4 * s);
+      ctx.fillRect(ox + 21 * s, oy + 1 * s + legOff, s, 3 * s);
       // Pattes avec griffes
       ctx.fillStyle = '#aa8810';
-      ctx.fillRect(ox+5*s, oy+13*s+legOff, 3*s, 4*s);
-      ctx.fillRect(ox+13*s, oy+13*s-legOff, 3*s, 4*s);
+      ctx.fillRect(ox + 5 * s, oy + 13 * s + legOff, 3 * s, 4 * s);
+      ctx.fillRect(ox + 13 * s, oy + 13 * s - legOff, 3 * s, 4 * s);
       ctx.fillStyle = '#888';
-      ctx.fillRect(ox+4*s, oy+16*s+legOff, s, 2*s); ctx.fillRect(ox+6*s, oy+17*s+legOff, s, 2*s); ctx.fillRect(ox+8*s, oy+16*s+legOff, s, 2*s);
-      ctx.fillRect(ox+12*s, oy+16*s-legOff, s, 2*s); ctx.fillRect(ox+14*s, oy+17*s-legOff, s, 2*s); ctx.fillRect(ox+16*s, oy+16*s-legOff, s, 2*s);
+      ctx.fillRect(ox + 4 * s, oy + 16 * s + legOff, s, 2 * s); ctx.fillRect(ox + 6 * s, oy + 17 * s + legOff, s, 2 * s); ctx.fillRect(ox + 8 * s, oy + 16 * s + legOff, s, 2 * s);
+      ctx.fillRect(ox + 12 * s, oy + 16 * s - legOff, s, 2 * s); ctx.fillRect(ox + 14 * s, oy + 17 * s - legOff, s, 2 * s); ctx.fillRect(ox + 16 * s, oy + 16 * s - legOff, s, 2 * s);
       ctx.restore();
     }
 
     // ─── GOLEM (montagne) ─────────────────────────────────────────
     function drawGolem(ctx, cx, cy, dir, frame, scale = 2.0, alpha = 1) {
       const s = scale; ctx.save(); ctx.translate(cx, cy); ctx.globalAlpha *= alpha;
-      if (dir < 0) ctx.scale(-1,1);
-      const ox = -12*s, oy = -16*s;
-      const legOff = frame===1?-s:frame===2?s:0;
-      const pulse = (Math.sin(GS.frame*0.06)+1)/2;
+      if (dir < 0) ctx.scale(-1, 1);
+      const ox = -12 * s, oy = -16 * s;
+      const legOff = frame === 1 ? -s : frame === 2 ? s : 0;
+      const pulse = (Math.sin(GS.frame * 0.06) + 1) / 2;
       // Corps massif
       ctx.fillStyle = '#5a5a5a';
-      ctx.fillRect(ox+2*s, oy+8*s, 20*s, 18*s);
-      ctx.fillStyle = '#707070'; ctx.fillRect(ox+3*s, oy+9*s, 18*s, 8*s);
+      ctx.fillRect(ox + 2 * s, oy + 8 * s, 20 * s, 18 * s);
+      ctx.fillStyle = '#707070'; ctx.fillRect(ox + 3 * s, oy + 9 * s, 18 * s, 8 * s);
       // Fissures lumineuses
-      ctx.strokeStyle = `rgba(255,${100+Math.floor(100*pulse)},0,${0.6+0.3*pulse})`; ctx.lineWidth = s;
-      ctx.beginPath(); ctx.moveTo(ox+8*s, oy+12*s); ctx.lineTo(ox+12*s, oy+20*s); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(ox+15*s, oy+11*s); ctx.lineTo(ox+13*s, oy+18*s); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(ox+6*s, oy+18*s); ctx.lineTo(ox+10*s, oy+24*s); ctx.stroke();
+      ctx.strokeStyle = `rgba(255,${100 + Math.floor(100 * pulse)},0,${0.6 + 0.3 * pulse})`; ctx.lineWidth = s;
+      ctx.beginPath(); ctx.moveTo(ox + 8 * s, oy + 12 * s); ctx.lineTo(ox + 12 * s, oy + 20 * s); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(ox + 15 * s, oy + 11 * s); ctx.lineTo(ox + 13 * s, oy + 18 * s); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(ox + 6 * s, oy + 18 * s); ctx.lineTo(ox + 10 * s, oy + 24 * s); ctx.stroke();
       // Épaulières rocheuses
       ctx.fillStyle = '#444';
-      ctx.fillRect(ox, oy+8*s, 4*s, 6*s); ctx.fillRect(ox+20*s, oy+8*s, 4*s, 6*s);
-      ctx.fillRect(ox-2*s, oy+6*s, 4*s, 4*s); ctx.fillRect(ox+22*s, oy+6*s, 4*s, 4*s);
+      ctx.fillRect(ox, oy + 8 * s, 4 * s, 6 * s); ctx.fillRect(ox + 20 * s, oy + 8 * s, 4 * s, 6 * s);
+      ctx.fillRect(ox - 2 * s, oy + 6 * s, 4 * s, 4 * s); ctx.fillRect(ox + 22 * s, oy + 6 * s, 4 * s, 4 * s);
       // Bras
       ctx.fillStyle = '#5a5a5a';
-      ctx.fillRect(ox-2*s, oy+9*s, 4*s, 12*s); ctx.fillRect(ox+22*s, oy+9*s, 4*s, 12*s);
+      ctx.fillRect(ox - 2 * s, oy + 9 * s, 4 * s, 12 * s); ctx.fillRect(ox + 22 * s, oy + 9 * s, 4 * s, 12 * s);
       // Poings
       ctx.fillStyle = '#444';
-      ctx.fillRect(ox-3*s, oy+20*s, 5*s, 5*s); ctx.fillRect(ox+22*s, oy+20*s, 5*s, 5*s);
+      ctx.fillRect(ox - 3 * s, oy + 20 * s, 5 * s, 5 * s); ctx.fillRect(ox + 22 * s, oy + 20 * s, 5 * s, 5 * s);
       // Tête
       ctx.fillStyle = '#4a4a4a';
-      ctx.fillRect(ox+4*s, oy+0*s, 16*s, 9*s);
-      ctx.fillStyle = '#606060'; ctx.fillRect(ox+5*s, oy+s, 14*s, 4*s);
+      ctx.fillRect(ox + 4 * s, oy + 0 * s, 16 * s, 9 * s);
+      ctx.fillStyle = '#606060'; ctx.fillRect(ox + 5 * s, oy + s, 14 * s, 4 * s);
       // Yeux de magma
-      ctx.fillStyle = `rgba(255,${80+Math.floor(120*pulse)},0,1)`;
-      ctx.fillRect(ox+5*s, oy+2*s, 5*s, 4*s); ctx.fillRect(ox+14*s, oy+2*s, 5*s, 4*s);
-      ctx.fillStyle = '#fff'; ctx.fillRect(ox+5*s, oy+2*s, 2*s, s); ctx.fillRect(ox+14*s, oy+2*s, 2*s, s);
+      ctx.fillStyle = `rgba(255,${80 + Math.floor(120 * pulse)},0,1)`;
+      ctx.fillRect(ox + 5 * s, oy + 2 * s, 5 * s, 4 * s); ctx.fillRect(ox + 14 * s, oy + 2 * s, 5 * s, 4 * s);
+      ctx.fillStyle = '#fff'; ctx.fillRect(ox + 5 * s, oy + 2 * s, 2 * s, s); ctx.fillRect(ox + 14 * s, oy + 2 * s, 2 * s, s);
       // Bouche
-      ctx.fillStyle = `rgba(255,60,0,${0.7+0.2*pulse})`;
-      ctx.fillRect(ox+6*s, oy+7*s, 12*s, 2*s);
-      for(let i=0;i<3;i++) { ctx.fillStyle='#333'; ctx.fillRect(ox+(7+i*3)*s, oy+7*s, 2*s, 2*s); }
+      ctx.fillStyle = `rgba(255,60,0,${0.7 + 0.2 * pulse})`;
+      ctx.fillRect(ox + 6 * s, oy + 7 * s, 12 * s, 2 * s);
+      for (let i = 0; i < 3; i++) { ctx.fillStyle = '#333'; ctx.fillRect(ox + (7 + i * 3) * s, oy + 7 * s, 2 * s, 2 * s); }
       // Jambes
       ctx.fillStyle = '#4a4a4a';
-      ctx.fillRect(ox+4*s, oy+26*s+legOff, 6*s, 6*s); ctx.fillRect(ox+14*s, oy+26*s-legOff, 6*s, 6*s);
-      ctx.fillStyle = '#333'; ctx.fillRect(ox+3*s, oy+31*s+legOff, 7*s, 2*s); ctx.fillRect(ox+13*s, oy+31*s-legOff, 7*s, 2*s);
+      ctx.fillRect(ox + 4 * s, oy + 26 * s + legOff, 6 * s, 6 * s); ctx.fillRect(ox + 14 * s, oy + 26 * s - legOff, 6 * s, 6 * s);
+      ctx.fillStyle = '#333'; ctx.fillRect(ox + 3 * s, oy + 31 * s + legOff, 7 * s, 2 * s); ctx.fillRect(ox + 13 * s, oy + 31 * s - legOff, 7 * s, 2 * s);
       ctx.restore();
     }
 
     // ─── ÉLÉMENTAL DE NEIGE (montagne) ────────────────────────────
     function drawElemental(ctx, cx, cy, frame, scale = 1.7, alpha = 1) {
       const s = scale; ctx.save(); ctx.translate(cx, cy); ctx.globalAlpha *= alpha;
-      const ox = -8*s, oy = -12*s;
-      const pulse = (Math.sin(GS.frame*0.1)+1)/2;
+      const ox = -8 * s, oy = -12 * s;
+      const pulse = (Math.sin(GS.frame * 0.1) + 1) / 2;
       const spin = GS.frame * 0.05;
       // Tourbillon neige extérieur
-      ctx.strokeStyle = `rgba(180,220,255,${0.3+0.2*pulse})`; ctx.lineWidth = s;
-      for(let i=0;i<3;i++){
-        ctx.beginPath(); ctx.arc(0, 0, (8+i*4)*s, spin+i*Math.PI*0.6, spin+i*Math.PI*0.6+Math.PI*1.4); ctx.stroke();
+      ctx.strokeStyle = `rgba(180,220,255,${0.3 + 0.2 * pulse})`; ctx.lineWidth = s;
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath(); ctx.arc(0, 0, (8 + i * 4) * s, spin + i * Math.PI * 0.6, spin + i * Math.PI * 0.6 + Math.PI * 1.4); ctx.stroke();
       }
       // Corps neige/glace
-      ctx.fillStyle = `rgba(180,220,255,${0.75+0.15*pulse})`;
-      ctx.beginPath(); ctx.arc(ox+8*s, oy+8*s, 8*s, 0, Math.PI*2); ctx.fill();
-      ctx.fillStyle = `rgba(220,240,255,${0.5+0.2*pulse})`;
-      ctx.beginPath(); ctx.arc(ox+8*s, oy+6*s, 6*s, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = `rgba(180,220,255,${0.75 + 0.15 * pulse})`;
+      ctx.beginPath(); ctx.arc(ox + 8 * s, oy + 8 * s, 8 * s, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = `rgba(220,240,255,${0.5 + 0.2 * pulse})`;
+      ctx.beginPath(); ctx.arc(ox + 8 * s, oy + 6 * s, 6 * s, 0, Math.PI * 2); ctx.fill();
       // Cristaux internes
       ctx.fillStyle = '#aaddff';
-      for(let i=0;i<4;i++){
-        const a2 = spin*2 + i*Math.PI/2;
-        ctx.fillRect(ox+8*s+Math.cos(a2)*4*s-s, oy+8*s+Math.sin(a2)*4*s-s, 2*s, 2*s);
+      for (let i = 0; i < 4; i++) {
+        const a2 = spin * 2 + i * Math.PI / 2;
+        ctx.fillRect(ox + 8 * s + Math.cos(a2) * 4 * s - s, oy + 8 * s + Math.sin(a2) * 4 * s - s, 2 * s, 2 * s);
       }
       // Yeux
       ctx.fillStyle = '#0044aa';
-      ctx.fillRect(ox+4*s, oy+5*s, 3*s, 4*s); ctx.fillRect(ox+9*s, oy+5*s, 3*s, 4*s);
-      ctx.fillStyle = '#00aaff'; ctx.fillRect(ox+4*s, oy+5*s, s, s); ctx.fillRect(ox+9*s, oy+5*s, s, s);
+      ctx.fillRect(ox + 4 * s, oy + 5 * s, 3 * s, 4 * s); ctx.fillRect(ox + 9 * s, oy + 5 * s, 3 * s, 4 * s);
+      ctx.fillStyle = '#00aaff'; ctx.fillRect(ox + 4 * s, oy + 5 * s, s, s); ctx.fillRect(ox + 9 * s, oy + 5 * s, s, s);
       // Bouche
       ctx.fillStyle = '#0044aa';
-      ctx.fillRect(ox+5*s, oy+10*s, 6*s, s);
-      for(let i=0;i<3;i++) { ctx.fillStyle='#88ccff'; ctx.fillRect(ox+(5+i*2)*s, oy+10*s, s, s); }
+      ctx.fillRect(ox + 5 * s, oy + 10 * s, 6 * s, s);
+      for (let i = 0; i < 3; i++) { ctx.fillStyle = '#88ccff'; ctx.fillRect(ox + (5 + i * 2) * s, oy + 10 * s, s, s); }
       // Bras cristaux flottants
-      ctx.fillStyle = `rgba(140,200,255,${0.7+0.2*pulse})`;
-      ctx.fillRect(ox-2*s, oy+6*s, 3*s, 6*s); ctx.fillRect(ox+15*s, oy+6*s, 3*s, 6*s);
-      ctx.fillStyle = '#aaddff'; ctx.fillRect(ox-3*s, oy+5*s, 2*s, 2*s); ctx.fillRect(ox+17*s, oy+5*s, 2*s, 2*s);
+      ctx.fillStyle = `rgba(140,200,255,${0.7 + 0.2 * pulse})`;
+      ctx.fillRect(ox - 2 * s, oy + 6 * s, 3 * s, 6 * s); ctx.fillRect(ox + 15 * s, oy + 6 * s, 3 * s, 6 * s);
+      ctx.fillStyle = '#aaddff'; ctx.fillRect(ox - 3 * s, oy + 5 * s, 2 * s, 2 * s); ctx.fillRect(ox + 17 * s, oy + 5 * s, 2 * s, 2 * s);
       // Bas du corps (fondu en particules)
-      for(let i=0;i<5;i++){
-        ctx.fillStyle = `rgba(180,220,255,${(0.5-i*0.08)*pulse})`;
-        ctx.fillRect(ox+(3+i*2)*s, oy+(14+i)*s, 2*s, 2*s);
+      for (let i = 0; i < 5; i++) {
+        ctx.fillStyle = `rgba(180,220,255,${(0.5 - i * 0.08) * pulse})`;
+        ctx.fillRect(ox + (3 + i * 2) * s, oy + (14 + i) * s, 2 * s, 2 * s);
       }
       ctx.restore();
     }
@@ -4499,10 +4952,726 @@
       const p = GS.p; p.hp = 6; p.maxHp = 6; p.xp = 0; p.lvl = 1; p.wPow = 1;
       p.weapon = '⚔️ Épée Rouillée'; p.atkCDs = [0, 0, 0, 0];
       p.dashCD = 0; p.invincible = false; p.invincibleTimer = 0;
+      BossMusic.init();
       loadLevel(0); loop();
     }
 
   </script>
+
+<!-- ══════════════════════════════════════════════════
+     BOSS MUSIC ENGINE — Synthèse procédurale intégrée
+══════════════════════════════════════════════════ -->
+<script>
+'use strict';
+// ─────────────────────────────────────────────────────────────
+// CONSTANTES
+// ─────────────────────────────────────────────────────────────
+const MUSIC_SR = 48000;
+
+// ─────────────────────────────────────────────────────────────
+// PRIMITIVES AUDIO
+// ─────────────────────────────────────────────────────────────
+function m_osc(oc, type, freq, t0, dur, peak, opts={}) {
+  const { atk=0.01, dec=0.04, sus=0.75, rel=0.1, detune=0, lp=null, lpQ=1, pan=0 } = opts;
+  const o=oc.createOscillator(), g=oc.createGain();
+  o.type=type; o.frequency.value=freq; o.detune.value=detune;
+  let node=o;
+  if (lp) { const f=oc.createBiquadFilter(); f.type='lowpass'; f.frequency.value=lp; f.Q.value=lpQ; o.connect(f); node=f; }
+  if (pan!==0) { const p=oc.createStereoPanner(); p.pan.value=pan; node.connect(p); node=p; }
+  node.connect(g); g.connect(oc.destination);
+  const t1=t0+atk, t2=t1+dec, t3=t0+dur-rel, t4=t0+dur;
+  g.gain.setValueAtTime(0,0);
+  g.gain.setValueAtTime(0,t0);
+  g.gain.linearRampToValueAtTime(peak,t1);
+  g.gain.linearRampToValueAtTime(peak*sus,t2);
+  g.gain.setValueAtTime(peak*sus, Math.max(t2,t3));
+  g.gain.linearRampToValueAtTime(0,t4);
+  o.start(t0); o.stop(t4+0.05);
+}
+
+function m_distOsc(oc, freq, t0, dur, peak, drive=180, opts={}) {
+  const { atk=0.008, rel=0.08, lp=700, pan=0, type='sawtooth' } = opts;
+  const o=oc.createOscillator(); o.type=type; o.frequency.value=freq;
+  const ws=oc.createWaveShaper();
+  const k=drive, n=512, curve=new Float32Array(n);
+  for (let i=0;i<n;i++) { const x=(2*i/n-1); curve[i]=((Math.PI+k)*x)/(Math.PI+k*Math.abs(x)); }
+  ws.curve=curve; ws.oversample='4x';
+  const f=oc.createBiquadFilter(); f.type='lowpass'; f.frequency.value=lp;
+  const g=oc.createGain();
+  let node=g;
+  if (pan!==0) { const p=oc.createStereoPanner(); p.pan.value=pan; g.connect(p); node=p; }
+  node.connect(oc.destination);
+  o.connect(ws); ws.connect(f); f.connect(g);
+  g.gain.setValueAtTime(0,0);
+  g.gain.setValueAtTime(0,t0);
+  g.gain.linearRampToValueAtTime(peak,t0+atk);
+  g.gain.setValueAtTime(peak,t0+dur-rel);
+  g.gain.linearRampToValueAtTime(0,t0+dur);
+  o.start(t0); o.stop(t0+dur+0.05);
+}
+
+function m_noise(oc, t0, dur, peak, opts={}) {
+  const { atk=0.002, rel=0.15, ftype='bandpass', freq=600, Q=1.5, pan=0, pink=false } = opts;
+  const len=Math.ceil(MUSIC_SR*(dur+0.1));
+  const buf=oc.createBuffer(1,len,MUSIC_SR);
+  const d=buf.getChannelData(0);
+  if (pink) {
+    let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0;
+    for (let i=0;i<len;i++) {
+      const w=Math.random()*2-1;
+      b0=0.99886*b0+w*0.0555179; b1=0.99332*b1+w*0.0750759;
+      b2=0.96900*b2+w*0.1538520; b3=0.86650*b3+w*0.3104856;
+      b4=0.55000*b4+w*0.5329522; b5=-0.7616*b5-w*0.0168980;
+      d[i]=(b0+b1+b2+b3+b4+b5+w*0.5362)*0.11;
+    }
+  } else { for (let i=0;i<len;i++) d[i]=Math.random()*2-1; }
+  const src=oc.createBufferSource(); src.buffer=buf;
+  const flt=oc.createBiquadFilter(); flt.type=ftype; flt.frequency.value=freq; flt.Q.value=Q;
+  const g=oc.createGain();
+  let node=g;
+  if (pan!==0) { const p=oc.createStereoPanner(); p.pan.value=pan; g.connect(p); node=p; }
+  node.connect(oc.destination); src.connect(flt); flt.connect(g);
+  g.gain.setValueAtTime(0,0);
+  g.gain.setValueAtTime(0,t0);
+  g.gain.linearRampToValueAtTime(peak,t0+atk);
+  g.gain.setValueAtTime(peak,t0+dur*0.25);
+  g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+  src.start(t0); src.stop(t0+dur+0.1);
+}
+
+function m_kick(oc, t0, peak=0.9, p0=120, p1=40, opts={}) {
+  const { dec=0.38, pan=0 } = opts;
+  const o=oc.createOscillator(); o.type='sine';
+  const g=oc.createGain();
+  let node=g;
+  if (pan!==0) { const p=oc.createStereoPanner(); p.pan.value=pan; g.connect(p); node=p; }
+  node.connect(oc.destination); o.connect(g);
+  o.frequency.setValueAtTime(p0,t0);
+  o.frequency.exponentialRampToValueAtTime(p1,t0+dec*0.5);
+  g.gain.setValueAtTime(0,0);
+  g.gain.setValueAtTime(peak,t0);
+  g.gain.exponentialRampToValueAtTime(0.0001,t0+dec);
+  o.start(t0); o.stop(t0+dec+0.05);
+  m_noise(oc,t0,0.007,peak*0.4,{atk:0.001,ftype:'highpass',freq:3000,Q:1,pan});
+}
+
+function m_taiko(oc, t0, peak=1.0, opts={}) {
+  const { p0=85, p1=28, dec=0.6, pan=0 } = opts;
+  const o=oc.createOscillator(); o.type='sine';
+  const comp=oc.createDynamicsCompressor();
+  comp.threshold.value=-20; comp.ratio.value=14;
+  const g=oc.createGain();
+  let node=g;
+  if (pan!==0) { const p=oc.createStereoPanner(); p.pan.value=pan; g.connect(p); node=p; }
+  node.connect(oc.destination);
+  o.connect(comp); comp.connect(g);
+  o.frequency.setValueAtTime(p0,t0);
+  o.frequency.exponentialRampToValueAtTime(p1,t0+dec*0.55);
+  g.gain.setValueAtTime(0,0);
+  g.gain.setValueAtTime(peak,t0);
+  g.gain.exponentialRampToValueAtTime(0.0001,t0+dec);
+  o.start(t0); o.stop(t0+dec+0.05);
+  m_noise(oc,t0,0.018,peak*0.25,{atk:0.001,ftype:'lowpass',freq:100,Q:0.5,pan});
+}
+
+function m_snare(oc, t0, peak=0.6, opts={}) {
+  const { bf=200, bd=0.14, nd=0.18, ng=0.7, pan=0 } = opts;
+  const o=oc.createOscillator(); o.type='triangle'; o.frequency.value=bf;
+  const gb=oc.createGain(); gb.connect(oc.destination); o.connect(gb);
+  gb.gain.setValueAtTime(0,0);
+  gb.gain.setValueAtTime(peak*0.4,t0);
+  gb.gain.exponentialRampToValueAtTime(0.0001,t0+bd);
+  o.start(t0); o.stop(t0+bd+0.05);
+  m_noise(oc,t0,nd,peak*ng,{atk:0.001,ftype:'bandpass',freq:2200,Q:0.8,pan});
+}
+
+function m_hihat(oc, t0, peak=0.2, open=false, pan=0) {
+  const dur=open?0.3:0.065;
+  m_noise(oc,t0,dur,peak,{atk:0.001,ftype:'highpass',freq:7000,Q:1.0,pan});
+}
+
+function m_bell(oc, freq, t0, peak=0.25, dec=2.0, pan=0) {
+  const ptls=[[1,1],[2.756,0.42],[5.404,0.2],[8.931,0.1],[13.35,0.05]];
+  for (const [r,a] of ptls) {
+    const o=oc.createOscillator(); o.type='sine'; o.frequency.value=freq*r;
+    const g=oc.createGain();
+    let node=g;
+    if (pan!==0) { const p=oc.createStereoPanner(); p.pan.value=pan; g.connect(p); node=p; }
+    node.connect(oc.destination); o.connect(g);
+    g.gain.setValueAtTime(0,0);
+    g.gain.setValueAtTime(peak*a,t0);
+    g.gain.exponentialRampToValueAtTime(0.0001,t0+Math.max(0.05, dec*(1-r*0.04)));
+    o.start(t0); o.stop(t0+dec+0.1);
+  }
+}
+
+function m_strings(oc, freq, t0, dur, peak=0.12, opts={}) {
+  const { atk=0.25, rel=0.5, lp=900, pan=0, vRate=4, vDepth=3 } = opts;
+  for (let v=0;v<3;v++) {
+    const o=oc.createOscillator(); o.type='sawtooth';
+    o.frequency.value=freq; o.detune.value=(v-1)*7;
+    const lfo=oc.createOscillator(); lfo.frequency.value=vRate+v*0.3;
+    const lg=oc.createGain(); lg.gain.value=vDepth;
+    lfo.connect(lg); lg.connect(o.frequency);
+    const f=oc.createBiquadFilter(); f.type='lowpass'; f.frequency.value=lp;
+    const g=oc.createGain();
+    let node=g;
+    if (pan!==0) { const p=oc.createStereoPanner(); p.pan.value=pan; g.connect(p); node=p; }
+    node.connect(oc.destination); o.connect(f); f.connect(g);
+    g.gain.setValueAtTime(0,0);
+    g.gain.setValueAtTime(0,t0);
+    g.gain.linearRampToValueAtTime(peak/3,t0+atk);
+    g.gain.setValueAtTime(peak/3,t0+dur-rel);
+    g.gain.linearRampToValueAtTime(0,t0+dur);
+    lfo.start(t0); lfo.stop(t0+dur+0.1);
+    o.start(t0); o.stop(t0+dur+0.1);
+  }
+}
+
+function m_drone(oc, freq, t0, dur, peak=0.4, opts={}) {
+  const { atk=2.0, rel=2.0, lp=180, harm=2 } = opts;
+  for (let h=0;h<=harm;h++) {
+    const o=oc.createOscillator();
+    o.type=h===0?'sine':'sawtooth'; o.frequency.value=freq*(h===0?1:h+1);
+    const f=oc.createBiquadFilter(); f.type='lowpass'; f.frequency.value=lp/(h+1)*1.2;
+    const g=oc.createGain(); g.connect(oc.destination); o.connect(f); f.connect(g);
+    const lvl=peak/(h*1.5+1);
+    g.gain.setValueAtTime(0,0);
+    g.gain.setValueAtTime(0,t0);
+    g.gain.linearRampToValueAtTime(lvl,t0+atk);
+    g.gain.setValueAtTime(lvl,t0+dur-rel);
+    g.gain.linearRampToValueAtTime(0,t0+dur);
+    o.start(t0); o.stop(t0+dur+0.1);
+  }
+}
+
+function m_choir(oc, freq, t0, dur, peak=0.12, opts={}) {
+  const { atk=1.0, rel=1.5, dets=[-10,-5,0,5,10], lp=1200 } = opts;
+  for (const dt of dets) {
+    const o=oc.createOscillator(); o.type='sine'; o.frequency.value=freq; o.detune.value=dt;
+    const f=oc.createBiquadFilter(); f.type='lowpass'; f.frequency.value=lp;
+    const g=oc.createGain(); g.connect(oc.destination);
+    o.connect(f); f.connect(g);
+    g.gain.setValueAtTime(0,0);
+    g.gain.setValueAtTime(0,t0);
+    g.gain.linearRampToValueAtTime(peak/dets.length,t0+atk);
+    g.gain.setValueAtTime(peak/dets.length,t0+dur-rel);
+    g.gain.linearRampToValueAtTime(0,t0+dur);
+    o.start(t0); o.stop(t0+dur+0.1);
+  }
+}
+
+function m_flute(oc, freq, t0, dur, peak=0.18, opts={}) {
+  const { vRate=5, vDepth=5, pan=0, breath=0.05 } = opts;
+  const o=oc.createOscillator(); o.type='triangle'; o.frequency.value=freq;
+  const lfo=oc.createOscillator(); lfo.frequency.value=vRate;
+  const lg=oc.createGain(); lg.gain.value=vDepth;
+  lfo.connect(lg); lg.connect(o.frequency);
+  const nlen=Math.ceil(MUSIC_SR*(dur+0.1));
+  const nbuf=oc.createBuffer(1,nlen,MUSIC_SR);
+  const nd=nbuf.getChannelData(0);
+  for (let i=0;i<nlen;i++) nd[i]=Math.random()*2-1;
+  const ns=oc.createBufferSource(); ns.buffer=nbuf;
+  const nhp=oc.createBiquadFilter(); nhp.type='highpass'; nhp.frequency.value=1800;
+  const ng=oc.createGain(); ng.gain.value=breath;
+  const mg=oc.createGain();
+  let node=mg;
+  if (pan!==0) { const p=oc.createStereoPanner(); p.pan.value=pan; mg.connect(p); node=p; }
+  node.connect(oc.destination);
+  o.connect(mg); ns.connect(nhp); nhp.connect(ng); ng.connect(mg);
+  mg.gain.setValueAtTime(0,0);
+  mg.gain.setValueAtTime(0,t0);
+  mg.gain.linearRampToValueAtTime(peak,t0+0.07);
+  mg.gain.setValueAtTime(peak,t0+dur-0.12);
+  mg.gain.linearRampToValueAtTime(0,t0+dur);
+  lfo.start(t0); lfo.stop(t0+dur+0.1);
+  ns.start(t0); ns.stop(t0+dur+0.1);
+  o.start(t0); o.stop(t0+dur+0.1);
+}
+
+function m_wind(oc, t0, dur, peak=0.08) {
+  const len=Math.ceil(MUSIC_SR*(dur+0.1));
+  const buf=oc.createBuffer(2,len,MUSIC_SR);
+  for (let ch=0;ch<2;ch++) {
+    const d=buf.getChannelData(ch); let b0=0,b1=0,b2=0;
+    for (let i=0;i<len;i++) {
+      const w=Math.random()*2-1;
+      b0=0.99*b0+w*0.01; b1=0.88*b1+w*0.12; b2=0.55*b2+w*0.45;
+      const t=i/MUSIC_SR;
+      const mod=0.5+0.5*Math.sin(t*0.35)*Math.sin(t*0.11+ch);
+      d[i]=(b0*0.5+b1*0.35+b2*0.15)*peak*mod;
+    }
+  }
+  const src=oc.createBufferSource(); src.buffer=buf;
+  const bp=oc.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=700; bp.Q.value=0.5;
+  const g=oc.createGain(); g.gain.value=1; g.connect(oc.destination);
+  src.connect(bp); bp.connect(g); src.start(t0); src.stop(t0+dur+0.1);
+}
+
+// ─────────────────────────────────────────────────────────────
+// COMPOSITEURS DE TRACKS (1 par boss, 3 phases chacun)
+// Indices: 0=pré-boss ambient, 1=combat phase1, 2=rage phase2
+// ─────────────────────────────────────────────────────────────
+
+const MUSIC_TRACKS = {
+
+  // ───── BOSS 0 : Vorgath (Démon) ─────
+  // Phase 0: Pré-boss – Embers & Dread
+  'b0-0': { dur: 38.4, compose: async (oc, D) => {
+    const hb=60/50;
+    m_drone(oc,36.71,0,D,0.55,{atk:2.5,rel:2.5,lp:150,harm:1});
+    m_drone(oc,55.0,0,D,0.18,{atk:3.0,rel:3.0,lp:120,harm:0});
+    m_choir(oc,73.42,0,D,0.05,{atk:4.0,rel:4.0,lp:380,dets:[-14,-7,0,7,14]});
+    // Heartbeat
+    for (let b=0; b<Math.floor(D/hb); b++) {
+      const t=b*hb;
+      m_kick(oc,t,0.5,80,34,{dec:0.30,pan:0});
+      m_kick(oc,t+0.19,0.25,58,26,{dec:0.22,pan:0.1});
+    }
+    // Metallic rattle
+    for (let i=0;i<4;i++) {
+      const t=i*(D/4)+1.2;
+      m_noise(oc,t,0.6,0.06,{atk:0.002,ftype:'bandpass',freq:1600,Q:4.0,pan:(i%2===0?-0.35:0.35)});
+    }
+  }},
+
+  // Phase 1: Combat – Infernal Charge (CORRIGÉ)
+  'b0-1': { dur: 38.4, compose: async (oc, D) => {
+    const BEAT=60/100, BAR=BEAT*4, BARS=Math.floor(D/BAR);
+    // Sub drone continu
+    m_drone(oc,36.71,0,D,0.40,{atk:0.1,rel:0.3,lp:200,harm:2});
+    // Bass motif — utilise des durées courtes pour éviter le dépassement
+    const BP=[[0,0.20,73.42],[0.5,0.14,73.42],[1,0.25,87.31],[1.5,0.10,98.0],[2,0.20,65.41],[2.5,0.14,73.42],[3,0.30,55.0],[3.75,0.12,73.42]];
+    for (let b=0;b<BARS;b++) {
+      const tBar=b*BAR;
+      for (const [beat,d,f] of BP) {
+        const t0=tBar+beat*BEAT;
+        if (t0+d < D) m_distOsc(oc,f,t0,d,0.38,175,{lp:420,pan:0});
+      }
+    }
+    // Strings sombres — 2 répétitions max sur la durée
+    const SP=[[0,73.42,BAR*1.6],[BAR*2,87.31,BAR*0.85],[BAR*3,82.41,BAR*1.3],[BAR*4,73.42,BAR*2],[BAR*6,65.41,BAR*1.0],[BAR*7,73.42,BAR*0.8]];
+    const reps=Math.floor(BARS/8);
+    for (let r=0;r<reps;r++) {
+      for (const [bOff,f,d] of SP) {
+        const t0=r*BAR*8+bOff;
+        if (t0+d < D) {
+          m_strings(oc,f,t0,d,0.11,{atk:0.08,rel:0.25,lp:600,pan:-0.25});
+          m_strings(oc,f*1.5,t0,d*0.8,0.065,{atk:0.1,rel:0.2,lp:500,pan:0.25});
+        }
+      }
+    }
+    // Tambours tribaux
+    for (let b=0;b<BARS;b++) {
+      const t=b*BAR;
+      m_kick(oc,t,0.92,125,38,{dec:0.45});
+      m_kick(oc,t+0.5*BEAT,0.38,90,32,{dec:0.30});
+      m_kick(oc,t+2*BEAT,0.85,118,36,{dec:0.42});
+      if (b%2===1) m_kick(oc,t+3.5*BEAT,0.48,90,30,{dec:0.28});
+      m_taiko(oc,t,0.60,{p0:78,p1:26,dec:0.52,pan:-0.32});
+      m_taiko(oc,t+2*BEAT,0.52,{p0:72,p1:24,dec:0.46,pan:0.32});
+      m_snare(oc,t+BEAT,0.50,{bf:180,bd:0.12,nd:0.16,ng:0.8,pan:0});
+      m_snare(oc,t+3*BEAT,0.55,{bf:185,bd:0.13,nd:0.17,ng:0.8,pan:0});
+      for (let h=0;h<8;h++) m_hihat(oc,t+h*BEAT*0.5,(h%2===0?0.16:0.07),false,(h%2===0?-0.22:0.22));
+      if (b%4===3) m_hihat(oc,t+2.5*BEAT,0.12,true,0);
+    }
+  }},
+
+  // Phase 2: Rage – The Burning Wrath (CORRIGÉ)
+  'b0-2': { dur: 32.0, compose: async (oc, D) => {
+    const BEAT=60/120, BAR=BEAT*4, BARS=Math.floor(D/BAR);
+    m_drone(oc,36.71,0,D,0.48,{atk:0.05,rel:0.2,lp:240,harm:2});
+    // Bass rapide
+    const BP2=[[0,0.14,73.42],[0.25,0.09,73.42],[0.5,0.14,87.31],[0.75,0.09,98.0],[1,0.14,65.41],[1.25,0.09,73.42],[1.5,0.16,55.0],[1.75,0.09,65.41],[2,0.14,73.42],[2.25,0.09,87.31],[2.5,0.14,98.0],[2.75,0.09,73.42],[3,0.14,65.41],[3.25,0.11,55.0],[3.5,0.16,73.42],[3.75,0.09,98.0]];
+    for (let b=0;b<BARS;b++) {
+      const tBar=b*BAR;
+      for (const [beat,d,f] of BP2) {
+        const t0=tBar+beat*BEAT;
+        if (t0+d < D) m_distOsc(oc,f,t0,d,0.36,220,{lp:380});
+      }
+    }
+    // Layer haut distordu
+    const HP=[[0,293.66,0.13],[0.5,329.63,0.10],[1.0,392.0,0.16],[1.5,349.23,0.10],[2.0,440.0,0.18],[3.0,392.0,0.26]];
+    for (let b=0;b<BARS;b++) {
+      const tBar=b*BAR;
+      for (const [bt,f,d] of HP) {
+        const t0=tBar+bt*BEAT;
+        if (t0+d < D) m_distOsc(oc,f,t0,d,0.16,320,{lp:1400,pan:(b%2===0?-0.45:0.45),atk:0.005,rel:0.04,type:'sawtooth'});
+      }
+    }
+    // Drums métalliques
+    for (let b=0;b<BARS;b++) {
+      const t=b*BAR;
+      m_kick(oc,t,1.0,132,42,{dec:0.34});
+      m_kick(oc,t+0.5*BEAT,0.52,100,35,{dec:0.24});
+      m_kick(oc,t+BEAT,0.42,88,30,{dec:0.20});
+      m_kick(oc,t+2*BEAT,1.0,128,40,{dec:0.34});
+      m_kick(oc,t+2.5*BEAT,0.56,100,32,{dec:0.24});
+      m_kick(oc,t+3*BEAT,0.47,88,28,{dec:0.20});
+      m_snare(oc,t+BEAT,0.70,{bf:250,bd:0.1,nd:0.22,ng:1.0,pan:0});
+      m_snare(oc,t+3*BEAT,0.76,{bf:260,bd:0.1,nd:0.24,ng:1.0,pan:0});
+      m_bell(oc,880,t+BEAT,0.10,0.38,(b%2===0?-0.55:0.55));
+      if (b%2===0) m_bell(oc,1320,t+3*BEAT,0.065,0.28,0.6);
+      m_taiko(oc,t,0.65,{p0:80,p1:26,dec:0.38,pan:-0.4});
+      m_taiko(oc,t+2*BEAT,0.55,{p0:74,p1:24,dec:0.36,pan:0.4});
+      for (let h=0;h<16;h++) m_hihat(oc,t+h*BEAT*0.25,(h%4===0?0.19:h%2===0?0.10:0.055),false,(h%3===0?-0.35:0.28));
+    }
+  }},
+
+  // ───── BOSS 1 : Nytherion (Roi) ─────
+  // Phase 0: Pré-boss – Empty Corridors
+  'b1-0': { dur: 21.3, compose: async (oc, D) => {
+    m_wind(oc,0,D,0.09);
+    m_drone(oc,55.0,0,D,0.18,{atk:3.5,rel:3.5,lp:220,harm:1});
+    m_choir(oc,110.0,0,D,0.065,{atk:4.0,rel:4.0,lp:320,dets:[-14,-7,0,7,14]});
+    const bells=[[2.2,220,0.12,3.5,-0.45],[6.8,196,0.10,3.0,0.45],[11.5,261.63,0.08,2.8,-0.3],[15.5,220,0.10,3.2,0.3],[19.0,174.61,0.07,2.5,0]];
+    for (const [t,f,p,d,pan] of bells) {
+      if (t<D) { m_bell(oc,f,t,p,d,pan); if (t+1.1<D) m_bell(oc,f,t+1.1,p*0.45,d*0.8,pan*0.5); }
+    }
+  }},
+
+  // Phase 1: Combat – Haunted Reign
+  'b1-1': { dur: 42.67, compose: async (oc, D) => {
+    const BEAT=60/90, BAR=BEAT*4, BARS=Math.floor(D/BAR);
+    m_drone(oc,55.0,0,D,0.26,{atk:2.0,rel:2.0,lp:200,harm:1});
+    // Choir chords
+    const CHORDS=[[55,65.41,82.41],[49,61.74,73.42],[43.65,55,65.41],[55,73.42,98]];
+    const numChordCycles=Math.floor(D/(BAR*4));
+    for (let i=0;i<numChordCycles;i++) {
+      const ch=CHORDS[i%CHORDS.length], t0=i*BAR*4;
+      const chDur=Math.min(BAR*4.5, D-t0);
+      for (const f of ch) {
+        if (t0+chDur > 0 && t0 < D) m_choir(oc,f*4,t0,chDur,0.055,{atk:1.3,rel:2.8,lp:1000,dets:[-8,-4,0,4,8]});
+      }
+    }
+    // Piano motif
+    const PM=[[0,440,1.3],[BEAT,392,0.9],[BEAT*2,349.23,1.6],[BEAT*3,293.66,2.1],[BAR*2,329.63,1.0],[BAR*2+BEAT,293.66,0.85],[BAR*2+BEAT*2,261.63,1.9],[BAR*3,246.94,0.7],[BAR*3+BEAT,220,2.5]];
+    const reps=Math.floor(BARS/8);
+    for (let r=0;r<reps;r++) {
+      for (const [b,f,d] of PM) {
+        const t0=r*BAR*8+b;
+        if (t0+d < D) m_osc(oc,'sine',f,t0,d+1.0,0.08,{atk:0.012,dec:0.08,sus:0.4,rel:d*0.5+0.3,pan:(r%2===0?0.1:-0.1)});
+      }
+    }
+    // Strings
+    const SM=[[0,220,BAR*2.5],[BAR*2,196,BAR*1.9],[BAR*4,246.94,BAR*2.2],[BAR*6,220,BAR*2.0]];
+    for (let r=0;r<Math.floor(BARS/8);r++) {
+      for (const [b,f,d] of SM) {
+        const t0=r*BAR*8+b;
+        if (t0+d < D) m_strings(oc,f,t0,d,0.075,{atk:0.4,rel:1.0,lp:700,pan:-0.35,vRate:3.8,vDepth:2.5});
+      }
+    }
+    // Percussion légère
+    for (let b=0;b<BARS;b++) {
+      const t=b*BAR;
+      m_kick(oc,t,0.40,88,40,{dec:0.58});
+      if (b%2===0) m_kick(oc,t+2*BEAT,0.30,78,34,{dec:0.46});
+      m_snare(oc,t+BEAT,0.18,{bf:320,bd:0.07,nd:0.09,ng:0.3,pan:0});
+      m_snare(oc,t+3*BEAT,0.20,{bf:310,bd:0.07,nd:0.09,ng:0.3,pan:0});
+      if (b%4===0) m_bell(oc,880,t+BEAT*2,0.06,2.4,0.5);
+    }
+  }},
+
+  // Phase 2: Rage – The Revenant's Throne
+  'b1-2': { dur: 42.67, compose: async (oc, D) => {
+    const BEAT=60/90, BAR=BEAT*4, BARS=Math.floor(D/BAR);
+    m_drone(oc,55.0,0,D,0.32,{atk:0.5,rel:0.8,lp:220,harm:2});
+    const SR2=[[0,220,BAR*1.8],[BAR*0.5,261.63,BAR*1.5],[BAR*2,246.94,BAR*1.8],[BAR*2.5,293.66,BAR*1.5],[BAR*4,329.63,BAR*2],[BAR*5,349.23,BAR*1.8],[BAR*6,392,BAR*1.5],[BAR*7,440,BAR*2]];
+    for (let r=0;r<Math.floor(BARS/8);r++) {
+      for (const [b,f,d] of SR2) {
+        const t0=r*BAR*8+b;
+        if (t0+d < D) {
+          m_strings(oc,f,t0,d,0.12,{atk:0.18,rel:0.45,lp:950,pan:-0.3,vRate:4.2,vDepth:3.0});
+          m_strings(oc,f*2,t0+0.18,d*0.9,0.075,{atk:0.14,rel:0.38,lp:1500,pan:0.3,vRate:4.5,vDepth:3.0});
+        }
+      }
+    }
+    // Choir
+    const numCycles=Math.floor(D/(BAR*4));
+    const CHORDS2=[[220,440,330],[196,392,293],[246.94,493.88,370],[261.63,523.25,392]];
+    for (let i=0;i<numCycles;i++) {
+      const t0=i*BAR*4;
+      const chDur=Math.min(BAR*4.5, D-t0);
+      for (const f of CHORDS2[i%CHORDS2.length]) {
+        if (t0 < D) m_choir(oc,f,t0,chDur,0.065,{atk:1.0,rel:2.2,lp:1600,dets:[-10,-5,0,5,10]});
+      }
+    }
+    // Percussion plus dense
+    for (let b=0;b<BARS;b++) {
+      const t=b*BAR;
+      m_kick(oc,t,0.65,100,42,{dec:0.42});
+      m_kick(oc,t+2*BEAT,0.60,95,38,{dec:0.38});
+      if (b%2===1) m_kick(oc,t+1.5*BEAT,0.30,78,32,{dec:0.28});
+      m_snare(oc,t+BEAT,0.45,{bf:200,bd:0.13,nd:0.2,ng:0.7,pan:0});
+      m_snare(oc,t+3*BEAT,0.50,{bf:205,bd:0.14,nd:0.22,ng:0.75,pan:0});
+      if (b%2===0) for (let h=0;h<4;h++) m_hihat(oc,t+h*BEAT,0.10,(h===2),h%2===0?-0.3:0.3);
+      if (b%4===0) m_bell(oc,1318.51,t,0.085,1.5,0.6);
+      if (b%4===2) m_bell(oc,987.77,t+BEAT*2,0.065,1.2,-0.5);
+    }
+  }},
+
+  // ───── BOSS 2 : Thyrax (Dragon) ─────
+  // Phase 0: Pré-boss – Mountain Silence
+  'b2-0': { dur: 19.2, compose: async (oc, D) => {
+    m_wind(oc,0,D,0.11);
+    m_drone(oc,41.2,0,D,0.58,{atk:3.0,rel:3.0,lp:140,harm:1});
+    m_drone(oc,55.0,1.5,D-1.5,0.16,{atk:3.5,rel:2.5,lp:100,harm:0});
+    const tTimes=[1.2, 10.5];
+    for (const tt of tTimes) if (tt<D-2) {
+      m_noise(oc,tt,2.8,0.30,{atk:0.012,ftype:'lowpass',freq:80,Q:0.6,pink:true});
+      m_noise(oc,tt,3.8,0.12,{atk:0.06,ftype:'bandpass',freq:200,Q:0.5});
+    }
+  }},
+
+  // Phase 1: Combat – Ancient Fury (CORRIGÉ)
+  'b2-1': { dur: 38.4, compose: async (oc, D) => {
+    const BEAT=60/100, BAR=BEAT*4, BARS=Math.floor(D/BAR);
+    m_drone(oc,41.2,0,D,0.48,{atk:0.15,rel:0.4,lp:200,harm:2});
+    m_drone(oc,61.74,0,D,0.16,{atk:0.5,rel:0.4,lp:180,harm:0});
+    // Bass modal
+    const BP3=[[0,0.22,82.41],[1,0.22,82.41],[1.5,0.17,98.0],[2,0.26,73.42],[3,0.22,82.41],[3.5,0.14,87.31]];
+    for (let b=0;b<BARS;b++) {
+      const tBar=b*BAR;
+      for (const [beat,d,f] of BP3) {
+        const t0=tBar+beat*BEAT;
+        if (t0+d < D) m_distOsc(oc,f,t0,d,0.32,145,{lp:300,type:'sine'});
+      }
+    }
+    // Flûte bambou — E mineur pentatonique
+    const FP=[
+      [[0,164.81,0.7,0.15],[BEAT*1.5,196.0,0.5,0.13],[BEAT*3,220.0,1.3,0.14]],
+      [[0,246.94,0.65,0.14],[BEAT*1,220.0,0.85,0.12],[BEAT*2.5,196.0,1.6,0.13]],
+      [[0,164.81,0.45,0.11],[BEAT*2,185.0,0.9,0.13],[BEAT*3.5,164.81,0.55,0.10]],
+      [[0,220.0,0.5,0.14],[BEAT*1.5,246.94,0.42,0.12],[BEAT*2.5,220.0,0.62,0.11],[BEAT*3.5,196.0,1.9,0.13]]
+    ];
+    for (let r=0;r<Math.floor(BARS/8);r++) {
+      for (let pi=0;pi<FP.length;pi++) {
+        const t0=r*BAR*8+pi*BAR*2;
+        for (const [b,f,d,g] of FP[pi]) {
+          if (t0+b+d < D) m_flute(oc,f,t0+b,d,g,{vRate:4.5,vDepth:5,pan:(pi%2===0?-0.22:0.22)});
+        }
+      }
+    }
+    // Taiko puissant
+    for (let b=0;b<BARS;b++) {
+      const t=b*BAR;
+      m_taiko(oc,t,1.0,{p0:88,p1:28,dec:0.62,pan:-0.28});
+      m_taiko(oc,t+2*BEAT,0.85,{p0:82,p1:25,dec:0.56,pan:0.28});
+      m_taiko(oc,t+BEAT*0.75,0.36,{p0:112,p1:50,dec:0.34,pan:0.52});
+      m_taiko(oc,t+BEAT*2.5,0.34,{p0:106,p1:48,dec:0.30,pan:-0.52});
+      if (b%2===1) m_taiko(oc,t+BEAT*3.5,0.46,{p0:96,p1:40,dec:0.36,pan:0});
+      m_snare(oc,t+BEAT,0.24,{bf:420,bd:0.06,nd:0.1,ng:0.5,pan:-0.3});
+      m_snare(oc,t+BEAT*3,0.26,{bf:400,bd:0.06,nd:0.1,ng:0.5,pan:0.3});
+      if (b%4===0) m_bell(oc,784,t+BEAT,0.09,1.2,0.42);
+      if (b%4===2) m_bell(oc,659.25,t+BEAT*3,0.075,1.0,-0.42);
+    }
+  }},
+
+  // Phase 2: Rage – Temporal Devastation (CORRIGÉ)
+  'b2-2': { dur: 29.54, compose: async (oc, D) => {
+    const BEAT=60/130, BAR=BEAT*4, BARS=Math.floor(D/BAR);
+    m_drone(oc,41.2,0,D,0.55,{atk:0.08,rel:0.25,lp:230,harm:3});
+    // Bass agressive
+    const BR=[[0,0.14,82.41],[0.25,0.09,82.41],[0.5,0.13,98.0],[0.75,0.09,82.41],[1,0.14,73.42],[1.5,0.14,82.41],[1.75,0.09,92.5],[2,0.14,82.41],[2.25,0.09,98.0],[2.5,0.13,110.0],[2.75,0.09,98.0],[3,0.14,82.41],[3.25,0.09,73.42],[3.5,0.16,82.41],[3.75,0.11,61.74]];
+    for (let b=0;b<BARS;b++) {
+      const tBar=b*BAR;
+      for (const [bt,d,f] of BR) {
+        const t0=tBar+bt*BEAT;
+        if (t0+d < D) m_distOsc(oc,f,t0,d,0.38,200,{lp:360,type:'sawtooth'});
+      }
+    }
+    // Strings aigus
+    const SH=[[0,659.25,0.26],[BEAT*0.5,587.33,0.20],[BEAT,659.25,0.30],[BEAT*2,740.0,0.24],[BEAT*2.5,698.46,0.26],[BEAT*3,659.25,0.38],[BEAT*3.5,587.33,0.18]];
+    for (let b=0;b<BARS;b++) {
+      const tBar=b*BAR;
+      for (const [bt,f,d] of SH) {
+        const t0=tBar+bt*BEAT;
+        if (t0+d < D) m_strings(oc,f,t0,d,0.09,{atk:0.04,rel:0.08,lp:2400,pan:(b%2===0?-0.45:0.45),vRate:6,vDepth:4});
+      }
+    }
+    // Brass stabs
+    for (let b=0;b<BARS;b++) {
+      if (b%2===0) {
+        const t=b*BAR;
+        if (t+0.1 < D) m_distOsc(oc,164.81*4,t,0.09,0.18,95,{lp:2200,type:'square',atk:0.02,rel:0.04});
+        if (t+2*BEAT+0.09 < D) m_distOsc(oc,196.0*4,t+2*BEAT,0.08,0.15,95,{lp:2000,type:'square',atk:0.02,rel:0.04});
+      }
+    }
+    // Taiko intense
+    for (let b=0;b<BARS;b++) {
+      const t=b*BAR;
+      m_taiko(oc,t,1.0,{p0:96,p1:30,dec:0.44,pan:-0.3});
+      m_taiko(oc,t+0.5*BEAT,0.36,{p0:80,p1:35,dec:0.28,pan:0.42});
+      m_taiko(oc,t+BEAT,0.50,{p0:100,p1:38,dec:0.36,pan:0.2});
+      m_taiko(oc,t+1.5*BEAT,0.30,{p0:75,p1:30,dec:0.26,pan:-0.42});
+      m_taiko(oc,t+2*BEAT,1.0,{p0:95,p1:30,dec:0.44,pan:0.3});
+      m_taiko(oc,t+2.5*BEAT,0.36,{p0:80,p1:35,dec:0.28,pan:-0.3});
+      m_taiko(oc,t+3*BEAT,0.55,{p0:90,p1:32,dec:0.36,pan:-0.2});
+      if (b%2===0) m_taiko(oc,t+3.5*BEAT,0.40,{p0:85,p1:30,dec:0.30,pan:0.4});
+      m_snare(oc,t+BEAT,0.60,{bf:300,bd:0.09,nd:0.18,ng:0.92,pan:0});
+      m_snare(oc,t+BEAT*3,0.65,{bf:310,bd:0.1,nd:0.20,ng:0.95,pan:0});
+      for (let h=0;h<16;h++) m_hihat(oc,t+h*BEAT*0.25,(h%4===0?0.18:h%2===0?0.09:0.055),false,(h%3===0?-0.42:0.32));
+      if (b%2===0) m_bell(oc,1046.5,t,0.12,0.55,0.62);
+      if (b%2===1) m_bell(oc,880,t+2*BEAT,0.10,0.48,-0.62);
+    }
+  }}
+};
+
+// ─────────────────────────────────────────────────────────────
+// MOTEUR DE LECTURE — BossMusic
+// ─────────────────────────────────────────────────────────────
+const BossMusic = (() => {
+  let actx = null, masterGain = null;
+  let currentSrc = null;
+  const bufCache = {};
+  const renderQueue = {};
+  let _engaged = false; // premier échange de coups détecté
+
+  function getCtx() {
+    if (!actx) {
+      actx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: MUSIC_SR });
+      masterGain = actx.createGain();
+      masterGain.gain.value = 0.72;
+      masterGain.connect(actx.destination);
+    }
+    if (actx.state === 'suspended') actx.resume();
+    return actx;
+  }
+
+  async function renderTrack(key) {
+    if (bufCache[key]) return bufCache[key];
+    if (renderQueue[key]) return renderQueue[key];
+    const def = MUSIC_TRACKS[key];
+    if (!def) throw new Error('Unknown track: ' + key);
+    const D = def.dur;
+    // Ajouter 0.5s de marge pour éviter la troncature des notes en fin de buffer
+    const totalSamples = Math.ceil(MUSIC_SR * (D + 0.5));
+    const p = new Promise((res, rej) => {
+      try {
+        const oc = new OfflineAudioContext(2, totalSamples, MUSIC_SR);
+        def.compose(oc, D).then(() => {
+          return oc.startRendering();
+        }).then(buf => {
+          bufCache[key] = buf;
+          res(buf);
+        }).catch(err => {
+          console.error('Render error', key, err);
+          rej(err);
+        });
+      } catch(e) { rej(e); }
+    });
+    renderQueue[key] = p;
+    return p;
+  }
+
+  function _playBuffer(buf, vol=0.75, fadein=0.8) {
+    const c = getCtx();
+    if (currentSrc) {
+      try { currentSrc.stop(); } catch(e){}
+      currentSrc = null;
+    }
+    const src = c.createBufferSource();
+    src.buffer = buf;
+    src.loop = true;
+    src.loopStart = 0;
+    src.loopEnd = buf.duration;
+    const g = c.createGain();
+    g.gain.setValueAtTime(0, c.currentTime);
+    g.gain.linearRampToValueAtTime(vol, c.currentTime + fadein);
+    src.connect(g);
+    g.connect(masterGain);
+    src.start();
+    currentSrc = src;
+    currentSrc._gainNode = g;
+  }
+
+  async function _crossfade(key, vol=0.75) {
+    const c = getCtx();
+    const buf = await renderTrack(key);
+    // Fade out l'actuel
+    if (currentSrc && currentSrc._gainNode) {
+      const oldGain = currentSrc._gainNode;
+      oldGain.gain.setValueAtTime(oldGain.gain.value, c.currentTime);
+      oldGain.gain.linearRampToValueAtTime(0, c.currentTime + 0.5);
+      const oldSrc = currentSrc;
+      setTimeout(() => { try { oldSrc.stop(); } catch(e){} }, 600);
+      currentSrc = null;
+    }
+    await new Promise(r => setTimeout(r, 300));
+    _playBuffer(buf, vol, 0.5);
+  }
+
+  // Pré-render les 3 tracks d'un boss en arrière-plan
+  function preloadBoss(lvlIdx) {
+    for (let p=0; p<3; p++) {
+      const key = `b${lvlIdx}-${p}`;
+      renderTrack(key).catch(e => console.warn('Preload failed', key, e));
+    }
+  }
+
+  return {
+    init() {
+      getCtx();
+      // Pré-charger le niveau 0 dès que possible
+      if (typeof requestIdleCallback !== 'undefined') {
+        requestIdleCallback(() => preloadBoss(0));
+      } else {
+        setTimeout(() => preloadBoss(0), 1000);
+      }
+    },
+
+    // Appelé dans loadLevel(idx) — musique d'ambiance pré-boss
+    onLoadLevel(idx) {
+      _engaged = false;
+      const key = `b${idx}-0`;
+      renderTrack(key).then(buf => {
+        _playBuffer(buf, 0.55, 2.0);
+      }).catch(e => console.error('Music error', e));
+      // Pré-charger les 3 pistes en avance
+      preloadBoss(idx);
+      // Et pré-charger le niveau suivant si il existe
+      if (idx + 1 < 3) {
+        setTimeout(() => preloadBoss(idx + 1), 5000);
+      }
+    },
+
+    // Appelé quand spawnBoss() — boss apparu, on reste sur l'ambient
+    onSpawnBoss(lvlIdx) {
+      // On continue la musique ambiante — pas de changement ici
+      // La transition vers le combat se fait au premier échange
+    },
+
+    // Appelé quand le premier échange de coups se produit (boss en combat)
+    onCombatStart(lvlIdx) {
+      if (_engaged) return;
+      _engaged = true;
+      const key = `b${lvlIdx}-1`;
+      _crossfade(key, 0.78);
+    },
+
+    // Appelé quand rageMode = true (phase finale)
+    onRageMode(lvlIdx) {
+      const key = `b${lvlIdx}-2`;
+      _crossfade(key, 0.88);
+    },
+
+    // Fade out et stop
+    stop(fadeDur=1.5) {
+      if (!actx || !currentSrc) return;
+      if (currentSrc._gainNode) {
+        const g = currentSrc._gainNode;
+        g.gain.setValueAtTime(g.gain.value, actx.currentTime);
+        g.gain.linearRampToValueAtTime(0, actx.currentTime + fadeDur);
+      }
+      const s = currentSrc;
+      currentSrc = null;
+      setTimeout(() => { try { s.stop(); } catch(e){} }, fadeDur * 1000 + 200);
+    },
+
+    get engaged() { return _engaged; }
+  };
+})();
+</script>
 </body>
 
 </html>
